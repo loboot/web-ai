@@ -172,6 +172,7 @@ export const MODEL_LIST = [
   'gpt-4-32k-0613',
   'gpt-4-1106-preview',
   'gpt-4-vision-preview',
+  'gpt-4-all',
 ]
 
 // 模型列表 0 mj   1 Dall-e
@@ -265,7 +266,8 @@ export const MODELSMAPLIST = {
     'gpt-4-32k-0613',
     'gpt-4-1106-preview',
     'gpt-4-vision-preview',
-    ],
+    'gpt-4-all',
+  ],
   2: [
     'ERNIE-Bot',
     'ERNIE-Bot',

@@ -10,7 +10,7 @@ export class ModelsEntity extends BaseEntity {
   @Column({ comment: '模型名称' })
   modelName: string;
 
-  @Column({ comment: '模型的key'})
+  @Column({ comment: '模型的key' })
   key: string;
 
   @Column({ comment: '模型的secret', default: null })
@@ -49,7 +49,7 @@ export class ModelsEntity extends BaseEntity {
   @Column({ comment: '当前模型的超时时间单位s', default: 200 })
   timeout: number;
 
-  @Column({ comment: '单词调用扣除的次数', default: 1 })
+  @Column({ comment: '单次调用扣除的次数', default: 1 })
   deduct: number;
 
   @Column({ comment: '扣除余额类型 1： 普通模型 2：高级模型', default: 1 })
@@ -63,4 +63,7 @@ export class ModelsEntity extends BaseEntity {
 
   @Column({ comment: '是否是绘画key: 0:不是 1：是', default: 0 })
   isDraw: boolean;
+
+  @Column({ comment: '是否使用token计费: 0:不是 1：是', default: 0 })
+  isTokenBased: boolean;
 }

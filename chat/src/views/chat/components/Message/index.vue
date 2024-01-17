@@ -55,12 +55,19 @@ const options = computed(() => {
       key: 'toggleRenderType',
       icon: iconRender({ icon: asRawText.value ? 'ic:outline-code-off' : 'ic:outline-code' }),
     })
+
+		  // 添加重新回答选项
+    common.unshift({
+      label: t('chat.regenerate'), // 修改为您的本地化文本
+      key: 'regenerate',
+      icon: iconRender({ icon: 'ri:restart-line' }), // 修改为适当的图标
+    });
   }
 
   return common
 })
 
-function handleSelect(key: 'copyText' | 'delete' | 'toggleRenderType') {
+function handleSelect(key: 'copyText' | 'delete' | 'toggleRenderType'|'regenerate') {
   switch (key) {
     case 'copyText':
       copyText({ text: props.text ?? '' })
@@ -71,6 +78,10 @@ function handleSelect(key: 'copyText' | 'delete' | 'toggleRenderType') {
       return
     case 'delete':
       emit('delete')
+    return
+    case 'regenerate':
+     emit('regenerate'); // 调用您已经定义的 regenerate 处理函数
+      return;
   }
 }
 

@@ -23,7 +23,7 @@ export class DatabaseService implements OnModuleInit {
   async checkSuperAdmin() {
     const user = await this.connection.query(`SELECT * FROM users WHERE role = 'super'`);
     if (!user || user.length === 0) {
-      const superPassword = bcrypt.hashSync('nine-super', 10);
+      const superPassword = bcrypt.hashSync('123456', 10);
       const adminPassword = bcrypt.hashSync('123456', 10);
       const superEmail = 'default@cooper.com';
       const adminEmail = 'defaultAdmin@cooper.com';
@@ -151,7 +151,7 @@ export class DatabaseService implements OnModuleInit {
         { configKey: 'invitedGuestSendDrawMjCount', configVal: '1', public: 1, encry: 0 },
         { configKey: 'isVerifyEmail', configVal: '1', public: 1, encry: 0 },
       ];
-      
+
       const res = await this.connection.query(
         `INSERT INTO config (configKey, configVal, public, encry) VALUES ${defaultConfig
           .map((d) => `('${d.configKey}', '${d.configVal.replace(/'/g, "\\'")}', '${d.public}', '${d.encry}')`)

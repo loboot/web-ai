@@ -1,9 +1,18 @@
-<script setup lang='ts'>
+<script setup lang="ts">
 import type { Ref } from 'vue'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import { NButton, NCascader, NInput, NPopover, NTooltip, useDialog, useMessage } from 'naive-ui'
+import {
+  NButton,
+  NCascader,
+  NInput,
+  NPopover,
+  NTooltip,
+  useDialog,
+  useMessage,
+} from 'naive-ui'
 import html2canvas from 'html2canvas'
 import { useRoute } from 'vue-router'
+import axios from 'axios'
 import { Message } from './components'
 import { useScroll } from './hooks/useScroll'
 import { useCopyCode } from './hooks/useCopyCode'
@@ -15,7 +24,12 @@ import AiBotComponent from './components/AiBot/index.vue'
 import AppTips from './components/AppTips/index.vue'
 import { SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { useAppStore, useAuthStore, useChatStore, useGlobalStoreWithOut } from '@/store'
+import {
+  useAppStore,
+  useAuthStore,
+  useChatStore,
+  useGlobalStoreWithOut,
+} from '@/store'
 import { fetchQueryOneCatAPI } from '@/api/appStore'
 import { fetchChatAPIProcess } from '@/api'
 import { t } from '@/locales'
@@ -38,7 +52,9 @@ const chatPreRef = ref(null)
 const isShowChatPre = ref(false)
 
 const globaelConfig = computed(() => authStore.globalConfig)
-const isSetBeian = computed(() => globaelConfig.value?.companyName && globaelConfig.value?.filingNumber)
+const isSetBeian = computed(
+  () => globaelConfig.value?.companyName && globaelConfig.value?.filingNumber,
+)
 const { addGroupChat, updateGroupChat, updateGroupChatSome } = useChat()
 const tradeStatus = computed(() => route.query.trade_status as string)
 const token = computed(() => route.query.token as string)
@@ -49,14 +65,20 @@ const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom } = useScroll()
 const { usingContext, toggleUsingContext } = useUsingContext()
 const { usingNetwork, toggleUsingNetwork } = useUsingNetwork()
 const dataSources = computed(() => chatStore.chatList)
+const fileInput = ref(null)
 
 /* 当前所有的ai回复信息列表 方便拿到上下文 */
-const conversationList = computed(() => dataSources.value.filter(item => (!item.inversion && !item.error)))
+const conversationList = computed(() =>
+  dataSources.value.filter(item => !item.inversion && !item.error),
+)
 
 /* 当前上下文有id的最后一条 防止停止回答的时候 上一条的id是空 接不上上下文 */
 const lastContext = computed(() => {
-  const hasIdCoversationList = conversationList.value.filter(item => item.conversationOptions?.parentMessageId)
-  return hasIdCoversationList[hasIdCoversationList.length - 1]?.conversationOptions
+  const hasIdCoversationList = conversationList.value.filter(
+    item => item.conversationOptions?.parentMessageId,
+  )
+  return hasIdCoversationList[hasIdCoversationList.length - 1]
+    ?.conversationOptions
 })
 
 const prompt = ref<string>('')
@@ -70,13 +92,26 @@ const tipsHeight = ref<any>(null)
 /* 当前选中的对话组 */
 const activeGroupId = computed(() => chatStore.active)
 /* 当前对话组的详细信息 */
-const activeGroupInfo = computed(() => chatStore.groupList.find((item: any) => item.uuid === chatStore.active))
+const activeGroupInfo = computed(() =>
+  chatStore.groupList.find((item: any) => item.uuid === chatStore.active),
+)
 /* 当前选用的模型的类型 1： openai  2: 百度  */
-const activeModelKeyType = computed(() => Number(chatStore?.activeModelKeyType))
+const activeModelKeyType = computed(() =>
+  Number(chatStore?.activeModelKeyType),
+)
+
+const isGpt4AllModel = computed(() => {
+  return chatStore?.activeModelName === 'gpt-4-all';
+});
+
 /* 当前对话组是否是应用 */
-const activeAppId = computed(() => activeGroupInfo?.value ? activeGroupInfo.value.appId : 0)
+const activeAppId = computed(() =>
+  activeGroupInfo?.value ? activeGroupInfo.value.appId : 0,
+)
 /* 粘贴板的文字 */
 const clipboardText = computed(() => useGlobalStore.clipboardText)
+
+const uploadUrl = ref(`${import.meta.env.VITE_GLOB_API_URL}/upload/file`)
 
 watch(clipboardText, (val) => {
   prompt.value = val
@@ -84,32 +119,38 @@ watch(clipboardText, (val) => {
   inputRef.value.scrollTop = inputRef.value.scrollHeight
 })
 
-watch(activeAppId, (val) => {
-  if (val)
-    queryAppDetail(val)
-
-  else
-    appDetail.value = null
-}, { immediate: true })
-
-watch(activeGroupId, (val) => {
-  if (val)
-    firstScroll.value = true
-  if (inputRef.value && !isMobile.value)
-    inputRef.value?.focus()
-},
-{ immediate: true },
+watch(
+  activeAppId,
+  (val) => {
+    if (val)
+      queryAppDetail(val)
+    else appDetail.value = null
+  },
+  { immediate: true },
 )
 
-watch(dataSources, (val) => {
-  if (val.length === 0)
-    return
-  if (firstScroll.value) {
-    firstScroll.value = false
-    scrollToBottom()
-  }
-},
-{ immediate: true },
+watch(
+  activeGroupId,
+  (val) => {
+    if (val)
+      firstScroll.value = true
+    if (inputRef.value && !isMobile.value)
+      inputRef.value?.focus()
+  },
+  { immediate: true },
+)
+
+watch(
+  dataSources,
+  (val) => {
+    if (val.length === 0)
+      return
+    if (firstScroll.value) {
+      firstScroll.value = false
+      scrollToBottom()
+    }
+  },
+  { immediate: true },
 )
 
 function openChatPre() {
@@ -141,13 +182,17 @@ function handleScrollBtm() {
 
 /* 发送消息 */
 async function handleSubmit(index?: number) {
-  if (chatStore.groupList.length === 0 || loading.value || !typingStatusEnd.value)
+  if (
+    chatStore.groupList.length === 0
+    || loading.value
+    || !typingStatusEnd.value
+  )
     return
   let message = ''
   /* 如果有index就是重新生成 */
   if (index && typeof index === 'number') {
     const { requestOptions } = dataSources.value[index]
-  	message = requestOptions?.prompt ?? ''
+    message = requestOptions?.prompt ?? ''
   }
   onConversation(message)
 }
@@ -160,12 +205,39 @@ function parseTextToJSON(input: string) {
   let endIndex = input.indexOf('","delta"', startIndex)
   if (endIndex === -1)
     endIndex = input.length - 1
-
-  else
-    endIndex = endIndex - 10
+  else endIndex = endIndex - 10
 
   const text = input.substring(startIndex, endIndex)
   return { text }
+}
+
+async function handleFileChange(event) {
+  const file = event.target.files[0]
+  if (!file)
+    return
+
+  // 创建 FormData 对象并添加文件
+  const formData = new FormData()
+  formData.append('file', file)
+
+  try {
+    const response = await axios.post(uploadUrl.value, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+
+    // 假设服务器响应中包含文件的链接
+    const fileLink = response.data.data
+
+    // 将文件链接添加到输入框中
+    prompt.value += ` ${fileLink}`
+  }
+  catch (error) {
+    console.error('上传失败:', error)
+  }
+}
+
+function triggerFileUpload() {
+  fileInput.value.click()
 }
 
 /* 按钮发送消息 */
@@ -184,39 +256,38 @@ async function onConversation(msg?: string) {
   controller = new AbortController()
 
   /* 虚拟增加一条用户记录 */
-  addGroupChat(
-    {
-      dateTime: new Date().toLocaleString(),
-      text: message,
-      inversion: true,
-      error: false,
-      conversationOptions: null,
-      requestOptions: { prompt: message, options: null },
-    },
-  )
+  addGroupChat({
+    dateTime: new Date().toLocaleString(),
+    text: message,
+    inversion: true,
+    error: false,
+    conversationOptions: null,
+    requestOptions: { prompt: message, options: null },
+  })
 
   scrollToBottom()
 
   loading.value = true
   prompt.value = ''
 
-  let options: any = { groupId: +activeGroupId.value, usingNetwork: usingNetwork.value }
+  let options: any = {
+    groupId: +activeGroupId.value,
+    usingNetwork: usingNetwork.value,
+  }
 
   if (lastContext.value && usingContext.value && !usingNetwork.value)
     options = { ...lastContext.value, ...options }
 
   /* 虚拟增加一条ai记录 */
-  addGroupChat(
-    {
-      dateTime: new Date().toLocaleString(),
-      text: 'AI思考中',
-      loading: true,
-      inversion: false,
-      error: false,
-      conversationOptions: null,
-      requestOptions: { prompt: message, options: { ...options } },
-    },
-  )
+  addGroupChat({
+    dateTime: new Date().toLocaleString(),
+    text: 'AI思考中',
+    loading: true,
+    inversion: false,
+    error: false,
+    conversationOptions: null,
+    requestOptions: { prompt: message, options: { ...options } },
+  })
 
   scrollToBottom()
   const timer: any = null
@@ -256,7 +327,10 @@ async function onConversation(msg?: string) {
               usage: data?.detail?.usage,
               error: false,
               loading: true,
-              conversationOptions: { conversationId: data?.conversationId, parentMessageId: data?.id },
+              conversationOptions: {
+                conversationId: data?.conversationId,
+                parentMessageId: data?.id,
+              },
               requestOptions: { prompt: message, options: { ...options } },
             })
             scrollToBottomIfAtBottom()
@@ -267,18 +341,29 @@ async function onConversation(msg?: string) {
             typingStatusEnd.value = true
             updateGroupChatSome(dataSources.value.length - 1, {
               loading: false,
-              conversationOptions: { conversationId: data?.conversationId, parentMessageId: data?.id },
+              conversationOptions: {
+                conversationId: data?.conversationId,
+                parentMessageId: data?.id,
+              },
               requestOptions: { prompt: message, options: { ...options } },
             })
             useGlobalStore.updateIsChatIn(false)
             if (Object.keys(userBanance).length)
               authStore.updateUserBanance(userBanance)
 
-            if (dataSources.value.length === 2 && !activeGroupInfo?.value?.appId) {
-              const title = dataSources.value[1].text.length > 15 ? dataSources.value[1].text.slice(0, 15) : dataSources.value[1].text
-              chatStore.updateGroupInfo({ groupId: +activeGroupId.value, title }).then(() => {
-                chatStore.queryMyGroup()
-              })
+            if (
+              dataSources.value.length === 2
+              && !activeGroupInfo?.value?.appId
+            ) {
+              const title
+                = dataSources.value[1].text.length > 15
+                  ? dataSources.value[1].text.slice(0, 15)
+                  : dataSources.value[1].text
+              chatStore
+                .updateGroupInfo({ groupId: +activeGroupId.value, title })
+                .then(() => {
+                  chatStore.queryMyGroup()
+                })
             }
             shouldContinue = false // 结束动画循环
           }
@@ -306,7 +391,10 @@ async function onConversation(msg?: string) {
 
           /* 这种解析只对openai有效 其他的会漏掉前面的字 */
           if ([1].includes(activeModelKeyType.value)) {
-            const lastIndex = responseText.lastIndexOf('\n', responseText.length - 2)
+            const lastIndex = responseText.lastIndexOf(
+              '\n',
+              responseText.length - 2,
+            )
             let chunk = responseText
             if (lastIndex !== -1)
               chunk = responseText.substring(lastIndex)
@@ -372,12 +460,14 @@ async function onConversation(msg?: string) {
     useGlobalStore.updateIsChatIn(false)
     clearInterval(timer)
     isStreamIn.value = false
-    if (error.code === 402 || error?.message.includes('余额不足') || error?.message.includes('免费额度已经使用完毕')) {
+    if (
+      error.code === 402
+      || error?.message.includes('余额不足')
+      || error?.message.includes('免费额度已经使用完毕')
+    ) {
       if (isLogin.value)
         useGlobalStore.updateGoodsDialog(true)
-
-      else
-        authStore.setLoginDialog(true)
+      else authStore.setLoginDialog(true)
     }
 
     let errorMessage = error?.message ?? t('common.wrong')
@@ -396,28 +486,24 @@ async function onConversation(msg?: string) {
     const currentChat = dataSources.value[dataSources.value.length - 1]
 
     if (currentChat?.text && currentChat.text !== '') {
-      updateGroupChatSome(
-        dataSources.value.length - 1,
-        {
-          text: `${currentChat.text === 'AI思考中' ? '' : currentChat.text}\n[${errorMessage}]`,
-          error: false,
-          loading: false,
-        },
-      )
+      updateGroupChatSome(dataSources.value.length - 1, {
+        text: `${
+          currentChat.text === 'AI思考中' ? '' : currentChat.text
+        }\n[${errorMessage}]`,
+        error: false,
+        loading: false,
+      })
       return
     }
-    updateGroupChat(
-      dataSources.value.length - 1,
-      {
-        dateTime: new Date().toLocaleString(),
-        text: errorMessage,
-        inversion: false,
-        error: true,
-        loading: false,
-        conversationOptions: null,
-        requestOptions: { prompt: message, options: { ...options } },
-      },
-    )
+    updateGroupChat(dataSources.value.length - 1, {
+      dateTime: new Date().toLocaleString(),
+      text: errorMessage,
+      inversion: false,
+      error: true,
+      loading: false,
+      conversationOptions: null,
+      requestOptions: { prompt: message, options: { ...options } },
+    })
     scrollToBottomIfAtBottom()
   }
   finally {
@@ -552,7 +638,12 @@ const placeholder = computed(() => {
 })
 
 const buttonDisabled = computed(() => {
-  return loading.value || !prompt.value || prompt.value.trim() === '' || !typingStatusEnd.value
+  return (
+    loading.value
+    || !prompt.value
+    || prompt.value.trim() === ''
+    || !typingStatusEnd.value
+  )
 })
 
 function getTipsRefHeight() {
@@ -593,7 +684,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="h-full  flex flex-col bg-white dark:bg-[#111114]">
+  <div class="h-full flex flex-col bg-white dark:bg-[#111114]">
     <HeaderComponent
       :using-context="usingContext"
       :dark-mode="darkMode"
@@ -603,14 +694,21 @@ onUnmounted(() => {
       @scroll-btn="handleScrollBtm"
     />
     <main class="flex-1 overflow-hidden">
-      <div id="scrollRef" ref="scrollRef" class="relative h-full overflow-hidden overflow-y-auto scroll-smooth">
+      <div
+        id="scrollRef"
+        ref="scrollRef"
+        class="relative h-full overflow-hidden overflow-y-auto scroll-smooth"
+      >
         <div
           id="image-wrapper"
           class="w-full max-w-screen-4xl m-auto dark:bg-[#101014] h-full"
           :class="[isMobile ? 'p-2' : 'p-4']"
         >
           <template v-if="!dataSources.length && !activeAppId">
-            <div class="flex justify-center items-center text-center " :class="[isMobile ? 'h-full' : 'h-4/5 ']">
+            <div
+              class="flex justify-center items-center text-center"
+              :class="[isMobile ? 'h-full' : 'h-4/5 ']"
+            >
               <AiBotComponent @prompt="handlePrompt" />
             </div>
           </template>
@@ -646,20 +744,43 @@ onUnmounted(() => {
         </div>
       </div>
     </main>
-    <div v-if="isMobile">
-      <div class="flex items-center w-[160px] p-1 mb-1 text-[#3076fd] rounded cursor-pointer transition hover:bg-[#eef0f3] dark:border-neutral-700 dark:hover:bg-[#33373c]" @click="useGlobalStore.updateGoodsDialog(true)">
-        <SvgIcon icon="material-symbols:shopping-bag-outline" class="mr-1 text-base" />
+    <!-- <div v-if="isMobile">
+      <div
+        class="flex items-center w-[160px] p-1 mb-1 text-[#3076fd] rounded cursor-pointer transition hover:bg-[#eef0f3] dark:border-neutral-700 dark:hover:bg-[#33373c]"
+        @click="useGlobalStore.updateGoodsDialog(true)"
+      >
+        <SvgIcon
+          icon="material-symbols:shopping-bag-outline"
+          class="mr-1 text-base"
+        />
         进入市场选购商品
       </div>
-    </div>
+    </div> -->
     <footer>
       <div :class="[isMobile ? 'px-2' : 'px-4']" class="flex space-x-2">
-        <NPopover v-if="chatStore.chatPreList?.length" placement="top-start" style="width: 200px" raw :show-arrow="false">
+        <NPopover
+          v-if="chatStore.chatPreList?.length"
+          placement="top-start"
+          style="width: 200px"
+          raw
+          :show-arrow="false"
+        >
           <template #trigger>
-            <NTooltip trigger="hover" placement="bottom-end" :disabled="isMobile">
+            <NTooltip
+              trigger="hover"
+              placement="bottom-end"
+              :disabled="isMobile"
+            >
               <template #trigger>
-                <button class="flex h-8 w-8 items-center justify-center rounded border transition hover:bg-[#eef0f3] dark:border-neutral-700 dark:hover:bg-[#33373c]" @click="openChatPre">
-                  <span><SvgIcon class="text-lg" style="width: 1em;height: 1em" icon="ic:outline-tips-and-updates" /></span>
+                <button
+                  class="flex h-8 w-8 items-center justify-center rounded border transition hover:bg-[#eef0f3] dark:border-neutral-700 dark:hover:bg-[#33373c]"
+                  @click="openChatPre"
+                >
+                  <span><SvgIcon
+                    class="text-lg"
+                    style="width: 1em; height: 1em"
+                    icon="ic:outline-tips-and-updates"
+                  /></span>
                 </button>
               </template>
               学术快问
@@ -682,9 +803,13 @@ onUnmounted(() => {
           </div>
         </NPopover>
       </div>
-      <div class="m-auto max-w-screen-4xl" :class="[isMobile ? 'px-2 py-1' : 'px-4 py-2']">
+      <div
+        class="m-auto max-w-screen-4xl"
+        :class="[isMobile ? 'px-2 py-1' : 'px-4 py-2']"
+      >
         <div class="flex items-stretch space-x-2">
           <div class="relative flex-1">
+            <input ref="fileInput" type="file" style="display: none;" @change="handleFileChange">
             <NInput
               ref="inputRef"
               v-model:value="prompt"
@@ -694,10 +819,18 @@ onUnmounted(() => {
               class="pb-10"
               autofocus
               :placeholder="placeholder"
-              :autosize="{ minRows: isMobile ? 1 : 2, maxRows: isMobile ? 3 : 4 }"
+              :autosize="{
+                minRows: isMobile ? 1 : 2,
+                maxRows: isMobile ? 2 : 3,
+              }"
               @keypress="handleEnter"
             />
-            <div v-if="tipText" ref="tipsRef" class="absolute h-auto top-0 w-full px-3 pt-1 flex justify-between" :style="tipsHeight && { height: tipsHeight }">
+            <div
+              v-if="tipText"
+              ref="tipsRef"
+              class="absolute h-auto top-0 w-full px-3 pt-1 flex justify-between"
+              :style="tipsHeight && { height: tipsHeight }"
+            >
               <div class="flex w-full flex-col mb-1">
                 <span class="text-neutral-400 mb-1">提示词：</span>
                 <NInput
@@ -715,30 +848,68 @@ onUnmounted(() => {
             <div class="absolute bottom-1 left-2 right-2">
               <div class="flex items-center justify-between">
                 <div class="flex space-x-2">
-                  <NTooltip trigger="hover" placement="bottom-end" :disabled="isMobile">
+									<template v-if="isGpt4AllModel">
+                  <NTooltip
+                    trigger="hover"
+                    placement="bottom-end"
+                    :disabled="isMobile"
+                  >
                     <template #trigger>
-                      <button class="flex h-8 w-8 items-center justify-center rounded border transition hover:bg-[#eef0f3] dark:border-neutral-700 dark:hover:bg-[#33373c]" @click="toggleUsingContext">
-                        <span class="" :class="{ 'text-[#3076fd]': usingContext, 'text-[#a8071a]': !usingContext }"><SvgIcon class="text-lg" style="width: 1em;height: 1em" icon="ri:chat-history-line" /></span>
+                      <button
+                        class="flex h-8 w-8 items-center justify-center rounded border transition hover:bg-[#eef0f3] dark:border-neutral-700 dark:hover:bg-[#33373c]"
+                        @click="triggerFileUpload"
+                      >
+                        <span>
+                          <SvgIcon
+                            class="text-lg"
+                            style="width: 1em; height: 1em"
+                            icon="icon-park-outline:upload"
+                          />
+                        </span>
                       </button>
                     </template>
-                    上下文状态
+                    上传文件
                   </NTooltip>
+									</template>
                 </div>
-                <div class="flex justify-between items-center ">
-                  <div class="flex items-center text-neutral-400 cursor-pointer hover:text-[#3076fd] ">
-                    <span class="ml-2 mr-2 text-xs" @click="toggleUsingNetwork">{{ usingNetwork ? '关闭' : '开启' }}联网访问</span>
+                <div class="flex justify-between items-center">
+                  <!-- <div
+                    class="flex items-center text-neutral-400 cursor-pointer hover:text-[#3076fd]"
+                  >
+                    <span class="ml-2 mr-2 text-xs" @click="toggleUsingNetwork"
+                      >{{ usingNetwork ? "关闭" : "开启" }}联网访问</span
+                    >
                     <NTooltip trigger="hover" :disabled="isMobile">
                       <template #trigger>
-                        <SvgIcon icon="zondicons:network" class="cursor-pointer mb-0.5" :class="[{ 'text-[#3076fd]': usingNetwork, '': !usingNetwork }]" @click="toggleUsingNetwork" />
+                        <SvgIcon
+                          icon="zondicons:network"
+                          class="cursor-pointer mb-0.5"
+                          :class="[
+                            {
+                              'text-[#3076fd]': usingNetwork,
+                              '': !usingNetwork,
+                            },
+                          ]"
+                          @click="toggleUsingNetwork"
+                        />
                       </template>
-                      {{ usingNetwork ? '关闭联网模式' : '开启联网模式' }}
+                      {{ usingNetwork ? "关闭联网模式" : "开启联网模式" }}
                     </NTooltip>
-                    <div class="mx-4 h-full text-neutral-300 dark:text-neutral-600">
+                    <div
+                      class="mx-4 h-full text-neutral-300 dark:text-neutral-600"
+                    >
                       |
                     </div>
-                  </div>
+                  </div> -->
 
-                  <NButton type="primary" size="small" style="padding: 0px; width: 28px; height: 28px; border: 0px;" :disabled="buttonDisabled" round @click="handleSubmit">
+                  <NButton
+                    type="primary"
+                    size="small"
+                    style="padding: 0px; width: 28px; height: 28px; border: 0px"
+                    :disabled="buttonDisabled"
+                    round
+                    @click="handleSubmit"
+                  >
                     <template #icon>
                       <span class="dark:text-black">
                         <SvgIcon icon="icon-park-outline:send" />
@@ -752,8 +923,16 @@ onUnmounted(() => {
         </div>
       </div>
     </footer>
-    <div v-if="isSetBeian && !isMobile" class="w-full flex justify-center items-center py-2 text-xs text-[#aeaeae]">
-      版权所有 © {{ globaelConfig?.companyName }}  <a class="ml-2 transition-all text-[#aeaeae] hover:text-[#60606d]" href="https://beian.miit.gov.cn" target="_blank">{{ globaelConfig?.filingNumber }}</a>
+    <div
+      v-if="isSetBeian && !isMobile"
+      class="w-full flex justify-center items-center py-2 text-xs text-[#aeaeae]"
+    >
+      版权所有 © {{ globaelConfig?.companyName }}
+      <a
+        class="ml-2 transition-all text-[#aeaeae] hover:text-[#60606d]"
+        href="https://beian.miit.gov.cn"
+        target="_blank"
+      >{{ globaelConfig?.filingNumber }}</a>
     </div>
   </div>
 </template>

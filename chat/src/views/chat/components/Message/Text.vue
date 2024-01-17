@@ -95,7 +95,7 @@ defineExpose({ textRef })
           <div v-else class="w-full whitespace-pre-wrap" v-text="text" />
           <!-- <span v-if="loading" class="dark:text-white w-[4px] h-[20px] block animate-blink" /> -->
         </div>
-        <div class="mt-3">
+        <!-- <div class="mt-3">
           <NButton class="ml-2" text type="primary" @click="handleCopy">
             <template #icon>
               <NIcon :size="10" :component="Copy" />
@@ -126,7 +126,7 @@ defineExpose({ textRef })
             </template>
             <span class="text-xs">重新回答</span>
           </NButton>
-        </div>
+        </div> -->
       </div>
       <div v-else>
         <div class="whitespace-pre-wrap" v-text="text" />
@@ -135,7 +135,6 @@ defineExpose({ textRef })
             <template #icon>
               <NIcon :size="10" :component="Copy" />
             </template>
-
             <span class="text-xs">复制</span>
           </NButton>
           <span class="ml-3" />

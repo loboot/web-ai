@@ -2,7 +2,7 @@ import { UploadService } from './../upload/upload.service';
 import { UserService } from './../user/user.service';
 import { ConfigService } from 'nestjs-config';
 import { HttpException, HttpStatus, Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import type { ChatGPTAPIOptions, ChatMessage, SendMessageOptions } from 'chatgpt-nine-ai';
+import type { ChatGPTAPIOptions, ChatMessage, SendMessageOptions } from 'chatgpt-ai-web';
 import { Request, Response } from 'express';
 import { OpenAiErrorCodeMessage } from '@/common/constants/errorMessage.constant';
 import {
@@ -83,7 +83,7 @@ export class ChatgptService implements OnModuleInit {
     private readonly fanyiService: FanyiService,
     private readonly chatGroupService: ChatGroupService,
     private readonly modelsService: ModelsService,
-  ) {}
+  ) { }
 
   private api;
   private nineStore: NineStoreInterface = null; // redis存储
@@ -92,12 +92,12 @@ export class ChatgptService implements OnModuleInit {
     list3: Key[];
     list4: Key[];
   } = {
-    list3: [],
-    list4: [],
-  };
+      list3: [],
+      list4: [],
+    };
 
   async onModuleInit() {
-    let chatgpt = await importDynamic('chatgpt-nine-ai');
+    let chatgpt = await importDynamic('chatgpt-ai-web');
     let KeyvRedis = await importDynamic('@keyv/redis');
     let Keyv = await importDynamic('keyv');
     chatgpt = chatgpt?.default ? chatgpt.default : chatgpt;
@@ -184,7 +184,7 @@ export class ChatgptService implements OnModuleInit {
       throw new HttpException('当前流程所需要的模型已被管理员下架、请联系管理员上架专属模型！', HttpStatus.BAD_REQUEST);
     }
 
-    const { deduct, deductType, key: modelKey, secret, modelName, id: keyId, accessToken } = currentRequestModelKey;
+    const { deduct, isTokenBased, deductType, key: modelKey, secret, modelName, id: keyId, accessToken } = currentRequestModelKey;
     /* 用户状态检测 */
     await this.userService.checkUserStatus(req.user);
     /* 用户余额检测 */
@@ -303,7 +303,11 @@ export class ChatgptService implements OnModuleInit {
           });
 
           /* 当用户回答一般停止时 也需要扣费 */
-          await this.userBalanceService.deductFromBalance(req.user.id, `model${deductType === 1 ? 3 : 4}`, deduct, total_tokens);
+          let charge = deduct;
+          if (isTokenBased === true) {
+            charge = deduct * total_tokens;
+          }
+          await this.userBalanceService.deductFromBalance(req.user.id, `model${deductType === 1 ? 3 : 4}`, charge, total_tokens);
         });
 
         /* openAi */
@@ -427,7 +431,11 @@ export class ChatgptService implements OnModuleInit {
       const { prompt_tokens = 0, completion_tokens = 0, total_tokens = 0 } = formatResponse.usage;
 
       /* 区分扣除普通还是高级余额  model3: 普通余额  model4： 高级余额 */
-      await this.userBalanceService.deductFromBalance(req.user.id, `model${deductType === 1 ? 3 : 4}`, deduct, total_tokens);
+      let charge = deduct;
+      if (isTokenBased === true) {
+        charge = deduct * total_tokens;
+      }
+      await this.userBalanceService.deductFromBalance(req.user.id, `model${deductType === 1 ? 3 : 4}`, charge, total_tokens);
 
       /* 记录key的使用次数 和使用token */
       await this.modelsService.saveUseLog(keyId, total_tokens);

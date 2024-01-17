@@ -20,7 +20,6 @@ const modelLoading = ref(false)
 const bulkVisible = ref(false)
 
 
-
 const formInline = reactive({
   keyType: '',
   model: '',
@@ -39,6 +38,7 @@ const formPackage = reactive({
   status: true,
   model: '',
   isDraw: false,
+  isTokenBased: false,
   keyWeight: 1,
   maxModelTokens: 4096,
   maxResponseTokens: 2000,
@@ -56,6 +56,7 @@ const rules = reactive<FormRules>({
   secret: [{ required: true, message: '请填写您的调用模型的secret', trigger: 'blur' }],
   status: [{ required: true, message: '请选择key的启用状态', trigger: 'change' }],
   isDraw: [{ required: true, message: '请选择当前key是否作为基础绘画key', trigger: 'change' }],
+  isTokenBased: [{ required: true, message: '请选择当前key是否基于token计费', trigger: 'change' }],
   model: [{ required: true, message: '请选择当前key需要绑定的模型', trigger: 'change' }],
   keyWeight: [{ required: true, message: '请填写key的权重值', trigger: 'blur' }],
   maxModelTokens: [{ required: true, message: '请填写模型最大token数', trigger: 'blur' }],
@@ -109,9 +110,9 @@ async function handleDeleteKey(row: any) {
 
 function handleEditKey(row: any) {
   activeModelKeyId.value = row.id
-  const { keyType, modelName, key, secret, status, model, keyWeight, maxModelTokens, maxResponseTokens, proxyUrl, timeout, deductType, deduct, maxRounds, isDraw } = row
+  const { keyType, modelName, key, secret, status, model, keyWeight, maxModelTokens, maxResponseTokens, proxyUrl, timeout, deductType, deduct, maxRounds, isDraw, isTokenBased } = row
   nextTick(() => {
-    Object.assign(formPackage, { keyType, modelName, key, secret, status, model, keyWeight, maxModelTokens, maxResponseTokens, proxyUrl, timeout, deductType, deduct, maxRounds, isDraw })
+    Object.assign(formPackage, { keyType, modelName, key, secret, status, model, keyWeight, maxModelTokens, maxResponseTokens, proxyUrl, timeout, deductType, deduct, maxRounds, isDraw, isTokenBased })
   })
   visible.value = true
 }
@@ -224,10 +225,17 @@ onMounted(() => {
           </template>
         </el-table-column>
 
-        <el-table-column prop="isDraw" align="center" label="是否绘画KEY" width="120">
+        <el-table-column prop="isDraw" align="center" label="绘画KEY" width="120">
           <template #default="scope">
             <el-tag :type="scope.row.isDraw ? 'success' : 'danger'">
               {{ scope.row.isDraw ? '是' : '否' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="isTokenBased" align="center" label="Token计费" width="120">
+          <template #default="scope">
+            <el-tag :type="scope.row.isTokenBased ? 'success' : 'danger'">
+              {{ scope.row.isTokenBased ? '是' : '否' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -422,8 +430,8 @@ onMounted(() => {
             <el-icon class="ml-3 cursor-pointer"><QuestionFilled /></el-icon>
           </el-tooltip>
         </el-form-item>
-        <el-form-item label="单词扣除金额" prop="deduct">
-          <el-input v-model.number="formPackage.deduct" placeholder="请填写单词调用此key的扣费金额！" style="width: 80%;" />
+        <el-form-item label="单次扣除金额" prop="deduct">
+          <el-input v-model.number="formPackage.deduct" placeholder="请填写单次调用此key的扣费金额！" style="width: 80%;" />
           <el-tooltip
             class="box-item"
             effect="dark"
@@ -431,7 +439,7 @@ onMounted(() => {
           >
             <template #content>
               <div style="width: 250px;">
-                设置当前key的单词调用扣除余额、建议同模型或名称key设置相同的金额、避免扣费发生异常！
+                设置当前key的单次调用扣除余额、建议同模型或名称key设置相同的金额、避免扣费发生异常！
               </div>
             </template>
             <el-icon class="ml-3 cursor-pointer"><QuestionFilled /></el-icon>
@@ -488,6 +496,23 @@ onMounted(() => {
           <template #content>
             <div style="width: 250px;">
               基础绘画来自于OPENAI的DALL-E模型、所以需要为官方的apiKey、请确定至少设置一张key为基础绘画key即可使用绘画功能！同时当前版本的mind思维导图和mj联想绘图等功能都会走当前设置的key，会后后续版本解除此限制！
+            </div>
+          </template>
+          <el-icon class="ml-3 cursor-pointer"><QuestionFilled /></el-icon>
+        </el-tooltip>
+        </el-form-item>
+         <el-form-item label="设为token计费" prop="isTokenBased" v-if="[1].includes(Number(formPackage.keyType))">
+          <el-switch
+            v-model="formPackage.isTokenBased"
+          />
+        <el-tooltip
+          class="box-item"
+          effect="dark"
+          placement="right"
+        >
+          <template #content>
+            <div style="width: 250px;">
+              基于 token 计费，计费方式为（基础消费 * token消耗）
             </div>
           </template>
           <el-icon class="ml-3 cursor-pointer"><QuestionFilled /></el-icon>

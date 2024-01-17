@@ -468,6 +468,23 @@ onMounted(() => {
           <el-icon class="ml-3 cursor-pointer"><QuestionFilled /></el-icon>
         </el-tooltip>
         </el-form-item>
+        <el-form-item label="设为特殊key" prop="isDraw" v-if="[1].includes(Number(formPackage.keyType))">
+          <el-switch
+            v-model="formPackage.isDraw"
+          />
+        <el-tooltip
+          class="box-item"
+          effect="dark"
+          placement="right"
+        >
+          <template #content>
+            <div style="width: 250px;">
+              基础绘画来自于OPENAI的DALL-E模型、所以需要为官方的apiKey、请确定至少设置一张key为基础绘画key即可使用绘画功能！同时当前版本的mind思维导图和mj联想绘图等功能都会走当前设置的key，会后后续版本解除此限制！
+            </div>
+          </template>
+          <el-icon class="ml-3 cursor-pointer"><QuestionFilled /></el-icon>
+        </el-tooltip>
+        </el-form-item>
         <el-form-item label="指定代理地址" prop="proxyUrl" v-if="[1].includes(Number(formPackage.keyType))">
           <el-input v-model.number="formPackage.proxyUrl" placeholder="如需使用代理请填写、不填写默认使用全局配置！" />
         </el-form-item>

@@ -53,4 +53,7 @@ export class SetModelDto {
 
   @ApiProperty({ example: true, description: '是否设置为绘画Key', required: false })
   isDraw: boolean;
+
+  @ApiProperty({ example: true, description: '是否使用token计费', required: false })
+  isTokenBased: boolean;
 }

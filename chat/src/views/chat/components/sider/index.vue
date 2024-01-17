@@ -1,8 +1,8 @@
 <script setup lang='ts'>
 import type { CSSProperties } from 'vue'
-import { computed, ref, watch, nextTick } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import type { NumberAnimationInst } from 'naive-ui'
-import { NButton, NInput, NLayoutSider, NNumberAnimation, useDialog, useMessage } from 'naive-ui'
+import { NButton, NInput, NLayoutSider, useDialog, useMessage } from 'naive-ui'
 import { useRouter } from 'vue-router'
 import List from './List.vue'
 import { SvgIcon } from '@/components/common'
@@ -60,8 +60,8 @@ function handleInputGroupSearch(val: string) {
   chatStore.setGroupKeyWord(val)
 }
 
-function handleBlurInput(){
-	isSearch.value = false
+function handleBlurInput() {
+  isSearch.value = false
 }
 
 function handleOpenRole() {
@@ -101,11 +101,11 @@ function handleUpdateCollapsed() {
   appStore.setSiderCollapsed(!collapsed.value)
 }
 
-function handleOpenSearch(){
-	isSearch.value = true
-	nextTick(() => {
-		searchRef.value?.focus()
-	})
+function handleOpenSearch() {
+  isSearch.value = true
+  nextTick(() => {
+    searchRef.value?.focus()
+  })
 }
 
 const getMobileClass = computed<CSSProperties>(() => {
@@ -154,20 +154,20 @@ watch(
     >
       <div class="flex flex-col h-full bg-[#fafbfc] dark:bg-[#18181c]" :style="mobileSafeArea">
         <main class="flex flex-col h-full flex-1 min-h-0">
-          <div class="flex h-14 items-center space-x-2 bg-[#fafbfc] dark:bg-[#18181c]"  v-if="isSearch">
-						<NButton type="primary" :loading="addLoading" @click="handleAdd">
+          <div v-if="isSearch" class="flex h-14 items-center space-x-2 bg-[#fafbfc] dark:bg-[#18181c]">
+            <NButton type="primary" :loading="addLoading" @click="handleAdd">
               <SvgIcon icon="ion:add-outline" class="text-xl" />
             </NButton>
             <div class="flex-1">
-              <NInput v-model="groupKeyWord" ref="searchRef" type="text" placeholder="对话历史查找" @blur="handleBlurInput" clearable @input="handleInputGroupSearch" />
+              <NInput ref="searchRef" v-model="groupKeyWord" type="text" placeholder="对话历史查找" clearable @blur="handleBlurInput" @input="handleInputGroupSearch" />
             </div>
           </div>
-					<div class="flex h-14 items-center space-x-2 px-2 bg-[#fafbfc] dark:bg-[#18181c]"  v-if="!isSearch">
+          <div v-if="!isSearch" class="flex h-14 items-center space-x-2 px-2 bg-[#fafbfc] dark:bg-[#18181c]">
             <div class="flex-1">
-							<NButton type="primary" style="width: 100%" :loading="addLoading" @click="handleAdd">
-								新对话
-								<SvgIcon icon="ion:add-outline" class="text-xl" />
-							</NButton>
+              <NButton type="primary" style="width: 100%" :loading="addLoading" @click="handleAdd">
+                新对话
+                <SvgIcon icon="ion:add-outline" class="text-xl" />
+              </NButton>
             </div>
             <NButton @click="handleOpenSearch">
               <SvgIcon icon="icon-park-outline:search" class="text-xl" />
@@ -176,39 +176,42 @@ watch(
           <div class="flex-1 min-h-0 pb-4 overflow-hidden">
             <List />
           </div>
-          <div v-if="!isMobile" class="px-6 py-2 flex items-center   border-t dark:border-t-neutral-800">
+          <!-- <div v-if="!isMobile" class="px-6 py-2 flex items-center   border-t dark:border-t-neutral-800">
             <div class="flex items-center w-full p-1 mb-1 text-[#3076fd] rounded cursor-pointer transition hover:bg-[#eef0f3] dark:border-neutral-700 dark:hover:bg-[#33373c]" @click="useGlobalStore.updateGoodsDialog(true)">
               <SvgIcon icon="material-symbols:shopping-bag-outline" class="mr-1 text-base" />
               进入市场选购您的商品
             </div>
-          </div>
+          </div> -->
           <div class="p-4  border-t dark:border-t-neutral-800 flex flex-col">
-
             <div v-if="activeModelKeyDeductType === 1" class="my-1 flex items-center select-none">
               <SvgIcon icon="material-symbols:account-balance-wallet-outline" class="ml-2 mr-2 text-base" />普通额度： {{ `${userBalance.sumModel3Count || 0} 积分` }}
             </div>
-						<div v-if="activeModelKeyDeductType === 1" class="my-1 flex items-center select-none">
+            <!-- <div v-if="activeModelKeyDeductType === 1" class="my-1 flex items-center select-none">
               <SvgIcon icon="ic:twotone-hourglass-top" class="ml-2 mr-2 text-base" /> 我已使用：  <NNumberAnimation ref="model3AnimationInstRef" :from="oldUse3Token" :to="newUse3Token" /> Token
-            </div>
-						<div v-if="activeModelKeyDeductType === 1" class="my-1 flex items-center select-none">
+            </div> -->
+            <!-- <div v-if="activeModelKeyDeductType === 1" class="my-1 flex items-center select-none">
               <SvgIcon icon="mingcute:bill-line" class="ml-2 mr-2 text-base" /> 模型费用： {{ `${activeModelKeyPrice || 0}积分 / 次对话` }}
-            </div>
+            </div> -->
 
-            <div v-if="activeModelKeyDeductType === 2" class="my-1 flex items-center select-none">
+            <!-- <div v-if="activeModelKeyDeductType === 2" class="my-1 flex items-center select-none">
               <SvgIcon icon="ic:twotone-hourglass-top" class="ml-2 mr-2 text-base" />我已使用：  <NNumberAnimation ref="model4AnimationInstRef" :from="oldUse4Token" :to="newUse4Token" /> Token
-            </div>
-						<div v-if="activeModelKeyDeductType === 2" class="my-1 flex items-center select-none">
+            </div> -->
+            <div v-if="activeModelKeyDeductType === 2" class="my-1 flex items-center select-none">
               <SvgIcon icon="material-symbols:account-balance-wallet-outline" class="ml-2 mr-2 text-base " />高级额度： {{ `${userBalance.sumModel4Count || 0} 积分` }}
             </div>
-						<div v-if="activeModelKeyDeductType === 2" class="my-1 flex items-center select-none">
+            <!-- <div v-if="activeModelKeyDeductType === 2" class="my-1 flex items-center select-none">
               <SvgIcon icon="mingcute:bill-line" class="ml-2 mr-2 text-base " />模型费用： {{ `${activeModelKeyPrice || 0}积分 / 次对话` }}
-            </div>
+            </div> -->
 
             <div class="flex justify-between my-3">
               <NButton type="tertiary" size="small" @click="useGlobalStore.updateNoticeDialog(true)">
                 <SvgIcon icon="mdi:notice-board" class="ml-2 mr-2 text-sm" />
                 <span class="mr-2">公告栏</span>
               </NButton>
+              <!-- <NButton type="tertiary" size="small" @click="handleDelGroup">
+                <SvgIcon icon="ant-design:delete-outlined" class="ml-2 mr-2 text-sm" />
+                <span class="mr-3">清空会话</span>
+              </NButton> -->
               <NButton type="tertiary" size="small" @click="handleOpenRole">
                 <SvgIcon icon="ri:emoji-sticker-line" class="ml-2 mr-2 text-sm" />
                 <span class="mr-3">工作台</span>
@@ -217,7 +220,7 @@ watch(
             <div class="flex justify-betweenx">
               <NButton type="tertiary" size="small" style="width: 100%" @click="handleDelGroup">
                 <SvgIcon icon="ant-design:delete-outlined" class="ml-2 mr-2 text-sm" />
-                <span class="mr-3">清空全部非置顶会话</span>
+                <span class="mr-3">清空会话</span>
               </NButton>
             </div>
           <!-- <NButton block @click="show = true">

@@ -85,14 +85,13 @@ function handleInput(val: string) {
 }
 
 async function handleRunApp(app: MineApp) {
-	const res: any = await fetchQueryModelsListAPI()
-	const { modelMaps } = res.data
-	if(!modelMaps[1]){
-		return ms.warning('管理员未配置特定应用模型、请联系管理员配置~')
-	}
+  const res: any = await fetchQueryModelsListAPI()
+  const { modelMaps } = res.data
+  if (!modelMaps[1])
+    return ms.warning('管理员未配置特定应用模型、请联系管理员配置~')
+
   router.push({ path: '/chat', query: { appId: app.appId } })
 }
-
 
 /* 加入取消收藏 */
 async function handleCollect(app: MineApp) {
@@ -148,7 +147,7 @@ function handleBeforeUpload({ file, fileList }) {
       return resolve(false)
     }
     /* 如果图片大于300k 提示太大 */
-    if (size > 300 * 1024) {
+    if (size > 3000 * 1024) {
       ms.error('图片大小不能超过300k')
       return resolve(false)
     }

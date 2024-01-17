@@ -1,27 +1,25 @@
 <script lang="ts" setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { NButton,  NInput, NInputNumber, NSelect, NSpace, NSwitch, NTag, NTooltip, useDialog, useMessage, NScrollbar } from 'naive-ui'
+import { NButton, NInput, NInputNumber, NScrollbar, NSelect, NSpace, NSwitch, NTooltip, useDialog, useMessage } from 'naive-ui'
 import axios from 'axios'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import cardItem from './components/cardItem.vue'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { SvgIcon } from '@/components/common'
 import nijiImg from '@/assets/images/niji.png'
 import mjImg from '@/assets/images/mj.png'
-import { fetchMidjourneyDrawList, fetchMidjourneyPromptList, fetchMidjourneyFullPrompt } from '@/api'
+import { fetchMidjourneyDrawList, fetchMidjourneyFullPrompt, fetchMidjourneyPromptList } from '@/api'
 import { fetchDrawTaskAPI, fetchTranslateAPI } from '@/api/mjDraw'
 import type { ResData } from '@/api/types'
 import { fetchGetMjPromptAssociateApi, fetchGetMjPromptFanyiApi } from '@/api/index'
 import Loading from '@/components/base/Loading.vue'
 import { useAppStore, useAuthStore } from '@/store'
-import { copyText } from '@/utils/format'
 import marketImg from '@/assets/market.png'
 
-import cardItem from './components/cardItem.vue'
-
 interface PromptItem {
-	status: boolean
-	title: string
-	isCarryParams: boolean
+  status: boolean
+  title: string
+  isCarryParams: boolean
 }
 
 const containerRef = ref<HTMLElement | null>(null)
@@ -45,7 +43,7 @@ let isLoopIn = false
 let timer: any = null
 const aspect = ref('9:16')
 const model = ref('MJ')
-const version = ref('5.2')
+const version = ref('6.0')
 const style = ref(0)
 const quality = ref('1')
 const stylize = ref(100)
@@ -101,6 +99,7 @@ const qualityOptions = [
 const versionOptions = computed(() => {
   if (model.value === 'MJ') {
     return [
+      { label: '6.0', value: '6.0' },
       { label: '5.2', value: '5.2' },
       { label: '5.1', value: '5.1' },
       { label: '5', value: '5' },
@@ -148,10 +147,9 @@ async function handleSetFile(file: File) {
   reader.readAsDataURL(file)
 }
 
-
-async function hanleQueryPrompts(){
-	const res: any = await fetchMidjourneyPromptList()
-	promptList.value = res.data.filter( (item: any) => item.status)
+async function hanleQueryPrompts() {
+  const res: any = await fetchMidjourneyPromptList()
+  promptList.value = res.data.filter((item: any) => item.status)
 }
 
 async function queryAllDrawList() {
@@ -162,14 +160,16 @@ async function queryAllDrawList() {
   countQueue.value = queueCount || 0
 }
 
-async function drawLike(){
-	const id = route.query.mjId
-	if(!id) return;
-	const res: ResData = await fetchMidjourneyFullPrompt({id})
-	if(!res.success) return
-	prompt.value = res.data
-	carryOptions.value = 0
-	nextOpenCarryOptions.value =  true
+async function drawLike() {
+  const id = route.query.mjId
+  if (!id)
+    return
+  const res: ResData = await fetchMidjourneyFullPrompt({ id })
+  if (!res.success)
+    return
+  prompt.value = res.data
+  carryOptions.value = 0
+  nextOpenCarryOptions.value = true
 }
 
 /* 翻译prompt */
@@ -178,8 +178,8 @@ async function handleFanyiPrompt() {
     return ms.warning('请输入描述词！')
   translateLoading.value = true
   try {
-		const Interface = Number(authStore.globalConfig.mjUseBaiduFy) === 1 ?  fetchTranslateAPI : fetchGetMjPromptFanyiApi
-		const params: any =  Number(authStore.globalConfig.mjUseBaiduFy) === 1 ? { text: prompt.value } : { prompt: prompt.value }
+    const Interface = Number(authStore.globalConfig.mjUseBaiduFy) === 1 ? fetchTranslateAPI : fetchGetMjPromptFanyiApi
+    const params: any = Number(authStore.globalConfig.mjUseBaiduFy) === 1 ? { text: prompt.value } : { prompt: prompt.value }
     const res: ResData = await Interface(params)
     if (!res.success)
       return ms.error('翻译失败了！')
@@ -195,10 +195,10 @@ const translateNoLoading = ref(false)
 async function handleFanyiNoPrompt() {
   if (!noPrompt.value)
     return ms.warning('请输入描述词！')
-		translateNoLoading.value = true
+  translateNoLoading.value = true
   try {
-		const Interface = Number(authStore.globalConfig.mjUseBaiduFy) === 1 ?  fetchTranslateAPI : fetchGetMjPromptFanyiApi
-		const params: any =  Number(authStore.globalConfig.mjUseBaiduFy) === 1 ? { text: noPrompt.value } : { prompt: noPrompt.value }
+    const Interface = Number(authStore.globalConfig.mjUseBaiduFy) === 1 ? fetchTranslateAPI : fetchGetMjPromptFanyiApi
+    const params: any = Number(authStore.globalConfig.mjUseBaiduFy) === 1 ? { text: noPrompt.value } : { prompt: noPrompt.value }
     const res: ResData = await Interface(params)
     if (!res.success)
       return ms.error('翻译失败了！')
@@ -232,7 +232,6 @@ function hasChinese(str: string) {
   const reg = /[\u4E00-\u9FA5]/g
   return reg.test(str)
 }
-
 
 /* 移除用户自己的指令 */
 function removeParameters(str: string) {
@@ -275,38 +274,38 @@ async function uploadImg() {
 }
 
 /* 修改提示词 */
-function handleSelectPrompt(item: any){
-	const { prompt: text, aspect: size, isCarryParams  } = item
-	prompt.value = text
-	size && (aspect.value = size)
-	carryOptions.value = isCarryParams ? 1 : 0
+function handleSelectPrompt(item: any) {
+  const { prompt: text, aspect: size, isCarryParams } = item
+  prompt.value = text
+  size && (aspect.value = size)
+  carryOptions.value = isCarryParams ? 1 : 0
 }
 
-
-function checkHasChinese(){
-	const isHasPromptChinese = hasChinese(prompt.value)
-	const isHasNoPromptChinese = hasChinese(noPrompt.value)
-	if(isHasPromptChinese || isHasNoPromptChinese){
-		const d = dialog.warning({
-			title: '温馨提示',
-			content: '您的提示词中包含中文、绘画AI可能无法识别您的中文、我们建议您翻译后进行绘画得到更准确的结果、请问需要翻译后提交么？',
-			positiveText: '翻译提示词',
-			negativeText: '不需要',
-			onPositiveClick: async () => {
-				d.loading = true
-				const task = []
-				isHasPromptChinese && task.push(handleFanyiPrompt())
-				isHasNoPromptChinese && task.push(handleFanyiNoPrompt())
-				await Promise.all(task)
-				handleSubmit()
-			},
-			onNegativeClick: () => {
-				handleSubmit()
-			}
-		})
-	}else{
-		handleSubmit()
-	}
+function checkHasChinese() {
+  const isHasPromptChinese = hasChinese(prompt.value)
+  const isHasNoPromptChinese = hasChinese(noPrompt.value)
+  if (isHasPromptChinese || isHasNoPromptChinese) {
+    const d = dialog.warning({
+      title: '温馨提示',
+      content: '您的提示词中包含中文、绘画AI可能无法识别您的中文、我们建议您翻译后进行绘画得到更准确的结果、请问需要翻译后提交么？',
+      positiveText: '翻译提示词',
+      negativeText: '不需要',
+      onPositiveClick: async () => {
+        d.loading = true
+        const task = []
+        isHasPromptChinese && task.push(handleFanyiPrompt())
+        isHasNoPromptChinese && task.push(handleFanyiNoPrompt())
+        await Promise.all(task)
+        handleSubmit()
+      },
+      onNegativeClick: () => {
+        handleSubmit()
+      },
+    })
+  }
+  else {
+    handleSubmit()
+  }
 }
 
 /* 提交绘制任务|图生图 */
@@ -324,18 +323,16 @@ async function handleSubmit() {
   await fetchDrawTaskAPI({ prompt: prompt.value, imgUrl, extraParam })
   curFile && (curFile = null)
   dataBase64.value = ''
-	if(nextOpenCarryOptions.value){
-		carryOptions.value = 1
-		nextOpenCarryOptions.value = false
-	}
+  if (nextOpenCarryOptions.value) {
+    carryOptions.value = 1
+    nextOpenCarryOptions.value = false
+  }
   ms.success('提交绘制任务成功、请等待绘制结束！')
-	if(authStore.token){
-		await refreshUserInfo()
-	}
+  if (authStore.token)
+    await refreshUserInfo()
+
   !isLoopIn && queryDrawResult()
 }
-
-
 
 /* 轮询查询结果 */
 async function queryDrawResult() {
@@ -362,9 +359,6 @@ const curDrawTask = computed(() => {
   return drawList.value.filter((item: any) => [1, 2].includes(item.status))
 })
 
-
-
-
 /* 前往市场 */
 function readMore() {
   router.push('/market')
@@ -373,9 +367,9 @@ function readMore() {
 /* 复制 */
 function usePrompt(item: any) {
   const { fullPrompt } = item
-	carryOptions.value  = 0
-	prompt.value = fullPrompt
-	nextOpenCarryOptions.value = true
+  carryOptions.value = 0
+  prompt.value = fullPrompt
+  nextOpenCarryOptions.value = true
   // copyText({ text: fullPrompt })
   // ms.success('复制prompt完成！')
 }
@@ -389,7 +383,6 @@ function setModel(name: string) {
     version.value = '5'
 }
 
-
 async function refreshUserInfo() {
   refreshLoading.value = true
   try {
@@ -401,12 +394,10 @@ async function refreshUserInfo() {
   }
 }
 
-
-
 onMounted(() => {
   queryDrawResult()
-	drawLike()
-	hanleQueryPrompts()
+  drawLike()
+  hanleQueryPrompts()
   const container: any = document.getElementById('footer')
   const observer = new IntersectionObserver((entries, observer) => {
     entries.forEach((entry) => {
@@ -625,7 +616,7 @@ onMounted(() => {
                 4积分
               </span>
             </div>
-						<div class="flex justify-between">
+            <div class="flex justify-between">
               <span class="w-[120px] block text-sm">图生图单次消耗：</span>
               <span class="text-sm pr-2">
                 4积分
@@ -648,7 +639,7 @@ onMounted(() => {
             <h3 class="text-lg sm:text-2xl font-bold leading-6 ">
               Midjourney
             </h3>
-						<!-- <p>图生图：生成类似风格或类型图像；图生文：上传一张图片生成对应的提示词；融图：融合图片风格</p> -->
+            <!-- <p>图生图：生成类似风格或类型图像；图生文：上传一张图片生成对应的提示词；融图：融合图片风格</p> -->
             <div>
               <div class="flex justify-between items-end">
                 <b>你想生成什么图像?</b>
@@ -678,7 +669,7 @@ onMounted(() => {
                   }"
                   placeholder="例如: A cute little cat (Midjourney对中文描述词有一定限制、我们建议您点击右侧翻译将您的描述词转为英文再进行提交、联想则是会将您的描述词交由GPT让其发挥想象空间为您在此基础创建更为详细的描述！)"
                 />
-                <div class="mt-4" v-if="Number(authStore.globalConfig.mjHideNotBlock) !== 1">
+                <div v-if="Number(authStore.globalConfig.mjHideNotBlock) !== 1" class="mt-4">
                   <div class="mb-3 flex justify-between items-end">
                     <b>不需要的元素</b>
                     <NButton type="primary" :loading="translateNoLoading" @click="handleFanyiNoPrompt">
@@ -691,20 +682,20 @@ onMounted(() => {
                   <NInput
                     v-model:value="noPrompt"
                     type="textarea"
-										:rows="1"
+                    :rows="1"
                     placeholder="例：生成房间图片、但是不要床、你可以填bed！"
                   />
                 </div>
               </div>
-							<div class="w-full dark:bg-transparent"  :class="isMobile ? 'py-3' : 'py-6'" v-if="promptList.length">
-									<NScrollbar  x-scrollable>
-										<div class="flex items-center space-x-3 whitespace-nowrap pb-[15px]">
-											<n-button size="small" v-for="(item,index) in promptList" :key="index" @click="handleSelectPrompt(item)">
-												{{ item.title }}
-											</n-button>
-										</div>
-									</NScrollbar>
-								</div>
+              <div v-if="promptList.length" class="w-full dark:bg-transparent" :class="isMobile ? 'py-3' : 'py-6'">
+                <NScrollbar x-scrollable>
+                  <div class="flex items-center space-x-3 whitespace-nowrap pb-[15px]">
+                    <NButton v-for="(item, index) in promptList" :key="index" size="small" @click="handleSelectPrompt(item)">
+                      {{ item.title }}
+                    </NButton>
+                  </div>
+                </NScrollbar>
+              </div>
               <div class="mt-3">
                 <NButton type="primary" :loading="false" :disabled="submitDisabled" @click="checkHasChinese">
                   <template #icon>
@@ -717,29 +708,29 @@ onMounted(() => {
           </div>
 
           <div class="space-y-2 p-4">
-						<div   v-if="Number(authStore.globalConfig.mjHideWorkIn) !== 1">
-							<div class="mt-6 mb-4 flex flex-col">
-								<span class="text-xl font-bold flex items-end">
-									<b>工作中的内容</b>
-									<span v-if="countQueue" class="text-xs font-family ml-2">当前系统进行中任务[{{ countQueue }}]</span>
-								</span>
-							</div>
-							<div v-if="!curDrawTask.length" class="h-[10vh] flex flex-col justify-center items-center text-gray-500 relative">
-								<img class="w-18" :src="marketImg">
-								<span class="mt-4">
-									<NButton text size="small" @click="readMore">点击前往市场看看别人的作品吧！</NButton>
-								</span>
-							</div>
+            <div v-if="Number(authStore.globalConfig.mjHideWorkIn) !== 1">
+              <div class="mt-6 mb-4 flex flex-col">
+                <span class="text-xl font-bold flex items-end">
+                  <b>工作中的内容</b>
+                  <span v-if="countQueue" class="text-xs font-family ml-2">当前系统进行中任务[{{ countQueue }}]</span>
+                </span>
+              </div>
+              <div v-if="!curDrawTask.length" class="h-[10vh] flex flex-col justify-center items-center text-gray-500 relative">
+                <img class="w-18" :src="marketImg">
+                <span class="mt-4">
+                  <NButton text size="small" @click="readMore">点击前往市场看看别人的作品吧！</NButton>
+                </span>
+              </div>
 
-							<div v-if="curDrawTask.length" class="h-[10vh] flex flex-col justify-center items-center text-gray-500 relative">
-								<div class="w-56 h-14 relative">
-									<Loading :text-color="loadingTextColor" />
-								</div>
-								<p class="mb-3">
-									当前{{ curDrawTask.length }}个任务正在进行中、请耐心等候绘制完成、您可以前往其他页面稍后回来查看结果！
-								</p>
-							</div>
-						</div>
+              <div v-if="curDrawTask.length" class="h-[10vh] flex flex-col justify-center items-center text-gray-500 relative">
+                <div class="w-56 h-14 relative">
+                  <Loading :text-color="loadingTextColor" />
+                </div>
+                <p class="mb-3">
+                  当前{{ curDrawTask.length }}个任务正在进行中、请耐心等候绘制完成、您可以前往其他页面稍后回来查看结果！
+                </p>
+              </div>
+            </div>
             <!-- working -->
             <div class="min-h-[500px] mt-5">
               <div class="mt-6 mb-10 flex flex-col">
@@ -752,7 +743,7 @@ onMounted(() => {
 
               <div v-if="drawList && drawList.length">
                 <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 4xl:grid-cols-5 gap-4">
-									<cardItem v-for="item in drawList" :key="item.id" @queryData="queryDrawResult"  :drawItemInfo="item" />
+                  <cardItem v-for="item in drawList" :key="item.id" :draw-item-info="item" @queryData="queryDrawResult" />
                 </div>
               </div>
             </div>

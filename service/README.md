@@ -1,73 +1,49 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# 部署文档
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## 环境准备
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+1. **安装 Node.js 环境**
 
-## Description
+   - 请根据您的操作系统下载并安装 Node.js。
+   - 可以从[Node.js 官网](https://nodejs.org/)下载。
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+2. **安装 PM2**
 
-## Installation
+   - 使用 npm 安装 PM2：`npm install pm2 -g`
+   - PM2 是一个带有负载均衡功能的 Node 应用的进程管理器。
 
-```bash
-$ pnpm install
-```
+3. **安装 PNPM**
+   - 使用 npm 安装 PNPM：`npm install -g pnpm`
+   - PNPM 是一个快速、节省磁盘空间的包管理工具。
 
-## Running the app
+## 配置项目
 
-```bash
-# development
-$ pnpm run start
+1. **配置环境变量**
 
-# watch mode
-$ pnpm run start:dev
+   - 复制`.env.example`文件为`.env`。
+   - 根据需要修改`.env`文件中的配置项。
 
-# production mode
-$ pnpm run start:prod
-```
+2. **安装项目依赖**
+   - 运行命令：`pnpm install`
+   - 这将根据`package.json`文件安装所有必需的依赖。
 
-## Test
+## 启动项目
 
-```bash
-# unit tests
-$ pnpm run test
+1. **启动服务**
 
-# e2e tests
-$ pnpm run test:e2e
+   - 使用命令：`pnpm start`
+   - 这将启动项目，并默认在 9520 端口监听。
 
-# test coverage
-$ pnpm run test:cov
-```
+2. **访问项目**
+   - 在浏览器中访问`http://localhost:9520`，或者如果配置了 nginx 反向代理，则通过配置的域名访问。
 
-## Support
+## 管理平台
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- **管理端地址**：`/admin`
+- **普通管理员账号**：`admin`
+- **超级管理员账号**：`super`
+- **密码均为**：`123456`
 
-## Stay in touch
+普通管理员，可以预览后台非敏感信息。登入后台后请及时修改管理员密码，或按需要禁用普通管理员。
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+请确保遵循上述步骤进行配置和启动，以保证系统的正确运行。
