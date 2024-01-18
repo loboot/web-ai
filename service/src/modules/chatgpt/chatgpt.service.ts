@@ -184,7 +184,7 @@ export class ChatgptService implements OnModuleInit {
       throw new HttpException('当前流程所需要的模型已被管理员下架、请联系管理员上架专属模型！', HttpStatus.BAD_REQUEST);
     }
 
-    const { deduct, isTokenBased, deductType, key: modelKey, secret, modelName, id: keyId, accessToken } = currentRequestModelKey;
+    const { deduct, isTokenBased, tokenFeeRatio, deductType, key: modelKey, secret, modelName, id: keyId, accessToken } = currentRequestModelKey;
     /* 用户状态检测 */
     await this.userService.checkUserStatus(req.user);
     /* 用户余额检测 */
@@ -305,7 +305,7 @@ export class ChatgptService implements OnModuleInit {
           /* 当用户回答一般停止时 也需要扣费 */
           let charge = deduct;
           if (isTokenBased === true) {
-            charge = deduct * total_tokens;
+            charge = Math.ceil((deduct * total_tokens) / tokenFeeRatio);
           }
           await this.userBalanceService.deductFromBalance(req.user.id, `model${deductType === 1 ? 3 : 4}`, charge, total_tokens);
         });
@@ -433,7 +433,7 @@ export class ChatgptService implements OnModuleInit {
       /* 区分扣除普通还是高级余额  model3: 普通余额  model4： 高级余额 */
       let charge = deduct;
       if (isTokenBased === true) {
-        charge = deduct * total_tokens;
+        charge = Math.ceil((deduct * total_tokens) / tokenFeeRatio);
       }
       await this.userBalanceService.deductFromBalance(req.user.id, `model${deductType === 1 ? 3 : 4}`, charge, total_tokens);
 
