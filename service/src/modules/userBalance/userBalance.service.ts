@@ -67,8 +67,8 @@ export class UserBalanceService {
     private readonly midjourneyEntity: Repository<MidjourneyEntity>,
     private readonly salesService: SalesService,
     private readonly globalConfigService: GlobalConfigService,
-  ) {}
-  
+  ) { }
+
   /* 新注册用户赠送消费 */
   async addBalanceToNewUser(userId: number, invitedId: number) {
     try {
@@ -164,50 +164,50 @@ export class UserBalanceService {
 
   /* 检查余额 */
   async validateBalance(req, type, amount) {
-      const { id: userId, role } = req.user
-      let b = await this.userBalanceEntity.findOne({ where: { userId } });
-      if (!b) {
-        b = await this.createBaseUserBalance(userId);
-      }
-      if(role === 'visitor'){
-        return this.validateVisitorBalance(req, type, amount)
-      }
-      const res: ConfigEntity = await this.configEntity.findOne({ where: { configKey: 'vxNumber' } });
-      const vxNumber = res ? res.configVal : '---';
-      /* 会员扣费key */
-      const memberKey =
-        type === 'model3' ? 'memberModel3Count' : type === 'model4' ? 'memberModel4Count' : type === 'mjDraw' ? 'memberDrawMjCount' : null;
-      /* 非会员扣费key */
-      const baseKey = type === 'model3' ? 'model3Count' : type === 'model4' ? 'model4Count' : type === 'mjDraw' ? 'drawMjCount' : null;
-      /* 如果是会员 */
-      if (b.packageId && b[memberKey] < amount) {
-        if (b[baseKey] < amount) {
-          throw new HttpException(`您的账户余额不足,如果想继续体验服务,请联系管理员 <VX: ${vxNumber}> 或购买专属套餐 ！`, HttpStatus.PAYMENT_REQUIRED);
-        }
-      }
-      /* 如果不是会员 */
-      if (!b.packageId && b[baseKey] < amount) {
+    const { id: userId, role } = req.user
+    let b = await this.userBalanceEntity.findOne({ where: { userId } });
+    if (!b) {
+      b = await this.createBaseUserBalance(userId);
+    }
+    if (role === 'visitor') {
+      return this.validateVisitorBalance(req, type, amount)
+    }
+    const res: ConfigEntity = await this.configEntity.findOne({ where: { configKey: 'vxNumber' } });
+    const vxNumber = res ? res.configVal : '---';
+    /* 会员扣费key */
+    const memberKey =
+      type === 'model3' ? 'memberModel3Count' : type === 'model4' ? 'memberModel4Count' : type === 'mjDraw' ? 'memberDrawMjCount' : null;
+    /* 非会员扣费key */
+    const baseKey = type === 'model3' ? 'model3Count' : type === 'model4' ? 'model4Count' : type === 'mjDraw' ? 'drawMjCount' : null;
+    /* 如果是会员 */
+    if (b.packageId && b[memberKey] < amount) {
+      if (b[baseKey] < amount) {
         throw new HttpException(`您的账户余额不足,如果想继续体验服务,请联系管理员 <VX: ${vxNumber}> 或购买专属套餐 ！`, HttpStatus.PAYMENT_REQUIRED);
       }
-      return b;
-  
+    }
+    /* 如果不是会员 */
+    if (!b.packageId && b[baseKey] < amount) {
+      throw new HttpException(`您的账户余额不足,如果想继续体验服务,请联系管理员 <VX: ${vxNumber}> 或购买专属套餐 ！`, HttpStatus.PAYMENT_REQUIRED);
+    }
+    return b;
+
   }
 
   /* 检查游客的余额 */
- async validateVisitorBalance(req, type, amount){
-    const {id} = req.user
+  async validateVisitorBalance(req, type, amount) {
+    const { id } = req.user
     const baseKey = type === 'model3' ? 'model3Count' : type === 'model4' ? 'model4Count' : type === 'mjDraw' ? 'drawMjCount' : null;
     const now = new Date();
-    const log = await this.fingerprintLogEntity.findOne({where: {fingerprint: id}})
+    const log = await this.fingerprintLogEntity.findOne({ where: { fingerprint: id } })
     /* 判断余额 */
-    const {visitorModel3Num,visitorModel4Num,visitorMJNum} = await this.globalConfigService.getConfigs(['visitorModel3Num','visitorModel4Num','visitorMJNum'])
+    const { visitorModel3Num, visitorModel4Num, visitorMJNum } = await this.globalConfigService.getConfigs(['visitorModel3Num', 'visitorModel4Num', 'visitorMJNum'])
     const settings = {
       model3Count: visitorModel3Num ? Number(visitorModel3Num) : 0,
       model4Count: visitorModel4Num ? Number(visitorModel4Num) : 0,
       drawMjCount: visitorMJNum ? Number(visitorMJNum) : 0
     }
     /* 如果没有 */
-    if(!log){
+    if (!log) {
       let data = {
         fingerprint: id,
         model3Count: 0,
@@ -216,13 +216,13 @@ export class UserBalanceService {
       }
       data[baseKey] = data[baseKey] + amount
       /* 判断余额 */
-      if(data[baseKey] > settings[baseKey]){
+      if (data[baseKey] > settings[baseKey]) {
         throw new HttpException(`今日当前类型免费额度已经使用完毕、建议您注册账户体验更加完整的服务内容！`, HttpStatus.PAYMENT_REQUIRED);
-      }else{
+      } else {
         await this.fingerprintLogEntity.save(data)
         return true
       }
-    }else{
+    } else {
       const { model3Count, model4Count, drawMjCount } = log
       let data = {
         model3Count,
@@ -234,9 +234,9 @@ export class UserBalanceService {
       // const date = Number(new Date(log.updatedAt)) + 8 * 60 * 60 * 1000
       const date = Number(new Date(log.updatedAt))
       const isUpdateLastDay = this.isUpdatedToday(date)
-      if(isUpdateLastDay){
+      if (isUpdateLastDay) {
         data[baseKey] = data[baseKey] + amount
-      }else{
+      } else {
         data = {
           model3Count: 0,
           model4Count: 0,
@@ -244,18 +244,17 @@ export class UserBalanceService {
         }
         data[baseKey] = data[baseKey] + amount
       }
-      if(data[baseKey] > settings[baseKey]){
+      if (data[baseKey] > settings[baseKey]) {
         throw new HttpException(`今日当前类型免费额度已经使用完毕、建议您注册账户体验更加完整的服务内容！`, HttpStatus.PAYMENT_REQUIRED);
-      }else{
+      } else {
         await this.fingerprintLogEntity.update({ fingerprint: id }, data)
         return true
       }
     }
   }
 
-
   /* 判读上次更新是不是今天  */
-  isUpdatedToday (date) {
+  isUpdatedToday(date) {
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     return date >= todayStart;
@@ -263,28 +262,32 @@ export class UserBalanceService {
 
   /* 消费  UseAmount是使用的token */
   async deductFromBalance(userId, deductionType, amount, UseAmount = 0) {
+    // 从数据库中查找特定用户的账户余额记录
     const b = await this.userBalanceEntity.findOne({ where: { userId } });
+
+    // 如果没有找到用户账户记录，则抛出异常
     if (!b) {
       throw new HttpException('缺失当前用户账户记录！', HttpStatus.BAD_REQUEST);
     }
 
-    /* 如果是会员 */
+    /* 根据扣费类型确定会员账户的 key */
     const memberKey =
       deductionType === 'model3'
         ? 'memberModel3Count'
         : deductionType === 'model4'
-        ? 'memberModel4Count'
-        : deductionType === 'mjDraw'
-        ? 'memberDrawMjCount'
-        : null;
+          ? 'memberModel4Count'
+          : deductionType === 'mjDraw'
+            ? 'memberDrawMjCount'
+            : null;
 
-    /* 如果不是会员 */
+    /* 根据扣费类型确定非会员账户的 key */
     const baseKey =
       deductionType === 'model3' ? 'model3Count' : deductionType === 'model4' ? 'model4Count' : deductionType === 'mjDraw' ? 'drawMjCount' : null;
-    /* 记录需要扣费的key */
+
+    /* 确定最终需要扣费的 key */
     const updateKey = b.packageId && b[memberKey] < amount ? baseKey : b.packageId ? memberKey : baseKey;
 
-    /* 记录使用值的key */
+    /* 确定记录使用值的 key */
     let useKey = null;
     if (updateKey.includes('odel3')) {
       useKey = 'useModel3Token';
@@ -295,12 +298,25 @@ export class UserBalanceService {
     if (updateKey.includes('MjCount')) {
       useKey = 'useDrawMjToken';
     }
-    /* 记录修改使用的token */
-    const updateBalance = { [updateKey]: b[updateKey] - amount < 0 ? 0 : b[updateKey] - amount, [useKey]: b[useKey] + UseAmount };
-    /* 记录修改使用的次数 mj不需要 */
-    useKey === 'useModel3Token' && (updateBalance['useModel3Count'] = b['useModel3Count'] + 1);
-    useKey === 'useModel4Token' && (updateBalance['useModel4Count'] = b['useModel4Count'] + 1);
+
+    /* 计算更新账户余额和使用的token数量 */
+    const updateBalance = {
+      [updateKey]: b[updateKey] - amount < 0 ? 0 : b[updateKey] - amount,
+      [useKey]: b[useKey] + UseAmount,
+    };
+
+    /* 如果是model3或model4，记录使用的次数（mj不需要） */
+    if (useKey === 'useModel3Token') {
+      updateBalance['useModel3Count'] = b['useModel3Count'] + amount;
+    }
+    if (useKey === 'useModel4Token') {
+      updateBalance['useModel4Count'] = b['useModel4Count'] + amount;
+    }
+
+    // 更新数据库中的用户账户余额
     const result = await this.userBalanceEntity.update({ userId }, updateBalance);
+
+    // 如果没有记录被更新，则抛出异常
     if (result.affected === 0) {
       throw new HttpException('消费余额失败！', HttpStatus.BAD_REQUEST);
     }
@@ -605,20 +621,20 @@ export class UserBalanceService {
     }
   }
 
-  async inheritVisitorData(req: Request){
+  async inheritVisitorData(req: Request) {
     const { fingerprint } = req.headers
     const { id: userId } = req.user
-    await this.chatLogEntity.update({userId: Number(fingerprint)}, { userId })
-    await this.chatGroupEntity.update({userId: Number(fingerprint)}, { userId })
-    await this.midjourneyEntity.update({userId: Number(fingerprint)}, { userId })
+    await this.chatLogEntity.update({ userId: Number(fingerprint) }, { userId })
+    await this.chatGroupEntity.update({ userId: Number(fingerprint) }, { userId })
+    await this.midjourneyEntity.update({ userId: Number(fingerprint) }, { userId })
     return 1
   }
 
-  async getVisitorCount(req){
+  async getVisitorCount(req) {
     const { fingerprint } = req.headers
-    const countChat = await this.chatLogEntity.count({where: {userId: fingerprint}})
-    const countChatGroup = await this.chatGroupEntity.count({where: {userId: fingerprint}})
-    const countMj = await this.midjourneyEntity.count({where: {userId: fingerprint}})
+    const countChat = await this.chatLogEntity.count({ where: { userId: fingerprint } })
+    const countChatGroup = await this.chatGroupEntity.count({ where: { userId: fingerprint } })
+    const countMj = await this.midjourneyEntity.count({ where: { userId: fingerprint } })
     return countChat || countChatGroup || countMj || 0
   }
 }
