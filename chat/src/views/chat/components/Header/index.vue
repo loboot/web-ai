@@ -1,37 +1,34 @@
 <script lang="ts" setup>
-import { computed, nextTick, ref } from 'vue'
-import { NButton, NPopover, NTooltip, useMessage } from 'naive-ui'
-import { useUsingContext } from '../../hooks/useUsingContext'
-import { SvgIcon } from '@/components/common'
-import { useAppStore, useAuthStore, useChatStore, useGlobalStoreWithOut } from '@/store'
-import { useBasicLayout } from '@/hooks/useBasicLayout'
+import { computed, nextTick, ref } from 'vue';
+import { NButton, NPopover, NTooltip, useMessage } from 'naive-ui';
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
+import { useUsingContext } from '../../hooks/useUsingContext';
+import { SvgIcon } from '@/components/common';
+import {
+  useAppStore,
+  useAuthStore,
+  useChatStore,
+  useGlobalStoreWithOut,
+} from '@/store';
+import { useBasicLayout } from '@/hooks/useBasicLayout';
 
-import type { Theme } from '@/store/modules/app/helper'
-defineProps<Props>()
-const emit = defineEmits<Emit>()
-const authStore = useAuthStore()
-const { usingContext, toggleUsingContext } = useUsingContext()
+import type { Theme } from '@/store/modules/app/helper';
+defineProps<Props>();
+const emit = defineEmits<Emit>();
+const authStore = useAuthStore();
+const { usingContext, toggleUsingContext } = useUsingContext();
 
 interface Props {
-  usingContext: boolean
+  usingContext: boolean;
 }
 
 interface Emit {
-  (ev: 'export'): void
-  (ev: 'toggleUsingContext'): void
-  (ev: 'clear'): void
-  (ev: 'scrollBtn'): void
+  (ev: 'export'): void;
+  (ev: 'toggleUsingContext'): void;
+  (ev: 'clear'): void;
+  (ev: 'scrollBtn'): void;
 }
-const ms = useMessage()
-const marks = ref({
-  0: '死板',
-  0.1: '专业',
-  0.2: '准确',
-  0.8: '平衡',
-  1: '创造性',
-  1.3: '离谱',
-  1.6: '荒谬',
-})
+const ms = useMessage();
 const themeOptions: { label: string; key: Theme; icon: string }[] = [
   {
     label: 'Auto',
@@ -48,183 +45,197 @@ const themeOptions: { label: string; key: Theme; icon: string }[] = [
     key: 'dark',
     icon: 'ri:moon-foggy-line',
   },
-]
+];
 
 const modelName = computed(() => {
-  if (!chatStore.activeConfig)
-    return
-  const { modelTypeInfo, modelInfo } = chatStore.activeConfig
-  if (!modelTypeInfo || !modelInfo)
-    return
-  return `${modelTypeInfo?.label} / ${modelInfo.modelName}`
-})
+  if (!chatStore.activeConfig) return;
+  const { modelTypeInfo, modelInfo } = chatStore.activeConfig;
+  if (!modelTypeInfo || !modelInfo) return;
+  return `${modelInfo.modelName}`;
+});
 
-const appStore = useAppStore()
-const chatStore = useChatStore()
-const useGlobalStore = useGlobalStoreWithOut()
+const appStore = useAppStore();
+const chatStore = useChatStore();
+const useGlobalStore = useGlobalStoreWithOut();
+const darkMode = computed(() => appStore.theme === 'dark');
 
-const collapsed = computed(() => appStore.siderCollapsed)
-const currentChatHistory = computed(() => chatStore.getChatByGroupInfo())
+const collapsed = computed(() => appStore.siderCollapsed);
+const currentChatHistory = computed(() => chatStore.getChatByGroupInfo());
 
-const { isMobile } = useBasicLayout()
-const theme = computed(() => appStore.theme)
+const { isMobile } = useBasicLayout();
+const theme = computed(() => appStore.theme);
 
 function handleUpdateCollapsed() {
-  appStore.setSiderCollapsed(!collapsed.value)
+  appStore.setSiderCollapsed(!collapsed.value);
 }
 
 function onScrollToTop() {
-  const scrollRef = document.querySelector('#scrollRef')
-  if (scrollRef)
-    nextTick(() => scrollRef.scrollTop = 0)
+  const scrollRef = document.querySelector('#scrollRef');
+  if (scrollRef) nextTick(() => (scrollRef.scrollTop = 0));
 }
 
 function handleExport() {
-  emit('export')
+  emit('export');
 }
 
 function handleClear() {
-  emit('clear')
+  emit('clear');
 }
 
 function handleScrollBtm() {
-  emit('scrollBtn')
+  emit('scrollBtn');
+}
+
+function checkMode() {
+  const mode = darkMode.value ? 'light' : 'dark';
+  appStore.setTheme(mode);
 }
 
 function handleOpenModelDialog() {
   if (useGlobalStore.isChatIn)
-    return ms.warning('请等待聊天结束后修改模型信息！')
+    return ms.warning('请等待聊天结束后修改模型信息！');
 
-  useGlobalStore.updateModelDialog(true)
+  useGlobalStore.updateModelDialog(true);
 }
-const isLogin = computed(() => authStore.isLogin)
+const isLogin = computed(() => authStore.isLogin);
 
 function handleSignIn() {
   if (!isLogin.value) {
-    authStore.setLoginDialog(true)
-    return
+    authStore.setLoginDialog(true);
+    return;
   }
-  useGlobalStore.updateSignInDialog(true)
+  useGlobalStore.updateSignInDialog(true);
 }
 </script>
 
 <template>
   <header
-    class="sticky top-0 left-0 right-0 z-30 border-b dark:border-neutral-800 bg-white/80 dark:bg-black/20 backdrop-blur"
+    class="sticky top-0 left-0 right-0 z-30 border-b-gray-100 dark:border-neutral-800 bg-white dark:bg-gray-900 h-14"
   >
-    <div class="relative flex items-center justify-center min-w-0 overflow-hidden h-14">
-      <div class="max-w-screen-4xl  flex w-full h-full items-center px-4">
+    <div class="relative flex items-center justify-center min-w-0 h-full">
+      <div class="max-w-screen-4xl flex w-full h-full items-center px-4">
         <div v-if="isMobile" class="flex items-center">
           <button
-            class="flex items-center justify-center  w-11 h-11"
+            class="flex items-center justify-center w-11 h-full"
             @click="handleUpdateCollapsed"
           >
-            <SvgIcon v-if="collapsed" class="text-2xl" icon="ri:align-justify" />
+            <SvgIcon
+              v-if="collapsed"
+              class="text-2xl"
+              icon="ri:align-justify"
+            />
             <SvgIcon v-else class="text-2xl" icon="ri:align-right" />
           </button>
         </div>
 
         <!-- pc -->
         <div class="flex justify-between items-center h-full w-full">
-          <div class="flex-1 flex ele-drag items-center h-full">
-            <h1
-              class=" flex-1 px-4  font-bold pr-6 overflow-hidden cursor-pointer select-none text-ellipsis whitespace-nowrap"
-              @dblclick="onScrollToTop"
+          <div
+            class="flex-1 flex ele-drag items-center h-full dark:bg-gray-900"
+          >
+            <button
+              class="flex items-center rounded-md justify-between px-2 py-2 font-bold text-ellipsis whitespace-nowrap cursor-pointer select-none dark:text-gray-400 dark:hover:bg-gray-800"
+              @click="handleOpenModelDialog"
             >
-              {{ currentChatHistory?.title ?? '' }}
-            </h1>
+              <span class="flex-1 overflow-hidden">{{ modelName }}</span>
+              <SvgIcon
+                class="text-2xl"
+                :icon="
+                  useGlobalStore.modelDialog
+                    ? 'ri:arrow-down-s-line'
+                    : 'ri:arrow-right-s-line'
+                "
+              />
+            </button>
           </div>
-          <div class="flex items-center space-x-2">
-            <NTooltip trigger="hover" :disabled="isMobile">
-              <template #trigger>
-                <button class="flex h-8 w-8 items-center justify-center rounded border transition hover:bg-[#eef0f3] dark:border-neutral-700 dark:hover:bg-[#33373c]" @click="toggleUsingContext">
-                  <span class="" :class="{ 'text-[#3076fd]': usingContext, 'text-[#a8071a]': !usingContext }"><SvgIcon class="text-lg" style="width: 1em;height: 1em" icon="ri:chat-history-line" /></span>
-                </button>
-              </template>
-              上下文状态
-            </NTooltip>
 
-            <NPopover v-if="isMobile" trigger="click">
-              <template #trigger>
-                <button class="flex h-8 w-8 items-center justify-center rounded border transition hover:bg-[#eef0f3] dark:border-neutral-700 dark:hover:bg-[#33373c]">
-                  <span class="text-base text-slate-500 dark:text-slate-400">
-                    <SvgIcon icon="fluent:dark-theme-24-regular" />
-                  </span>
-                </button>
-              </template>
-              <div>
-                <div class="flex items-center gap-4">
-                  <template v-for="item of themeOptions" :key="item.key">
-                    <NButton
-                      size="small"
-                      :type="item.key === theme ? 'info' : undefined"
-                      @click="appStore.setTheme(item.key)"
+          <Menu as="div" class="relative inline-block text-left">
+            <div>
+              <MenuButton
+                class="inline-flex w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-400 text-gray-700"
+              >
+                更多
+              </MenuButton>
+            </div>
+
+            <transition
+              enter-active-class="transition ease-out duration-100"
+              enter-from-class="transform opacity-0 scale-95"
+              enter-to-class="transform opacity-100 scale-100"
+              leave-active-class="transition ease-in duration-75"
+              leave-from-class="transform opacity-100 scale-100"
+              leave-to-class="transform opacity-0 scale-95"
+            >
+              <MenuItems
+                class="absolute right-0 z-10 mt-2 w-24 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:text-gray-400 text-gray-900"
+              >
+                <div class="py-1">
+                  <MenuItem v-slot="{ active }">
+                    <a
+                      href="#"
+                      :class="[
+                        active ? 'bg-gray-100  dark:bg-gray-700' : '',
+                        'group flex items-center px-4 py-2 text-sm',
+                      ]"
+                      @click="checkMode"
                     >
-                      <template #icon>
-                        <SvgIcon :icon="item.icon" />
-                      </template>
-                    </NButton>
-                  </template>
+                      切换主题
+                    </a>
+                  </MenuItem>
+                  <MenuItem v-slot="{ active }">
+                    <a
+                      href="#"
+                      :class="[
+                        active ? 'bg-gray-100  dark:bg-gray-700' : '',
+                        'group flex items-center px-4 py-2 text-sm',
+                      ]"
+                      @click="handleSignIn"
+                    >
+                      每日签到
+                    </a>
+                  </MenuItem>
+                  <MenuItem v-slot="{ active }">
+                    <a
+                      href="#"
+                      :class="[
+                        active ? 'bg-gray-100  dark:bg-gray-700' : '',
+                        'group flex items-center px-4 py-2 text-sm',
+                      ]"
+                      @click="handleExport"
+                    >
+                      导出记录
+                    </a>
+                  </MenuItem>
+                  <MenuItem v-slot="{ active }">
+                    <a
+                      href="#"
+                      :class="[
+                        active ? 'bg-gray-100  dark:bg-gray-700' : '',
+                        'group flex items-center px-4 py-2 text-sm',
+                      ]"
+                      @click="handleClear"
+                    >
+                      清空本页
+                    </a>
+                  </MenuItem>
+                  <!-- <MenuItem v-slot="{ active }">
+                    <a
+                      href="#"
+                      :class="[
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'group flex items-center px-4 py-2 text-sm',
+                      ]"
+                      @click="handleScrollBtm"
+                    >
+                      滚动到底部
+                    </a>
+                  </MenuItem> -->
                 </div>
-              </div>
-            </NPopover>
-
-            <NTooltip v-if="isMobile" trigger="hover" :disabled="isMobile">
-              <template #trigger>
-                <button class="flex h-8 w-8 items-center justify-center rounded border transition hover:bg-[#eef0f3] dark:border-neutral-700 dark:hover:bg-[#33373c]" @click="handleSignIn">
-                  <span class="text-base text-slate-500 dark:text-slate-400">
-                    <SvgIcon icon="ant-design:gift-outlined" />
-                  </span>
-                </button>
-              </template>
-              签到领福利
-            </NTooltip>
-            <NTooltip trigger="hover" :disabled="isMobile">
-              <template #trigger>
-                <button class="flex h-8 w-8 items-center justify-center rounded border transition hover:bg-[#eef0f3] dark:border-neutral-700 dark:hover:bg-[#33373c]" @click="handleExport">
-                  <span class="text-base text-slate-500 dark:text-slate-400">
-                    <SvgIcon icon="material-symbols:sim-card-download-outline-rounded" />
-                  </span>
-                </button>
-              </template>
-              导出本页为图片
-            </NTooltip>
-            <NTooltip trigger="hover" :disabled="isMobile">
-              <template #trigger>
-                <button class="flex h-8 w-8 items-center justify-center rounded border transition hover:bg-[#eef0f3] dark:border-neutral-700 dark:hover:bg-[#33373c]" @click="handleClear">
-                  <span class="text-base text-slate-500 dark:text-slate-400"><SvgIcon icon="material-symbols:delete-outline" /></span>
-                </button>
-              </template>
-              删除本页内容
-            </NTooltip>
-            <NTooltip trigger="hover" :disabled="isMobile">
-              <template #trigger>
-                <button class="flex h-8 w-8 items-center justify-center rounded border transition hover:bg-[#eef0f3] dark:border-neutral-700 dark:hover:bg-[#33373c]" @click="handleScrollBtm">
-                  <span class="text-base text-slate-500 dark:text-slate-400"><SvgIcon icon="material-symbols:keyboard-arrow-down" /></span>
-                </button>
-              </template>
-              滚动到底部
-            </NTooltip>
-          </div>
+              </MenuItems>
+            </transition>
+          </Menu>
         </div>
       </div>
     </div>
-    <!-- <NPopover :show="showModelPopover">
-      <template #trigger> -->
-    <div class="absolute left-1/2 top-full -translate-x-1/2 whitespace-nowrap cursor-pointer select-none rounded-b-md border bg-white px-4 dark:border-neutral-700 dark:bg-[#111114] flex items-center hover:text-[#5a91fc] transition" @click="handleOpenModelDialog">
-      <!-- <SvgIcon class="text-base mr-2" icon="fluent:flash-sparkle-20-regular" /> -->
-      {{ modelName }}
-      <SvgIcon class="text-2xl" :icon="useGlobalStore.modelDialog ? 'ri:arrow-down-s-line' : 'ri:arrow-right-s-line'" />
-    </div>
-    <!-- </template>
-      <template #header>
-        <span class="cursor-pointer  hover:text-[#3076fd]" @click="handleChangeMode(3)">
-          GPT-3.5
-        </span>
-      </template>
-      <span class="cursor-pointer  hover:text-[#3076fd]" @click="handleChangeMode(4)">
-        GPT-4.0
-      </span>
-    </NPopover> -->
   </header>
 </template>

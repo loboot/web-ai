@@ -50,12 +50,11 @@ mdi.use(mdKatex, { blockClass: 'katexmath-block rounded-md p-[10px]', errorColor
 const wrapClass = computed(() => {
   return [
     'text-wrap',
-    'min-w-[20px]',
-    'rounded-md',
+    'rounded-lg',
     isMobile.value ? 'p-2' : 'px-3 py-2',
-    props.inversion ? 'bg-[#5A91fc]' : 'bg-[#f4f6f8]',
-    props.inversion ? 'text-[#fff]' : 'text-[#000]',
-    props.inversion ? 'dark:bg-[#69af6b]' : 'dark:bg-[#1e1e20]',
+    props.inversion ? 'bg-primary-500' : 'bg-gray-100',
+    props.inversion ? 'text-white' : 'text-gray-800',
+    props.inversion ? 'dark:bg-primary-800' : 'dark:bg-gray-800',
     props.inversion ? 'message-request' : 'message-reply',
     { 'text-red-500': props.error },
   ]
@@ -87,11 +86,11 @@ defineExpose({ textRef })
 </script>
 
 <template>
-  <div :class="wrapClass" class="w-full">
-    <div ref="textRef" class="leading-relaxed break-words">
-      <div v-if="!inversion" class="flex flex-col items-start">
+  <div :class="wrapClass" >
+    <div ref="textRef" class="leading-relaxed break-words ">
+      <div v-if="!inversion" class="flex flex-col items-start ">
         <div class="w-full">
-          <div v-if="!asRawText" class="w-full markdown-body" :class="[{ 'markdown-body-generate': loading }]" v-html="text" />
+          <div v-if="!asRawText" class="w-full markdown-body " :class="[{ 'markdown-body-generate': loading }]" v-html="text" />
           <div v-else class="w-full whitespace-pre-wrap" v-text="text" />
           <!-- <span v-if="loading" class="dark:text-white w-[4px] h-[20px] block animate-blink" /> -->
         </div>

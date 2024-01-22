@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { NCountdown, NIcon, NImage, NModal, NSkeleton, NSpin, useMessage, NInput, NSelect, NCascader, NCollapse, NCollapseItem, NButton, NSlider, NTooltip, NTag } from 'naive-ui'
+import { NIcon, NImage, NModal, NSkeleton, NSpin, useMessage, NInput, NSelect, NCascader, NCollapse, NCollapseItem, NButton, NSlider, NTooltip, NTag } from 'naive-ui'
 import { ref, onMounted, computed, watch, h } from 'vue'
 import { CloseOutline, SettingsOutline } from '@vicons/ionicons5'
 import { fetchQueryModelsListAPI } from '@/api/models'
@@ -148,7 +148,6 @@ function getModelTypeInfo(type: any) {
 function getModelDetailInfo(type: any, model: any) {
 	return modelMapsCache[type].find((item: any) => item.model === model);
 }
-
 
 /* 修改对话组模型配置 */
 async function handleUpdateConfig() {

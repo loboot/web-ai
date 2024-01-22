@@ -51,7 +51,7 @@ export default {
     clearHistoryConfirm: '确定清空聊天记录?',
     preview: '预览',
     showRawText: '显示原文',
-		regenerate:  '重新生成',
+    regenerate: '重新生成',
   },
   setting: {
     setting: '设置',
@@ -93,4 +93,4 @@ export default {
     onlineImportWarning: '注意：请检查 JSON 文件来源！',
     downloadError: '请检查网络状态与 JSON 文件有效性',
   },
-}
+};

@@ -1,39 +1,39 @@
 <script setup lang='ts'>
-import { computed, ref } from 'vue'
-import { NDropdown, useMessage } from 'naive-ui'
-import AvatarComponent from './Avatar.vue'
-import TextComponent from './Text.vue'
-import { copyText } from '@/utils/format'
-import { useIconRender } from '@/hooks/useIconRender'
-import { t } from '@/locales'
-import { useBasicLayout } from '@/hooks/useBasicLayout'
-import { SvgIcon } from '@/components/common'
+import { computed, ref } from 'vue';
+import { NDropdown, useMessage } from 'naive-ui';
+import AvatarComponent from './Avatar.vue';
+import TextComponent from './Text.vue';
+import { copyText } from '@/utils/format';
+import { useIconRender } from '@/hooks/useIconRender';
+import { t } from '@/locales';
+import { useBasicLayout } from '@/hooks/useBasicLayout';
+import { SvgIcon } from '@/components/common';
 
 interface Props {
-  dateTime?: string
-  text?: string
-  inversion?: boolean
-  error?: boolean
-  loading?: boolean
+  dateTime?: string;
+  text?: string;
+  inversion?: boolean;
+  error?: boolean;
+  loading?: boolean;
 }
 
 interface Emit {
-  (ev: 'regenerate'): void
-  (ev: 'delete'): void
+  (ev: 'regenerate'): void;
+  (ev: 'delete'): void;
 }
 
-const props = defineProps<Props>()
-const emit = defineEmits<Emit>()
-const ms = useMessage()
-const { isMobile } = useBasicLayout()
+const props = defineProps<Props>();
+const emit = defineEmits<Emit>();
+const ms = useMessage();
+const { isMobile } = useBasicLayout();
 
-const { iconRender } = useIconRender()
+const { iconRender } = useIconRender();
 
-const textRef = ref<HTMLElement>()
+const textRef = ref<HTMLElement>();
 
-const asRawText = ref(props.inversion)
+const asRawText = ref(props.inversion);
 
-const messageRef = ref<HTMLElement>()
+const messageRef = ref<HTMLElement>();
 
 const options = computed(() => {
   const common = [
@@ -47,16 +47,18 @@ const options = computed(() => {
       key: 'delete',
       icon: iconRender({ icon: 'ri:delete-bin-line' }),
     },
-  ]
+  ];
 
   if (!props.inversion) {
     common.unshift({
       label: asRawText.value ? t('chat.preview') : t('chat.showRawText'),
       key: 'toggleRenderType',
-      icon: iconRender({ icon: asRawText.value ? 'ic:outline-code-off' : 'ic:outline-code' }),
-    })
+      icon: iconRender({
+        icon: asRawText.value ? 'ic:outline-code-off' : 'ic:outline-code',
+      }),
+    });
 
-		  // 添加重新回答选项
+    // 添加重新回答选项
     common.unshift({
       label: t('chat.regenerate'), // 修改为您的本地化文本
       key: 'regenerate',
@@ -64,47 +66,49 @@ const options = computed(() => {
     });
   }
 
-  return common
-})
+  return common;
+});
 
-function handleSelect(key: 'copyText' | 'delete' | 'toggleRenderType'|'regenerate') {
+function handleSelect(
+  key: 'copyText' | 'delete' | 'toggleRenderType' | 'regenerate'
+) {
   switch (key) {
     case 'copyText':
-      copyText({ text: props.text ?? '' })
-      ms.success('复制成功！')
-      return
+      copyText({ text: props.text ?? '' });
+      ms.success('复制成功！');
+      return;
     case 'toggleRenderType':
-      asRawText.value = !asRawText.value
-      return
+      asRawText.value = !asRawText.value;
+      return;
     case 'delete':
-      emit('delete')
-    return
+      emit('delete');
+      return;
     case 'regenerate':
-     emit('regenerate'); // 调用您已经定义的 regenerate 处理函数
+      emit('regenerate'); // 调用您已经定义的 regenerate 处理函数
       return;
   }
 }
 
 function handleDetele() {
-  emit('delete')
+  emit('delete');
 }
 
 function handleCopy() {
-  copyText({ text: props.text ?? '' })
-  props.text && ms.success('复制成功！')
+  copyText({ text: props.text ?? '' });
+  props.text && ms.success('复制成功！');
 }
 
 function handleRegenerate() {
-  messageRef.value?.scrollIntoView()
-  emit('regenerate')
+  messageRef.value?.scrollIntoView();
+  emit('regenerate');
 }
 </script>
 
 <template>
   <div
     ref="messageRef"
-    class="flex w-full mb-6 overflow-hidden items-start"
-    :class="[{ 'flex-row-reverse': inversion }]"
+    class="flex w-full mb-6 overflow-hidden items-start bg-white dark:bg-gray-900"
+    :class="[inversion ? 'flex-row-reverse pl-6' : 'pr-6']"
   >
     <div
       class="flex items-center justify-center flex-shrink-0 mt-1"
@@ -112,8 +116,14 @@ function handleRegenerate() {
     >
       <AvatarComponent :image="inversion" />
     </div>
-    <div class="overflow-hidden text-sm " :class="[inversion ? 'items-end' : 'items-start']">
-      <p class="text-xs text-[#b4bbc4]" :class="[inversion ? 'text-right' : 'text-left']">
+    <div
+      class="overflow-hidden text-sm"
+      :class="[inversion ? 'items-end' : 'items-start']"
+    >
+      <p
+        class="text-xs text-[#b4bbc4]"
+        :class="[inversion ? 'text-right' : 'text-left']"
+      >
         {{ dateTime }}
       </p>
       <div
@@ -134,7 +144,7 @@ function handleRegenerate() {
         <div class="flex flex-col">
           <button
             v-if="!inversion"
-            class=" flex mb-2 transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-300"
+            class="flex mb-2 transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-300"
             @click="handleRegenerate"
           >
             <SvgIcon icon="ri:restart-line" />
@@ -145,7 +155,9 @@ function handleRegenerate() {
             :options="options"
             @select="handleSelect"
           >
-            <button class="transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-200">
+            <button
+              class="transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-200"
+            >
               <SvgIcon icon="ri:more-2-fill" />
             </button>
           </NDropdown>
