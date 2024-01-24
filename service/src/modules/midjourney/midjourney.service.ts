@@ -112,7 +112,10 @@ export class MidjourneyService {
         /* 存完解锁当前文件 */
         this.lockPrompt = this.lockPrompt.filter((item) => item !== drawInfo.randomDrawId);
       }
-
+      
+      /* 只有在画成功后才扣分*/
+      this.drawSuccess(jobData)
+      
       return true;
     } catch (error) {
       this.lockPrompt = this.lockPrompt.filter((item) => item !== drawInfo.randomDrawId);
@@ -870,9 +873,19 @@ export class MidjourneyService {
   async drawFailed(jobData) {
     const { id, userId, action } = jobData;
     /* 退还余额 放大图片（类型2）是1  其他都是4 */
-    const amount = action === 2 ? 1 : 4;
-    await this.userBalanceService.refundMjBalance(userId, amount);
+    // const amount = action === 2 ? 1 : 4;
+    // await this.userBalanceService.refundMjBalance(userId, amount);
     await this.midjourneyEntity.update({ id }, { status: 4 });
+  }
+
+  /* 绘图成功扣费 */
+  async drawSuccess(jobData) {
+    const {id, userId, action} = jobData;
+    /* 扣除余额 放大图片（类型2）是1 其他都是4 */
+    const amount = action === 2 ? 1 : 4;
+    Logger.debug(`绘画完成，执行扣费，扣除费用:${amount}积分。`)
+    await this.userBalanceService.refundMjBalance(userId, -amount);
+    await this.midjourneyEntity.update({ id }, { status: 3 });
   }
 
   /* 获取绘画列表  */
