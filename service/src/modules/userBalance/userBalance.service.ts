@@ -567,6 +567,7 @@ export class UserBalanceService {
 
   /* MJ绘画失败退款 */
   async refundMjBalance(userId, amount) {
+    return await this.deductFromBalance(userId, 'mjDraw', -amount);
   }
 
   /* V1.5升级将旧版本余额并入到新表 */
