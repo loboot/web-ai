@@ -10,7 +10,6 @@
     "svgo": "svgo -f src/assets/icons",
     "new": "plop",
     "lint:tsc": "vue-tsc --noEmit",
-    "lint:eslint": "eslint --cache --fix --no-ignore --no-error-on-unmatched-pattern --ext .ts,.tsx,.vue src/",
     "lint:stylelint": "stylelint src/**/*.{css,scss,vue} --cache --fix --allow-empty-input",
     "release": "bumpp"
   },
@@ -45,7 +44,6 @@
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^0.38.5",
     "@iconify-json/ep": "^1.1.10",
     "@iconify/vue": "^4.1.1",
     "@types/nprogress": "^0.2.0",
@@ -55,7 +53,6 @@
     "@vitejs/plugin-vue-jsx": "^3.0.1",
     "autoprefixer": "^10.4.14",
     "bumpp": "^9.1.0",
-    "eslint": "^8.38.0",
     "esno": "^0.16.3",
     "fs-extra": "^11.1.1",
     "http-server": "^14.1.1",

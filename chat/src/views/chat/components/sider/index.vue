@@ -1,4 +1,4 @@
-<script setup lang='ts'>
+<script setup lang="ts">
 import type { CSSProperties } from 'vue';
 import { computed, ref, watch } from 'vue';
 import type { NumberAnimationInst } from 'naive-ui';
@@ -196,7 +196,7 @@ watch(
             <!-- 新建对话按钮 -->
             <button
               type="button"
-              class="rounded-md p-2 text-sm  focus-visible:outline bg-white text-gray-400 dark:bg-gray-800"
+              class="rounded-md p-2 text-sm focus-visible:outline bg-white text-gray-400 dark:bg-gray-800"
               @click="handleAdd"
             >
               <PlusIcon class="h-5 w-5" aria-hidden="true" />

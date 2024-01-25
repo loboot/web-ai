@@ -637,13 +637,6 @@ function getTipsRefHeight() {
     tipsHeight.value = `${tipsRef.value.getBoundingClientRect()?.height}px`;
 }
 
-function onInputeTip() {
-  tipsHeight.value = 'auto';
-  if (!tipText.value) tipsHeight.value = 0;
-
-  nextTick(() => getTipsRefHeight());
-}
-
 onMounted(async () => {
   chatStore.queryChatPre();
   if (token.value) otherLoginByToken(token.value);
@@ -690,8 +683,8 @@ onUnmounted(() => {
       >
         <div
           id="image-wrapper"
-          class="w-full max-w-screen-4xl m-auto dark:bg-gray-900 h-full"
-          :class="[isMobile ? 'p-2' : 'p-4']"
+          class="w-full max-w-4xl m-auto dark:bg-gray-900 h-full"
+          :class="[isMobile ? 'p-2' : 'p-6']"
         >
           <template v-if="!dataSources.length && !activeAppId">
             <div
@@ -727,7 +720,6 @@ onUnmounted(() => {
                   停止输出
                 </NButton>
               </div> -->
-
               <div class="sticky bottom-0 left-0 flex justify-center mb-1 p-1">
                 <Button
                   v-if="!isAtBottom"
@@ -791,60 +783,51 @@ onUnmounted(() => {
           </div>
         </NPopover>
       </div>
+
       <div
-        class="m-auto max-w-screen-4xl"
-        :class="[isMobile ? 'px-2 py-1' : 'px-4 py-2']"
+        class="flex flex-col m-auto p-2 max-w-4xl block rounded-lg w-full shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-primary-600 py-3 text-gray-900 placeholder:text-gray-400 border-0 bg-transparent sm:text-sm sm:leading-6 resize-none dark:focus:ring-primary-800 dark:ring-inset dark:ring-primary-800 dark:bg-gray-800"
+        :class="[isMobile ? 'px-2 py-1' : 'px-4 pb-2 pt-1 ']"
       >
         <!-- 文本输入区域的容器 -->
-        <div
-          class="relative mt-2 block rounded-lg w-full shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-primary-600 py-2 pl-3 pr-11 text-gray-900 placeholder:text-gray-400 border-0 bg-transparent sm:text-sm sm:leading-6 resize-none dark:focus:ring-primary-800 dark:ring-inset dark:ring-primary-800 dark:bg-gray-800"
-        >
-          <!-- 文本输入区域 -->
-          <textarea
-            ref="inputRef"
-            v-model="prompt"
-            :placeholder="placeholder"
-            :rows="isMobile ? 2 : 3"
-            class="block w-full border-0 text-gray-700 placeholder:text-gray-400 border-0 bg-transparent sm:text-sm sm:leading-6 resize-none dark:text-gray-400"
-            @keypress="handleEnter"
-            @blur="handleBlurInput"
-          ></textarea>
 
-          <!-- 文件上传隐藏输入 -->
-          <input
-            ref="fileInput"
-            type="file"
-            class="hidden"
-            @change="handleFileChange"
-          />
-
-          <!-- 按钮容器 -->
-          <div
-            class="absolute bottom-0 right-0 flex flex-col justify-end h-full pr-2 pb-2"
+        <!-- 文本输入区域 -->
+        <textarea
+          ref="inputRef"
+          v-model="prompt"
+          :placeholder="placeholder"
+          :rows="isMobile ? 2 : 3"
+          class="flex block w-full border-0 text-gray-700 placeholder:text-gray-400 bg-transparent sm:text-sm sm:leading-6 resize-none dark:text-gray-400"
+          @keypress="handleEnter"
+        ></textarea>
+        <!-- 文件上传隐藏输入 -->
+        <input
+          ref="fileInput"
+          type="file"
+          class="hidden"
+          @change="handleFileChange"
+        />
+        <!-- 按钮容器 -->
+        <div class="flex justify-between items-center mt-2">
+          <!-- 文件上传按钮 -->
+          <button
+            v-if="isGpt4AllModel"
+            type="button"
+            class="rounded-md text-sm font-semibold text-white dark:hover:text-gray-200 shadow-sm bg-primary-400 p-2 text-sm font-semibold shadow-sm text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 hover:bg-primary-500 dark:bg-primary-900 hover:dark:border-primary-500 dark:hover:bg-primary-800 dark:text-gray-400"
+            @click="triggerFileUpload"
           >
-            <!-- 根据输入框内容切换显示上传按钮或发送按钮 -->
-            <div v-if="!prompt">
-              <!-- 文件上传按钮 -->
-              <button
-                type="button"
-                class="rounded-md text-sm font-semibold text-white dark:hover:text-gray-200 dark:text-gray-400 shadow-sm bg-primary-400 p-2 text-sm font-semibold shadow-sm text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 hover:bg-primary-500 dark:bg-primary-900 hover:dark:border-primary-500 dark:hover:bg-primary-800"
-                @click="triggerFileUpload"
-              >
-                <SvgIcon icon="icon-park-outline:upload" />
-              </button>
-            </div>
-            <div v-else>
-              <!-- 发送按钮 -->
-              <button
-                type="button"
-                class="rounded-md text-sm font-semibold text-white dark:hover:text-gray-200 dark:text-gray-400 shadow-sm bg-primary-600 p-2 text-sm font-semibold shadow-sm text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 hover:bg-primary-500 dark:bg-primary-900 hover:dark:border-primary-500 dark:hover:bg-primary-800"
-                :disabled="buttonDisabled"
-                @click="handleSubmit"
-              >
-                <SvgIcon icon="icon-park-outline:send" />
-              </button>
-            </div>
-          </div>
+            <SvgIcon icon="icon-park-outline:upload" />
+          </button>
+          <span></span>
+          <!-- 发送按钮 -->
+          <button
+            type="button"
+            class="rounded-md text-sm font-semibold text-white dark:hover:text-gray-200 shadow-sm p-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 hover:bg-primary-500 dark:bg-primary-900 hover:dark:border-primary-500 dark:hover:bg-primary-800 dark:text-gray-400"
+            :class="{ 'bg-primary-600': prompt, 'bg-primary-200': !prompt }"
+            :disabled="buttonDisabled"
+            @click="handleSubmit"
+          >
+            <SvgIcon icon="icon-park-outline:send" />
+          </button>
         </div>
       </div>
     </footer>

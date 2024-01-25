@@ -17,35 +17,56 @@ export class ChatGroupService {
     @InjectRepository(AppEntity)
     private readonly appEntity: Repository<AppEntity>,
     private readonly modelsService: ModelsService
-  ) {}
+  ) { }
 
   async create(body: CreateGroupDto, req: Request) {
     const { id } = req.user;
-    const { appId } = body;
+    const { appId, modelConfig: bodyModelConfig } = body;
+
+    // 尝试使用从请求体中提供的 modelConfig，否则获取默认配置
+    let modelConfig = bodyModelConfig;
+    if (!modelConfig) {
+      modelConfig = await this.modelsService.getBaseConfig(appId);
+      if (!modelConfig) {
+        throw new HttpException('管理员未配置任何AI模型、请先联系管理员开通聊天模型配置！', HttpStatus.BAD_REQUEST);
+      }
+    }
+
+    // 初始化创建对话组的参数
     const params = { title: '新对话', userId: id };
     if (appId) {
+      // 查找应用信息
       const appInfo = await this.appEntity.findOne({ where: { id: appId } });
       if (!appInfo) {
         throw new HttpException('非法操作、您在使用一个不存在的应用！', HttpStatus.BAD_REQUEST);
-      } else {
-        const { status, name } = appInfo;
-        const g = await this.chatGroupEntity.count({ where: { userId: id, appId, isDelete: false } });
-        if (g > 0) {
-          throw new HttpException('当前应用已经开启了一个对话无需新建了！', HttpStatus.BAD_REQUEST);
-        }
-        if (![1, 3, 4, 5].includes(status)) {
-          throw new HttpException('非法操作、您在使用一个未启用的应用！', HttpStatus.BAD_REQUEST);
-        }
-        name && (params['title'] = name);
-        appId && (params['appId'] = appId);
       }
+
+      // 提取应用信息并进行必要的验证
+      const { status, name } = appInfo;
+      const existingGroupCount = await this.chatGroupEntity.count({ where: { userId: id, appId, isDelete: false } });
+      if (existingGroupCount > 0) {
+        throw new HttpException('当前应用已经开启了一个对话无需新建了！', HttpStatus.BAD_REQUEST);
+      }
+      if (![1, 3, 4, 5].includes(status)) {
+        throw new HttpException('非法操作、您在使用一个未启用的应用！', HttpStatus.BAD_REQUEST);
+      }
+
+      // 如果有名称，则设置对话组标题
+      if (name) {
+        params['title'] = name;
+      }
+      // 设置 appId
+      params['appId'] = appId;
     }
-    const modelConfig: any = await this.modelsService.getBaseConfig(appId)
-    appId && (modelConfig.appId = appId)
-    if(!modelConfig){
-      throw new HttpException('管理员未配置任何AI模型、请先联系管理员开通聊天模型配置！', HttpStatus.BAD_REQUEST)
+
+    // 如果提供了 appId，则添加到 modelConfig
+    if (appId) {
+      modelConfig.appId = appId;
     }
-    return await this.chatGroupEntity.save({...params, config: JSON.stringify(modelConfig)});
+
+    // 创建新的聊天组并保存
+    const newGroup = await this.chatGroupEntity.save({ ...params, config: JSON.stringify(modelConfig) });
+    return newGroup;
   }
 
   async query(req: Request) {
@@ -53,15 +74,15 @@ export class ChatGroupService {
       const { id } = req.user;
       const params = { userId: id, isDelete: false };
       const res = await this.chatGroupEntity.find({ where: params, order: { isSticky: 'DESC', id: 'DESC' } });
-      const appIds = res.filter( t => t.appId).map( t => t.appId)
-      const appInfos = await this.appEntity.find({where: { id: In(appIds)}})
-      return res.map( (item: any) => {
-        item.appLogo = appInfos.find( t => t.id === item.appId)?.coverImg
+      const appIds = res.filter(t => t.appId).map(t => t.appId)
+      const appInfos = await this.appEntity.find({ where: { id: In(appIds) } })
+      return res.map((item: any) => {
+        item.appLogo = appInfos.find(t => t.id === item.appId)?.coverImg
         return item
       })
     } catch (error) {
       console.log('error: ', error);
-      
+
     }
   }
 
@@ -76,7 +97,7 @@ export class ChatGroupService {
     if (appId && !title) {
       try {
         const parseData = JSON.parse(config)
-        if(Number(parseData.keyType) !== 1){
+        if (Number(parseData.keyType) !== 1) {
           throw new HttpException('应用对话名称不能修改哟！', HttpStatus.BAD_REQUEST);
         }
       } catch (error) {
@@ -122,8 +143,8 @@ export class ChatGroupService {
   }
 
   /* 通过groupId查询当前对话组的详细信息 */
-  async getGroupInfoFromId(id){
-    if(!id) return;
-    return await this.chatGroupEntity.findOne({where: {id}})
+  async getGroupInfoFromId(id) {
+    if (!id) return;
+    return await this.chatGroupEntity.findOne({ where: { id } })
   }
 }

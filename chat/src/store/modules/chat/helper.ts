@@ -1,6 +1,6 @@
-import { ss } from '@/utils/storage'
+import { ss } from '@/utils/storage';
 
-const LOCAL_NAME = 'chatStorage'
+const LOCAL_NAME = 'chatStorage';
 
 export function defaultState(): Chat.ChatState {
   return {
@@ -10,32 +10,31 @@ export function defaultState(): Chat.ChatState {
     groupList: [],
     chatList: [],
     groupKeyWord: '',
-		baseConfig: null
-  }
+    baseConfig: null,
+  };
 }
 
 export function getLocalState(): Chat.ChatState {
-  const localState = ss.get(LOCAL_NAME)
-  return { ...defaultState(), ...localState }
+  const localState = ss.get(LOCAL_NAME);
+  return { ...defaultState(), ...localState };
 }
 
 export function setLocalState({ active }: Chat.ChatState) {
-  ss.set(LOCAL_NAME, { ...ss.get(LOCAL_NAME), active })
+  ss.set(LOCAL_NAME, { ...ss.get(LOCAL_NAME), active });
 }
 
-export function formatChatPre(data: any): any{
-	return data.map( (item: any) => {
-		const { name, childList, id } = item
-		return {
-			 label: name,
-			 value: id,
-			 children: childList.map( (t: any) => {
-				return {
-					label: t.title,
-					value: t.prompt
-				}
-			 })
-		}
-	})
+export function formatChatPre(data: any): any {
+  return data.map((item: any) => {
+    const { name, childList, id } = item;
+    return {
+      label: name,
+      value: id,
+      children: childList.map((t: any) => {
+        return {
+          label: t.title,
+          value: t.prompt,
+        };
+      }),
+    };
+  });
 }
-

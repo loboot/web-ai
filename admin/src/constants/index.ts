@@ -154,12 +154,12 @@ export const KEY_STATUS_MAP: QuestionStatusMap = {
   1: '工作中',
 }
 // 账号类型 5$ 18$ 120$
-export const ACCOUNT_TYPE_MAP: QuestionStatus = [
-  { value: '5$', label: '5$' },
-  { value: '18$', label: '18$' },
-  { value: '120$', label: '120$' },
-  { value: '其他', label: '其他' },
-]
+// export const ACCOUNT_TYPE_MAP: QuestionStatus = [
+//   { value: '5$', label: '5$' },
+//   { value: '18$', label: '18$' },
+//   { value: '120$', label: '120$' },
+//   { value: '其他', label: '其他' },
+// ]
 
 // 模型列表
 export const MODEL_LIST = [
@@ -173,6 +173,31 @@ export const MODEL_LIST = [
   'gpt-4-1106-preview',
   'gpt-4-vision-preview',
   'gpt-4-all',
+  // claude
+  'claude-2.0',
+  'claude-2.1',
+  // gemini
+  'gemini-pro',
+  // 百度文心
+  'ERNIE-Bot',
+  'ERNIE-Bot-4',
+  'ERNIE-Bot-turbo',
+  // 阿里通义
+  'qwen-turbo',
+  'qwen-plus',
+  'qwen-max',
+  'qwen-max-lingcontext',
+  // 腾讯混元
+  'hunyuan',
+  // 清华智谱
+  'chatglm_turbo',
+  'chatglm_pro',
+  'chatglm_std',
+  'chatglm_lite',
+  // 360 智脑
+  '360GPT_S2_V9',
+  // 讯飞星火
+  'SparkDesk',
 ]
 
 // 模型列表 0 mj   1 Dall-e
@@ -242,17 +267,16 @@ export const TYPEORIGINLIST = [
   { value: 'NineAI检测', label: 'NineAI检测' },
 ]
 
-
 export const MODELTYPELIST = [
   { value: 1, label: 'OpenAi - [chatGpt]' },
   { value: 2, label: '百度 - [千帆大模型]' },
-  { value: 3, label: '清华 - [智谱大模型]' }
+  { value: 3, label: '清华 - [智谱大模型]' },
 ]
 
 export const MODELSMAP = {
   1: 'OPENAI',
   2: '百度文心',
-  3: '清华智谱'
+  3: '清华智谱',
 }
 
 export const MODELSMAPLIST = {
@@ -267,6 +291,31 @@ export const MODELSMAPLIST = {
     'gpt-4-1106-preview',
     'gpt-4-vision-preview',
     'gpt-4-all',
+    // claude
+    'claude-2.0',
+    'claude-2.1',
+    // gemini
+    'gemini-pro',
+    // 百度文心
+    'ERNIE-Bot',
+    'ERNIE-Bot-4',
+    'ERNIE-Bot-turbo',
+    // 阿里通义
+    'qwen-turbo',
+    'qwen-plus',
+    'qwen-max',
+    'qwen-max-lingcontext',
+    // 腾讯混元
+    'hunyuan',
+    // 清华智谱
+    'chatglm_turbo',
+    'chatglm_pro',
+    'chatglm_std',
+    'chatglm_lite',
+    // 360 智脑
+    '360GPT_S2_V9',
+    // 讯飞星火
+    'SparkDesk',
   ],
   2: [
     'ERNIE-Bot',
@@ -280,14 +329,14 @@ export const MODELSMAPLIST = {
     // 'ChatGLM2-6B-32K',
     'Qianfan-BLOOMZ-7B-compressed',
     'Qianfan-Chinese-Llama-2-7B',
-    'AquilaChat-7B'
+    'AquilaChat-7B',
   ],
   3: [
     'chatglm_pro',
     'chatglm_std',
     'chatglm_lite',
-    'chatglm_lite_32k'
-  ]
+    'chatglm_lite_32k',
+  ],
 }
 
 /* 扣费类型  普通余额还是高级余额 */
@@ -296,10 +345,9 @@ export const DEDUCTTYPELIST = [
   { value: 2, label: '高级余额' },
 ]
 
-
 /* 不同模型在填入key字段的时候 key代表的含义不同 */
 export const ModelTypeLabelMap = {
   1: 'APIKey',
   2: 'client_id',
-  3: 'AppKey'
+  3: 'AppKey',
 }

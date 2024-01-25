@@ -48,7 +48,7 @@ const formPackage = reactive({
   isTokenBased: false,
   tokenFeeRatio: 1000,
   keyWeight: 1,
-  maxModelTokens: 4096,
+  maxModelTokens: 4000,
   maxResponseTokens: 2000,
   proxyUrl: "",
   timeout: 300,

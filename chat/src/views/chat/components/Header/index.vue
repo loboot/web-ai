@@ -1,8 +1,6 @@
 <script lang="ts" setup>
-import { computed, nextTick, ref } from 'vue';
-import { NButton, NPopover, NTooltip, useMessage } from 'naive-ui';
+import { computed, ref, onMounted, Ref } from 'vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
-import { useUsingContext } from '../../hooks/useUsingContext';
 import { SvgIcon } from '@/components/common';
 import {
   useAppStore,
@@ -11,15 +9,28 @@ import {
   useGlobalStoreWithOut,
 } from '@/store';
 import { useBasicLayout } from '@/hooks/useBasicLayout';
+import { fetchUpdateGroupAPI } from '@/api/group';
 
-import type { Theme } from '@/store/modules/app/helper';
+import { fetchQueryModelsListAPI } from '@/api/models';
 defineProps<Props>();
 const emit = defineEmits<Emit>();
 const authStore = useAuthStore();
-const { usingContext, toggleUsingContext } = useUsingContext();
 
 interface Props {
   usingContext: boolean;
+}
+
+interface ModelOption {
+  label: string;
+  value: string;
+}
+
+interface Model {
+  modelName: string; // 模型的名称
+  model: string; // 模型的标识符或代码
+  deduct: number; // 可能表示某种扣减值或费用
+  deductType: number; // 扣减类型的标识符
+  maxRounds: number; // 最大轮数或某种限制
 }
 
 interface Emit {
@@ -28,50 +39,36 @@ interface Emit {
   (ev: 'clear'): void;
   (ev: 'scrollBtn'): void;
 }
-const ms = useMessage();
-const themeOptions: { label: string; key: Theme; icon: string }[] = [
-  {
-    label: 'Auto',
-    key: 'auto',
-    icon: 'ri:contrast-line',
-  },
-  {
-    label: 'Light',
-    key: 'light',
-    icon: 'ri:sun-foggy-line',
-  },
-  {
-    label: 'Dark',
-    key: 'dark',
-    icon: 'ri:moon-foggy-line',
-  },
-];
 
-const modelName = computed(() => {
+let modelMapsCache: any = ref({});
+let modelTypeListCache: any = ref([]);
+
+const modelName = computed(() => getModelName());
+
+function getModelName() {
+  const chatStore = useChatStore();
+  console.log('当前的 activeConfig:', chatStore.activeConfig);
   if (!chatStore.activeConfig) return;
+
   const { modelTypeInfo, modelInfo } = chatStore.activeConfig;
+  console.log('当前的 activeConfig:', chatStore.activeConfig);
   if (!modelTypeInfo || !modelInfo) return;
   return `${modelInfo.modelName}`;
-});
+}
 
 const appStore = useAppStore();
 const chatStore = useChatStore();
+const modelOptions: Ref<ModelOption[]> = ref([]);
+
 const useGlobalStore = useGlobalStoreWithOut();
 const darkMode = computed(() => appStore.theme === 'dark');
 
 const collapsed = computed(() => appStore.siderCollapsed);
-const currentChatHistory = computed(() => chatStore.getChatByGroupInfo());
 
 const { isMobile } = useBasicLayout();
-const theme = computed(() => appStore.theme);
 
 function handleUpdateCollapsed() {
   appStore.setSiderCollapsed(!collapsed.value);
-}
-
-function onScrollToTop() {
-  const scrollRef = document.querySelector('#scrollRef');
-  if (scrollRef) nextTick(() => (scrollRef.scrollTop = 0));
 }
 
 function handleExport() {
@@ -82,21 +79,63 @@ function handleClear() {
   emit('clear');
 }
 
-function handleScrollBtm() {
-  emit('scrollBtn');
-}
-
 function checkMode() {
   const mode = darkMode.value ? 'light' : 'dark';
   appStore.setTheme(mode);
 }
 
-function handleOpenModelDialog() {
-  if (useGlobalStore.isChatIn)
-    return ms.warning('请等待聊天结束后修改模型信息！');
+/* 当前的对话组id */
+const chatGroupId = computed(() => chatStore.active);
 
-  useGlobalStore.updateModelDialog(true);
+/* 修改对话组模型配置 */
+async function switchModel(option) {
+  const { modelTypeInfo, modelInfo } = chatStore.activeConfig;
+  const config = {
+    modelInfo: {
+      keyType: modelInfo.keyType,
+      modelName: option.label,
+      model: option.value,
+      maxModelTokens: modelInfo.maxModelTokens,
+      maxResponseTokens: modelInfo.maxResponseTokens,
+      systemMessage: modelInfo.systemMessage,
+      topN: modelInfo.topN,
+      deductType: modelInfo.deductType,
+      deduct: modelInfo.deduct,
+      maxRounds: modelInfo.maxRounds,
+      rounds: modelInfo.rounds,
+    },
+    modelTypeInfo: modelTypeInfo,
+  };
+
+  const params = {
+    groupId: chatGroupId.value,
+    config: JSON.stringify(config),
+  };
+
+  await fetchUpdateGroupAPI(params);
+  await chatStore.queryMyGroup();
+  useGlobalStore.updateModelDialog(false);
 }
+
+async function queryModelsList() {
+  try {
+    const res: any = await fetchQueryModelsListAPI();
+    if (!res.success) return;
+    const { modelMaps, modelTypeList } = res.data;
+    modelMapsCache.value = modelMaps;
+    console.log('modelMaps', modelMaps);
+    modelTypeListCache.value = modelTypeList;
+    modelOptions.value = Object.values(modelMaps)
+      .flat()
+      .map((model: Model) => ({
+        label: model.modelName,
+        value: model.model,
+      }));
+  } catch (error) {
+    console.error('Error in queryModelsList:', error);
+  }
+}
+
 const isLogin = computed(() => authStore.isLogin);
 
 function handleSignIn() {
@@ -106,6 +145,10 @@ function handleSignIn() {
   }
   useGlobalStore.updateSignInDialog(true);
 }
+
+onMounted(() => {
+  queryModelsList();
+});
 </script>
 
 <template>
@@ -130,24 +173,47 @@ function handleSignIn() {
 
         <!-- pc -->
         <div class="flex justify-between items-center h-full w-full">
-          <div
-            class="flex-1 flex ele-drag items-center h-full dark:bg-gray-900"
+          <Menu
+            as="div"
+            class="relative flex-1 flex ele-drag items-center h-full dark:bg-gray-900"
           >
-            <button
-              class="flex items-center rounded-md justify-between px-2 py-2 font-bold text-ellipsis whitespace-nowrap cursor-pointer select-none dark:text-gray-400 dark:hover:bg-gray-800"
-              @click="handleOpenModelDialog"
+            <div>
+              <div class="py-1">
+                <MenuButton
+                  class="inline-flex w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-400 text-gray-700"
+                >
+                  {{ modelName }}
+                </MenuButton>
+              </div>
+            </div>
+            <transition
+              enter-active-class="transition ease-out duration-100"
+              enter-from-class="transform opacity-0 scale-95"
+              enter-to-class="transform opacity-100 scale-100"
+              leave-active-class="transition ease-in duration-75"
+              leave-from-class="transform opacity-100 scale-100"
+              leave-to-class="transform opacity-0 scale-95"
             >
-              <span class="flex-1 overflow-hidden">{{ modelName }}</span>
-              <SvgIcon
-                class="text-2xl"
-                :icon="
-                  useGlobalStore.modelDialog
-                    ? 'ri:arrow-down-s-line'
-                    : 'ri:arrow-right-s-line'
-                "
-              />
-            </button>
-          </div>
+              <MenuItems
+                class="absolute left-0 top-full z-10 origin-top-left divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:text-gray-400 text-gray-900"
+              >
+                <div class="py-1">
+                  <MenuItem
+                    v-for="(option, index) in modelOptions"
+                    :key="index"
+                  >
+                    <a
+                      href="#"
+                      class="group flex items-center px-4 py-2 text-sm"
+                      @click="switchModel(option)"
+                    >
+                      {{ option.label }}
+                    </a>
+                  </MenuItem>
+                </div>
+              </MenuItems>
+            </transition>
+          </Menu>
 
           <Menu as="div" class="relative inline-block text-left">
             <div>
