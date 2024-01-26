@@ -11,7 +11,7 @@ import { recDrawImgDto } from './dto/recDrawImg.dto';
 import { UserEntity } from '../user/user.entity';
 import { formatDate, maskEmail, utcToShanghaiTime } from '@/common/utils';
 import { QuerMyChatLogDto } from './dto/queryMyChatLog.dto';
-import  excel from 'exceljs';
+import excel from 'exceljs';
 import { ChatListDto } from './dto/chatList.dto';
 import { ChatGroupEntity } from '../chatGroup/chatGroup.entity';
 import { DelDto } from './dto/del.dto';
@@ -27,7 +27,7 @@ export class ChatLogService {
     private readonly userEntity: Repository<UserEntity>,
     @InjectRepository(ChatGroupEntity)
     private readonly chatGroupEntity: Repository<ChatGroupEntity>,
-  ) {}
+  ) { }
 
   /* 记录问答日志 */
   async saveChatLog(logInfo) {
@@ -39,10 +39,10 @@ export class ChatLogService {
     const { id } = req.user;
     const { model } = query;
     const where: any = { userId: id, type: DeductionKey.PAINT_TYPE };
-    if(model){
+    if (model) {
       where.model = model
-      if(model === 'DALL-E2'){
-        where.model = In(['DALL-E2', 'dall-e-3']) 
+      if (model === 'DALL-E2') {
+        where.model = In(['DALL-E2', 'dall-e-3'])
       }
     }
     const data = await this.chatLogEntity.find({
@@ -72,10 +72,10 @@ export class ChatLogService {
     const where: any = { type: DeductionKey.PAINT_TYPE, prompt: Not(''), answer: Not('') };
     rec && Object.assign(where, { rec });
     userId && Object.assign(where, { userId });
-    if(model){
+    if (model) {
       where.model = model
-      if(model === 'DALL-E2'){
-        where.model = In(['DALL-E2', 'dall-e-3']) 
+      if (model === 'DALL-E2') {
+        where.model = In(['DALL-E2', 'dall-e-3'])
       }
     }
     const [rows, count] = await this.chatLogEntity.findAndCount({
@@ -211,14 +211,14 @@ export class ChatLogService {
     }
     const list = await this.chatLogEntity.find({ where });
     return list.map((item) => {
-      const { prompt, role, answer, createdAt, model, conversationOptions, requestOptions, id } = item;
+      const { prompt, role, answer, createdAt, model, conversationOptions, requestOptions, id, fileInfo } = item;
       let parseConversationOptions: any = null
       let parseRequestOptions: any = null
       try {
         parseConversationOptions = JSON.parse(conversationOptions)
         parseRequestOptions = JSON.parse(requestOptions)
       } catch (error) {
-        
+
       }
       return {
         chatId: id,
@@ -228,6 +228,8 @@ export class ChatLogService {
         error: false,
         conversationOptions: parseConversationOptions,
         requestOptions: parseRequestOptions,
+        fileInfo: fileInfo,
+        model: model,
       };
     });
   }

@@ -71,7 +71,7 @@ function isActive(uuid: number) {
 </script>
 
 <template>
-  <p class="mt-1 mb-1 text-xs font-bold">
+  <p class="mt-3 mb-1 text-xs font-bold">
     {{ props.title }} <span class="ml-1">({{ dataSources?.length }})</span>
   </p>
   <div v-for="item of dataSources" :key="`${item.uuid}`">

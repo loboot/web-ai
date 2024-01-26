@@ -165,7 +165,7 @@ export class ChatgptService implements OnModuleInit {
     /* 不同场景会变更其信息 */
     let setSystemMessage = systemMessage;
     const { parentMessageId } = options;
-    const { prompt } = body;
+    const { prompt, fileInfo } = body;
     const { groupId, usingNetwork } = options;
     // const { model = 3 } = options;
     /* 获取当前对话组的详细配置信息 */
@@ -199,6 +199,11 @@ export class ChatgptService implements OnModuleInit {
       res.write(JSON.stringify(msg));
       return res.end();
     }
+
+    // // 如果模型是 gpt-4-all，将 url 拼接到 prompt 前面
+    // if (model === 'gpt-4-all' && url) {
+    //   prompt = `${url}\n${prompt}`;
+    // }
 
     /* 如果传入了appId 那么appId优先级更高 */
     if (appId) {
@@ -260,6 +265,7 @@ export class ChatgptService implements OnModuleInit {
             userId: req.user.id,
             type: DeductionKey.CHAT_TYPE,
             prompt,
+            fileInfo: fileInfo,
             answer: '',
             promptTokens: prompt_tokens,
             completionTokens: 0,
@@ -321,6 +327,8 @@ export class ChatgptService implements OnModuleInit {
             maxModelToken: maxToken,
             maxResponseTokens: maxTokenRes,
             maxRounds: addOneIfOdd(rounds),
+            fileInfo: fileInfo,
+            model: model
           });
           let firstChunk = true;
           response = await sendMessageFromOpenAi(messagesHistory, {
@@ -328,6 +336,7 @@ export class ChatgptService implements OnModuleInit {
             maxTokenRes,
             apiKey: modelKey,
             model,
+            fileInfo,
             temperature,
             proxyUrl: proxyResUrl,
             onProgress: (chat) => {
@@ -449,6 +458,7 @@ export class ChatgptService implements OnModuleInit {
         userId: req.user.id,
         type: DeductionKey.CHAT_TYPE,
         prompt,
+        fileInfo: fileInfo,
         answer: '',
         promptTokens: prompt_tokens,
         completionTokens: 0,

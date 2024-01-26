@@ -17,6 +17,8 @@ interface Props {
   text?: string;
   loading?: boolean;
   asRawText?: boolean;
+  fileInfo?: string;
+  model?: string;
 }
 
 interface Emit {
@@ -48,6 +50,13 @@ const mdi = new MarkdownIt({
   },
 });
 
+const fileInfo = computed(() => props.fileInfo);
+
+const isImageUrl = computed(() => {
+  if (!fileInfo.value) return false;
+  return /\.(jpg|jpeg|png|gif)$/i.test(fileInfo.value);
+});
+
 mdi.use(mila, { attrs: { target: '_blank', rel: 'noopener' } });
 mdi.use(mdKatex, {
   blockClass: 'katexmath-block rounded-md p-[10px]',
@@ -76,7 +85,9 @@ const text = computed(() => {
 });
 
 function highlightBlock(str: string, lang?: string) {
-  return `<pre class="code-block-wrapper"><div class="code-block-header"><span class="code-block-header__lang">${lang}</span><span class="code-block-header__copy">${t('chat.copyCode')}</span></div><code class="hljs code-block-body ${lang}">${str}</code></pre>`;
+  return `<pre class="code-block-wrapper"><div class="code-block-header"><span class="code-block-header__lang">${lang}</span><span class="code-block-header__copy">${t(
+    'chat.copyCode'
+  )}</span></div><code class="hljs code-block-body ${lang}">${str}</code></pre>`;
 }
 function handleRegenerate() {
   emit('regenerate');
@@ -96,6 +107,22 @@ defineExpose({ textRef });
 <template>
   <div class="flex flex-col group max-w-full">
     <div :class="wrapClass">
+      <div v-if="fileInfo && isImageUrl">
+        <img
+          :src="fileInfo"
+          alt="文件"
+          class="h-auto rounded-md mb-1"
+          :class="{ 'max-w-full': isMobile, 'max-w-sm': !isMobile }"
+        />
+      </div>
+
+      <div
+        v-if="fileInfo && !isImageUrl"
+        class="flex items-center justify-center border border-gray-300 rounded-lg h-8 hover:bg-primary-400 dark:hover:bg-primary-900 mb-1 max-w-[100px]"
+      >
+        <span>文件分析</span>
+      </div>
+
       <div ref="textRef" class="leading-relaxed break-words">
         <div v-if="!inversion" class="flex flex-col items-start">
           <div class="w-full">
@@ -109,24 +136,9 @@ defineExpose({ textRef });
             <!-- <span v-if="loading" class="dark:text-white w-[4px] h-[20px] block animate-blink" /> -->
           </div>
         </div>
-
         <div v-else>
           <div class="whitespace-pre-wrap" v-text="text" />
-          <div v-if="false" class="mt-1">
-            <!-- <NButton class="ml-2" text color="#FFF" @click="handleCopy">
-              <template #icon>
-                <NIcon :size="10" :component="Copy" />
-              </template>
-              <span class="text-xs">复制</span>
-            </NButton>
-            <span class="ml-3" />
-            <NButton text color="#FFF" @click="handleDelete">
-              <template #icon>
-                <NIcon :size="10" :component="Delete" />
-              </template>
-              <span class="text-xs">删除</span>
-            </NButton> -->
-          </div>
+          <div v-if="false" class="mt-1"></div>
         </div>
       </div>
     </div>
@@ -154,39 +166,6 @@ defineExpose({ textRef });
             <ArrowPathIcon class="flex h-3 w-3 mx-1" />
             <span class="flex text-xs">重新生成</span>
           </Button>
-
-          <!-- <NButton
-          class="ml-2"
-          text
-          type="primary"
-          @click="asRawText = !asRawText"
-        >
-          <template #icon>
-            <SvgIcon
-              class="text-xs"
-              :icon="asRawText ? 'ic:outline-code-off' : 'ic:outline-code'"
-            />
-          </template>
-          <span class="text-xs">{{
-            asRawText ? t('chat.preview') : t('chat.showRawText')
-          }}</span>
-        </NButton> -->
-
-          <!-- <span class="ml-2" />
-          <NButton text type="primary" @click="handleDelete">
-            <template #icon>
-              <NIcon :size="10" :component="Delete" />
-            </template>
-            <span class="text-xs"></span>
-          </NButton>
-
-          <span class="ml-4" />
-          <NButton text type="primary" @click="handleRegenerate">
-            <template #icon>
-              <NIcon :size="10" :component="Refresh" />
-            </template>
-            <span class="text-xs"></span>
-          </NButton> -->
         </div>
       </div>
 
@@ -201,40 +180,6 @@ defineExpose({ textRef });
             <ClipboardIcon class="flex h-3 w-3 mx-1" />
             <span class="flex text-xs">复制</span>
           </Button>
-
-          <!-- <span class="ml-2" /> -->
-          <!-- <NButton
-          class="ml-2"
-          text
-          type="primary"
-          @click="asRawText = !asRawText"
-        >
-          <template #icon>
-            <SvgIcon
-              class="text-xs"
-              :icon="asRawText ? 'ic:outline-code-off' : 'ic:outline-code'"
-            />
-          </template>
-          <span class="text-xs">{{
-            asRawText ? t('chat.preview') : t('chat.showRawText')
-          }}</span>
-        </NButton> -->
-
-          <!-- <span class="ml-2" />
-          <NButton text type="primary" @click="handleDelete">
-            <template #icon>
-              <NIcon :size="10" :component="Delete" />
-            </template>
-            <span class="text-xs"></span>
-          </NButton> -->
-
-          <!-- <span class="ml-4" /> -->
-          <!-- <NButton text type="primary" @click="handleRegenerate">
-            <template #icon>
-              <NIcon :size="10" :component="Refresh" />
-            </template>
-            <span class="text-xs"></span>
-          </NButton> -->
         </div>
       </div>
     </div>

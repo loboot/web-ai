@@ -15,6 +15,8 @@ interface Props {
   inversion?: boolean;
   error?: boolean;
   loading?: boolean;
+  fileInfo?: string;
+  model?: string;
 }
 
 interface Emit {
@@ -136,6 +138,8 @@ function handleRegenerate() {
             :inversion="inversion"
             :error="error"
             :text="text"
+            :fileInfo="fileInfo"
+            :model="model"
             :loading="loading"
             :as-raw-text="asRawText"
             @regenerate="handleRegenerate"

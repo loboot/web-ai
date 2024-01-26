@@ -2,18 +2,20 @@ import type { AxiosProgressEvent, GenericAbortSignal } from 'axios'
 import { get, post } from '@/utils/request'
 import { useSettingStore } from '@/store'
 
-/* 流失对话聊天 */
+/* 流式对话聊天 */
 export function fetchChatAPIProcess<T = any>(
   params: {
     prompt: string
+    fileInfo?: string
     appId?: number
     options?: { conversationId?: string; parentMessageId?: string; temperature: number }
     signal?: GenericAbortSignal
-    onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void },
+    onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void
+  },
 ) {
   return post<T>({
     url: '/chatgpt/chat-process',
-    data: { prompt: params.prompt, appId: params?.appId, options: params.options },
+    data: { prompt: params.prompt, fileInfo: params?.fileInfo, appId: params?.appId, options: params.options },
     signal: params.signal,
     onDownloadProgress: params.onDownloadProgress,
   })
@@ -25,12 +27,12 @@ export function fetchGetInfo<T>() {
 }
 
 /* 注册 */
-export function fetchRegisterAPI<T>(data: { username: string;password: string;email: string }): Promise<T> {
+export function fetchRegisterAPI<T>(data: { username: string; password: string; email: string }): Promise<T> {
   return post<T>({ url: '/auth/register', data }) as Promise<T>
 }
 
 /* 注册 */
-export function fetchRegisterByPhoneAPI<T>(data: { username: string;password: string; phone: string; phoneCode: string }): Promise<T> {
+export function fetchRegisterByPhoneAPI<T>(data: { username: string; password: string; phone: string; phoneCode: string }): Promise<T> {
   return post<T>({ url: '/auth/registerByPhone', data }) as Promise<T>
 }
 
@@ -60,12 +62,12 @@ export function fetchGetAllChatLogDraw<T>(data: { size: number; rec: number; mod
 }
 
 /* chatgpt的dall-e2绘画 */
-export function fetchChatDraw<T>(data: { prompt: string;n: number;size: string }): Promise<T> {
+export function fetchChatDraw<T>(data: { prompt: string; n: number; size: string }): Promise<T> {
   return post<T>({ url: '/chatgpt/chat-draw', data }) as Promise<T>
 }
 
 /* 修改密码 */
-export function fetchUpdatePasswordAPI<T>(data: { oldPassword?: string;password?: string }): Promise<T> {
+export function fetchUpdatePasswordAPI<T>(data: { oldPassword?: string; password?: string }): Promise<T> {
   return post<T>({ url: '/auth/updatePassword', data }) as Promise<T>
 }
 
@@ -75,7 +77,8 @@ export function fetchGetchatSyncApi<T = any>(
     prompt: string
     options?: { conversationId?: string; parentMessageId?: string; temperature: number }
     signal?: GenericAbortSignal
-    onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void },
+    onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void
+  },
 ) {
   return post<T>({
     url: '/chatgpt/chat-sync',
@@ -91,7 +94,8 @@ export function fetchGetchatMindApi<T = any>(
     prompt: string
     options?: { conversationId?: string; parentMessageId?: string; temperature: number }
     signal?: GenericAbortSignal
-    onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void },
+    onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void
+  },
 ) {
   return post<T>({
     url: '/chatgpt/chat-mind',

@@ -10,8 +10,8 @@ import {
 } from '@/store';
 import { useBasicLayout } from '@/hooks/useBasicLayout';
 import { fetchUpdateGroupAPI } from '@/api/group';
-
 import { fetchQueryModelsListAPI } from '@/api/models';
+import { ChevronRightIcon } from '@heroicons/vue/24/outline';
 defineProps<Props>();
 const emit = defineEmits<Emit>();
 const authStore = useAuthStore();
@@ -183,6 +183,7 @@ onMounted(() => {
                   class="inline-flex w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-400 text-gray-700"
                 >
                   {{ modelName }}
+                  <ChevronRightIcon class="h-4 w-4 align-middle" />
                 </MenuButton>
               </div>
             </div>
@@ -195,20 +196,27 @@ onMounted(() => {
               leave-to-class="transform opacity-0 scale-95"
             >
               <MenuItems
-                class="absolute left-0 top-full z-10 origin-top-left divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800 dark:text-gray-400 text-gray-900"
+                class="absolute left-0 top-full z-10 origin-top-left divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800 dark:text-gray-400 text-gray-900"
               >
                 <div class="py-1">
                   <MenuItem
                     v-for="(option, index) in modelOptions"
                     :key="index"
                   >
-                    <a
-                      href="#"
-                      class="group flex items-center px-4 py-2 text-sm"
-                      @click="switchModel(option)"
-                    >
-                      {{ option.label }}
-                    </a>
+                    <div class="group" @click="switchModel(option)">
+                      <a
+                        href="#"
+                        class="flex items-center px-4 py-2 text-sm group-hover:bg-gray-100 dark:group-hover:bg-gray-700"
+                      >
+                        {{ option.label }}
+                      </a>
+
+                      <!-- <p
+                        class="mt-1 p-5 text-gray-600 group-hover:bg-gray-100 dark:group-hover:bg-gray-700"
+                      >
+                        介绍介绍介绍介绍介绍介绍介绍介绍
+                      </p> -->
+                    </div>
                   </MenuItem>
                 </div>
               </MenuItems>

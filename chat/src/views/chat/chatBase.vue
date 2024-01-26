@@ -1,15 +1,7 @@
 <script setup lang="ts">
-import type { Ref } from 'vue';
+import { Ref } from 'vue';
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import {
-  NButton,
-  NCascader,
-  NInput,
-  NPopover,
-  NTooltip,
-  useDialog,
-  useMessage,
-} from 'naive-ui';
+import { NCascader, NPopover, NTooltip, useDialog, useMessage } from 'naive-ui';
 import html2canvas from 'html2canvas';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
@@ -24,7 +16,14 @@ import AiBotComponent from './components/AiBot/index.vue';
 import AppTips from './components/AppTips/index.vue';
 import { SvgIcon } from '@/components/common';
 import { useBasicLayout } from '@/hooks/useBasicLayout';
-import { ArrowDownIcon } from '@heroicons/vue/24/outline';
+import {
+  ArrowDownIcon,
+  XMarkIcon,
+  PaperAirplaneIcon,
+  StopIcon,
+  ArrowPathIcon,
+  ArrowUpTrayIcon,
+} from '@heroicons/vue/24/outline';
 import {
   useAppStore,
   useAuthStore,
@@ -35,6 +34,7 @@ import { fetchQueryOneCatAPI } from '@/api/appStore';
 import { fetchChatAPIProcess } from '@/api';
 import { t } from '@/locales';
 import { router } from '@/router';
+import { url } from 'inspector';
 const useGlobalStore = useGlobalStoreWithOut();
 const authStore = useAuthStore();
 const route = useRoute();
@@ -51,11 +51,9 @@ const appDetail: any = ref(null);
 const chatPreVal = ref('');
 const chatPreRef = ref(null);
 const isShowChatPre = ref(false);
+const showDeleteIcon = ref(false);
+const isImageFile = ref(true);
 
-const globaelConfig = computed(() => authStore.globalConfig);
-const isSetBeian = computed(
-  () => globaelConfig.value?.companyName && globaelConfig.value?.filingNumber
-);
 const { addGroupChat, updateGroupChat, updateGroupChatSome } = useChat();
 const tradeStatus = computed(() => route.query.trade_status as string);
 const token = computed(() => route.query.token as string);
@@ -64,9 +62,11 @@ const isLogin = computed(() => authStore.isLogin);
 const { isMobile } = useBasicLayout();
 const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom } = useScroll();
 const { usingContext, toggleUsingContext } = useUsingContext();
-const { usingNetwork, toggleUsingNetwork } = useUsingNetwork();
+const { usingNetwork } = useUsingNetwork();
 const dataSources = computed(() => chatStore.chatList);
 const fileInput = ref(null);
+const fileName = ref('');
+const isUploading = ref(false);
 
 /* 当前所有的ai回复信息列表 方便拿到上下文 */
 const conversationList = computed(() =>
@@ -102,8 +102,11 @@ const activeModelKeyType = computed(() =>
   Number(chatStore?.activeModelKeyType)
 );
 
-const isGpt4AllModel = computed(() => {
-  return chatStore?.activeModelName === 'gpt-4-all';
+const isFilesModel = computed(() => {
+  return (
+    chatStore?.activeModelName === 'gpt-4-all' ||
+    chatStore?.activeModelName === 'gpt-4-vision-preview'
+  );
 });
 
 /* 当前对话组是否是应用 */
@@ -114,6 +117,9 @@ const activeAppId = computed(() =>
 const clipboardText = computed(() => useGlobalStore.clipboardText);
 
 const uploadUrl = ref(`${import.meta.env.VITE_GLOB_API_URL}/upload/file`);
+
+const dataBase64 = ref('');
+let curFile: File | null;
 
 watch(clipboardText, (val) => {
   prompt.value = val;
@@ -208,38 +214,35 @@ async function handleSubmit(index?: number) {
   onConversation(message);
 }
 
-function parseTextToJSON(input: string) {
-  const startIndex = input.indexOf(',"text":"') + 10;
-  if (startIndex === -1) return { text: '' };
-
-  let endIndex = input.indexOf('","delta"', startIndex);
-  if (endIndex === -1) endIndex = input.length - 1;
-  else endIndex = endIndex - 10;
-
-  const text = input.substring(startIndex, endIndex);
-  return { text };
-}
-
-async function handleFileChange(event) {
-  const file = event.target.files[0];
+function handleFileSelect(event: any) {
+  const file = event?.target?.files[0];
   if (!file) return;
+  let trimmedFileName = file.name;
+  const maxLength = 10; // 最大长度限制
+  const extension = trimmedFileName.split('.').pop(); // 获取文件扩展名
 
-  // 创建 FormData 对象并添加文件
-  const formData = new FormData();
-  formData.append('file', file);
+  if (trimmedFileName.length > maxLength) {
+    // 截取文件名并添加省略号，同时保留扩展名
+    trimmedFileName =
+      trimmedFileName.substring(0, maxLength - extension.length - 1) +
+      '….' +
+      extension;
+  }
 
-  try {
-    const response = await axios.post(uploadUrl.value, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+  fileName.value = trimmedFileName; // 更新文件名
 
-    // 假设服务器响应中包含文件的链接
-    const fileLink = response.data.data;
-
-    // 将文件链接添加到输入框中
-    prompt.value += ` ${fileLink}`;
-  } catch (error) {
-    console.error('上传失败:', error);
+  // 检查文件类型
+  if (file.type.startsWith('image/')) {
+    // 处理图像文件
+    isImageFile.value = true;
+    handleSetFile(file);
+  } else if (file.type === 'application/pdf') {
+    // 处理 PDF 文件
+    isImageFile.value = false;
+    handleSetFile(file);
+  } else {
+    // 处理其他类型的文件或显示错误消息
+    console.log('不支持的文件类型');
   }
 }
 
@@ -247,8 +250,39 @@ function triggerFileUpload() {
   fileInput.value.click();
 }
 
+async function handleSetFile(file: File) {
+  curFile = file;
+  const reader = new FileReader();
+  reader.onload = (event: any) => {
+    dataBase64.value = event.target?.result as string;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* 上传文件 */
+async function uploadFile() {
+  isUploading.value = true;
+  try {
+    const form = new FormData();
+    curFile && form.append('file', curFile);
+    const res = await axios.post(uploadUrl.value, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res?.data?.data;
+  } catch (error) {
+    console.error('Upload failed:', error);
+    return null;
+  } finally {
+    isUploading.value = false;
+  }
+}
+
 /* 按钮发送消息 */
 async function onConversation(msg?: string) {
+  let fileUrl = '';
+  if (dataBase64.value || curFile) fileUrl = await uploadFile();
+  dataBase64.value = '';
+
   let message = msg || prompt.value;
 
   if (tipText.value && !message.includes(tipText.value))
@@ -265,6 +299,7 @@ async function onConversation(msg?: string) {
     dateTime: new Date().toLocaleString(),
     text: message,
     inversion: true,
+    fileInfo: fileUrl,
     error: false,
     conversationOptions: null,
     requestOptions: { prompt: message, options: null },
@@ -384,6 +419,7 @@ async function onConversation(msg?: string) {
       requestAnimationFrame(update); // 启动动画循环
       await fetchChatAPIProcess<Chat.ConversationResponse>({
         prompt: message,
+        fileInfo: fileUrl,
         appId: activeGroupInfo.value ? activeGroupInfo.value.appId : 0,
         options,
         signal: controller.signal,
@@ -447,7 +483,18 @@ async function onConversation(msg?: string) {
               isStreamIn.value = !is_end;
               data?.userBanance && (userBanance = data?.userBanance);
             }
-          } catch (error) {}
+          } catch (error: any) {
+            // 检查错误是否为 AbortError
+            if (
+              error.name === 'AbortError' ||
+              error?.message.includes('canceled')
+            ) {
+              console.log('请求已被取消');
+              // 在这里执行任何需要的 UI 更新或状态清理
+              return; // 提前返回，避免执行更多逻辑
+            }
+            // 处理其他类型的错误
+          }
         },
       });
     };
@@ -610,12 +657,14 @@ function handleEnter(event: KeyboardEvent) {
 }
 
 function handleStop() {
-  if (loading.value) {
-    controller.abort();
-    loading.value = false;
-    isStreamIn.value = false;
-    typingStatusEnd.value = true;
-  }
+  console.log('handleStop called'); // 添加日志以指示函数被调用
+  controller.abort();
+  loading.value = false;
+  isStreamIn.value = false;
+  typingStatusEnd.value = true;
+  console.log(
+    'AbortController called, loading set to false, isStreamIn set to false, typingStatusEnd set to true'
+  ); // 添加日志以记录状态更改
 }
 
 const placeholder = computed(() => {
@@ -706,20 +755,14 @@ onUnmounted(() => {
                 :key="item.chatId"
                 :date-time="item.dateTime"
                 :text="item.text"
+                :fileInfo="item.fileInfo"
+                :model="item.model"
                 :inversion="item.inversion"
                 :error="item.error"
                 :loading="item.loading"
                 @regenerate="handleSubmit(index)"
                 @delete="handleDelete(item)"
               />
-              <!-- <div class="sticky bottom-0 left-0 flex justify-center">
-                <NButton v-if="loading" @click="handleStop">
-                  <template #icon>
-                    <SvgIcon icon="ri:stop-circle-line" />
-                  </template>
-                  停止输出
-                </NButton>
-              </div> -->
               <div class="sticky bottom-0 left-0 flex justify-center mb-1 p-1">
                 <Button
                   v-if="!isAtBottom"
@@ -785,8 +828,10 @@ onUnmounted(() => {
       </div>
 
       <div
-        class="flex flex-col m-auto p-2 max-w-4xl block rounded-lg w-full shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-primary-600 py-3 text-gray-900 placeholder:text-gray-400 border-0 bg-transparent sm:text-sm sm:leading-6 resize-none dark:focus:ring-primary-800 dark:ring-inset dark:ring-primary-800 dark:bg-gray-800"
-        :class="[isMobile ? 'px-2 py-1' : 'px-4 pb-2 pt-1 ']"
+        class="flex flex-col m-auto block rounded-lg shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-primary-600 py-2 text-gray-900 placeholder:text-gray-400 border-0 bg-transparent sm:text-sm sm:leading-6 resize-none dark:focus:ring-primary-800 dark:ring-inset dark:ring-primary-800 dark:bg-gray-800"
+        :class="[
+          isMobile ? 'px-1  pb-1 mx-2' : 'px-2  pb-2 pt-1 max-w-4xl w-full',
+        ]"
       >
         <!-- 文本输入区域的容器 -->
 
@@ -796,7 +841,7 @@ onUnmounted(() => {
           v-model="prompt"
           :placeholder="placeholder"
           :rows="isMobile ? 2 : 3"
-          class="flex block w-full border-0 text-gray-700 placeholder:text-gray-400 bg-transparent sm:text-sm sm:leading-6 resize-none dark:text-gray-400"
+          class="flex block w-full border-0 text-gray-700 placeholder:text-gray-400 bg-transparent sm:text-sm sm:leading-6 resize-none dark:text-gray-400 px-1"
           @keypress="handleEnter"
         ></textarea>
         <!-- 文件上传隐藏输入 -->
@@ -804,29 +849,85 @@ onUnmounted(() => {
           ref="fileInput"
           type="file"
           class="hidden"
-          @change="handleFileChange"
+          @change="handleFileSelect"
+          accept="image/*, application/pdf"
         />
         <!-- 按钮容器 -->
-        <div class="flex justify-between items-center mt-2">
+        <div class="flex justify-between items-center">
           <!-- 文件上传按钮 -->
-          <button
-            v-if="isGpt4AllModel"
-            type="button"
-            class="rounded-md text-sm font-semibold text-white dark:hover:text-gray-200 shadow-sm bg-primary-400 p-2 text-sm font-semibold shadow-sm text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 hover:bg-primary-500 dark:bg-primary-900 hover:dark:border-primary-500 dark:hover:bg-primary-800 dark:text-gray-400"
-            @click="triggerFileUpload"
-          >
-            <SvgIcon icon="icon-park-outline:upload" />
-          </button>
+          <div class="flex justify-between items-center justify-start">
+            <button
+              v-if="isFilesModel"
+              type="button"
+              class="rounded-md text-sm font-semibold text-white dark:hover:text-gray-200 shadow-sm bg-primary-400 p-2 text-sm font-semibold shadow-sm text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 hover:bg-primary-500 dark:bg-primary-900 hover:dark:border-primary-500 dark:hover:bg-primary-800 dark:text-gray-400"
+              @click="triggerFileUpload"
+            >
+              <ArrowUpTrayIcon v-if="!isUploading" class="h-4 w-4" />
+              <ArrowPathIcon v-else class="h-4 w-4 animate-spin-slow" />
+            </button>
+            <!-- 预览容器 -->
+            <div
+              v-if="dataBase64"
+              class="relative flex items-start justify-start"
+            >
+              <div
+                class="group"
+                @mouseover="showDeleteIcon = true"
+                @mouseleave="showDeleteIcon = false"
+              >
+                <!-- 根据 isImageFile 的值显示不同内容 -->
+                <template v-if="isImageFile">
+                  <!-- 图片预览 -->
+                  <img
+                    :src="dataBase64"
+                    class="ml-2 max-w-full max-h-10 border border-gray-300 rounded-lg"
+                    alt="预览图片"
+                  />
+                </template>
+                <template v-else>
+                  <!-- 非图片文件预览（例如文件图标） -->
+                  <div
+                    class="flex items-center justify-center border border-gray-300 rounded-lg p-2 ml-2 h-8 hover:bg-gray-100 text-gray-700 dark:hover:bg-gray-700 dark:text-gray-400"
+                  >
+                    <span>{{ fileName }}</span>
+                    <!-- 替换为适当的文件图标 -->
+                  </div>
+                </template>
+                <!-- 清除图标 -->
+                <div
+                  v-show="showDeleteIcon"
+                  class="absolute top-0 right-0 transform cursor-pointer"
+                  @click="dataBase64 = ''"
+                >
+                  <XMarkIcon
+                    class="text-gray-500 hover:text-gray-700 rounded-full h-5 w-5"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
           <span></span>
-          <!-- 发送按钮 -->
+          <!-- 当不在加载状态时显示这个按钮，用于提交 -->
           <button
+            v-if="!isStreamIn"
             type="button"
-            class="rounded-md text-sm font-semibold text-white dark:hover:text-gray-200 shadow-sm p-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 hover:bg-primary-500 dark:bg-primary-900 hover:dark:border-primary-500 dark:hover:bg-primary-800 dark:text-gray-400"
+            class="rounded-md text-sm font-semibold text-white dark:hover:text-gray-200 shadow-sm p-2 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 hover:bg-primary-500 dark:bg-primary-900 hover:dark:border-primary-500 dark:hover:bg-primary-800 dark:text-gray-400"
             :class="{ 'bg-primary-600': prompt, 'bg-primary-200': !prompt }"
             :disabled="buttonDisabled"
-            @click="handleSubmit"
+            @click="handleSubmit()"
           >
-            <SvgIcon icon="icon-park-outline:send" />
+            <PaperAirplaneIcon class="h-4 w-4" />
+          </button>
+
+          <!-- 当在加载状态时显示这个按钮，用于停止 -->
+          <button
+            v-else
+            type="button"
+            class="rounded-md bg-primary-600 text-sm font-semibold text-white dark:hover:text-gray-200 shadow-sm p-2 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 hover:bg-primary-500 dark:bg-primary-900 hover:dark:border-primary-500 dark:hover:bg-primary-800 dark:text-gray-400"
+            @click="handleStop()"
+          >
+            <StopIcon class="h-4 w-4" />
           </button>
         </div>
       </div>

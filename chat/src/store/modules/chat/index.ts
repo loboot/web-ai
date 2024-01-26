@@ -73,8 +73,8 @@ export const useChatStore = defineStore('chat-store', {
     },
 
     /* 新增新的对话组 */
-    async addNewChatGroup(appId = 0, modelConfig = {}) {
-      const res: any = await fetchCreateGroupAPI({ appId, modelConfig });
+    async addNewChatGroup(appId = 0) {
+      const res: any = await fetchCreateGroupAPI({ appId });
       const { id: uuid } = res.data;
       await this.setActiveGroup(uuid);
       this.recordState();
