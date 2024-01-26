@@ -661,14 +661,10 @@ function handleEnter(event: KeyboardEvent) {
 }
 
 function handleStop() {
-  console.log('handleStop called'); // 添加日志以指示函数被调用
   controller.abort();
   loading.value = false;
   isStreamIn.value = false;
   typingStatusEnd.value = true;
-  console.log(
-    'AbortController called, loading set to false, isStreamIn set to false, typingStatusEnd set to true'
-  ); // 添加日志以记录状态更改
 }
 
 const placeholder = computed(() => {

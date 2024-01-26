@@ -11,16 +11,16 @@ interface SendMessageResult {
   detail?: any;
 }
 
-function getFullUrl(proxyUrl){
+function getFullUrl(proxyUrl) {
   const processedUrl = proxyUrl.endsWith('/') ? proxyUrl.slice(0, -1) : proxyUrl;
   const baseUrl = processedUrl || 'https://api.openai.com'
   return `${baseUrl}/v1/chat/completions`
 }
 
-export  function sendMessageFromOpenAi(messagesHistory,  inputs ){
+export function sendMessageFromOpenAi(messagesHistory, inputs) {
   const { onProgress, maxToken, apiKey, model, temperature = 0.95, proxyUrl } = inputs
-  console.log('current request options: ',apiKey, model, maxToken, proxyUrl );
-  const max_tokens = compilerToken(model,  maxToken)
+  // console.log('current request options: ', apiKey, model, maxToken, proxyUrl);
+  const max_tokens = compilerToken(model, maxToken)
   const options: AxiosRequestConfig = {
     method: 'POST',
     url: getFullUrl(proxyUrl),
@@ -37,8 +37,8 @@ export  function sendMessageFromOpenAi(messagesHistory,  inputs ){
       messages: messagesHistory
     },
   };
-  const prompt = messagesHistory[messagesHistory.length-1]?.content
-  return new Promise(async (resolve, reject) =>{
+  const prompt = messagesHistory[messagesHistory.length - 1]?.content
+  return new Promise(async (resolve, reject) => {
     try {
       const response: any = await axios(options);
       const stream = response.data;
@@ -54,7 +54,7 @@ export  function sendMessageFromOpenAi(messagesHistory,  inputs ){
             ISEND = false;
           }
           /* 如果结束 返回所有 */
-          if (data === '[DONE]' || ISEND) {
+          if (ISEND) {
             result.text = result.text.trim();
             return result;
           }
@@ -72,63 +72,65 @@ export  function sendMessageFromOpenAi(messagesHistory,  inputs ){
               }
               result.detail = parsedData;
             }
-            onProgress && onProgress({text:result.text})
+            onProgress && onProgress({ text: result.text })
           } catch (error) {
-            console.log('parse Error', data )
+            console.log('parse Error', data)
           }
         }
       });
-  
+
       stream.on('end', () => {
         // 手动计算token
-        if(result.detail && result.text){
+        if (result.detail && result.text) {
           const promptTokens = getTokenCount(prompt)
           const completionTokens = getTokenCount(result.text)
           result.detail.usage = {
             prompt_tokens: promptTokens,
-            completion_tokens: completionTokens ,
+            completion_tokens: completionTokens,
             total_tokens: promptTokens + completionTokens,
             estimated: true
           }
         }
         return resolve(result);
-      }); 
+      });
     } catch (error) {
       reject(error)
     }
   })
 }
 
-
-
 export function getTokenCount(text: string) {
-  if(!text) return 0;
+  if (!text) return 0;
+  // 确保text是字符串类型
+  if (typeof text !== 'string') {
+    text = String(text);
+  }
   text = text.replace(/<\|endoftext\|>/g, '')
   return tokenizer.encode(text).length
 }
 
-function compilerToken(model, maxToken){
+function compilerToken(model, maxToken) {
   let max = 0
 
   /* 3.5 */
-  if(model.includes(3.5)){
+  if (model.includes(3.5)) {
     max = maxToken > 4096 ? 4096 : maxToken
   }
 
   /* 4.0 */
-  if(model.includes('gpt-4')){
+  if (model.includes('gpt-4')) {
     max = maxToken > 8192 ? 8192 : maxToken
   }
 
   /* 4.0 preview */
-  if(model.includes('preview')){
+  if (model.includes('preview')) {
     max = maxToken > 4096 ? 4096 : maxToken
   }
 
   /* 4.0 32k */
-  if(model.includes('32k')){
+  if (model.includes('32k')) {
     max = maxToken > 32768 ? 32768 : maxToken
   }
- 
+
   return max
 }

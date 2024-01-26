@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref, onMounted, Ref } from 'vue';
+import { computed, ref, onMounted, Ref, defineProps } from 'vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import { SvgIcon } from '@/components/common';
 import {
@@ -12,9 +12,8 @@ import { useBasicLayout } from '@/hooks/useBasicLayout';
 import { fetchUpdateGroupAPI } from '@/api/group';
 import { fetchQueryModelsListAPI } from '@/api/models';
 import { ChevronRightIcon } from '@heroicons/vue/24/outline';
+
 defineProps<Props>();
-const emit = defineEmits<Emit>();
-const authStore = useAuthStore();
 
 interface Props {
   usingContext: boolean;
@@ -26,11 +25,11 @@ interface ModelOption {
 }
 
 interface Model {
-  modelName: string; // 模型的名称
-  model: string; // 模型的标识符或代码
-  deduct: number; // 可能表示某种扣减值或费用
-  deductType: number; // 扣减类型的标识符
-  maxRounds: number; // 最大轮数或某种限制
+  modelName: string;
+  model: string;
+  deductType: number;
+  maxRounds: number;
+  deduct: number;
 }
 
 interface Emit {
@@ -39,33 +38,32 @@ interface Emit {
   (ev: 'clear'): void;
   (ev: 'scrollBtn'): void;
 }
+const emit = defineEmits<Emit>();
+
+const authStore = useAuthStore();
+const appStore = useAppStore();
+const chatStore = useChatStore();
+const modelOptions: Ref<ModelOption[]> = ref([]);
+const useGlobalStore = useGlobalStoreWithOut();
 
 let modelMapsCache: any = ref({});
 let modelTypeListCache: any = ref([]);
 
 const modelName = computed(() => getModelName());
+const darkMode = computed(() => appStore.theme === 'dark');
+const collapsed = computed(() => appStore.siderCollapsed);
+const chatGroupId = computed(() => chatStore.active);
+const isLogin = computed(() => authStore.isLogin);
+
+const { isMobile } = useBasicLayout();
 
 function getModelName() {
   const chatStore = useChatStore();
-  console.log('当前的 activeConfig:', chatStore.activeConfig);
   if (!chatStore.activeConfig) return;
-
   const { modelTypeInfo, modelInfo } = chatStore.activeConfig;
-  console.log('当前的 activeConfig:', chatStore.activeConfig);
   if (!modelTypeInfo || !modelInfo) return;
   return `${modelInfo.modelName}`;
 }
-
-const appStore = useAppStore();
-const chatStore = useChatStore();
-const modelOptions: Ref<ModelOption[]> = ref([]);
-
-const useGlobalStore = useGlobalStoreWithOut();
-const darkMode = computed(() => appStore.theme === 'dark');
-
-const collapsed = computed(() => appStore.siderCollapsed);
-
-const { isMobile } = useBasicLayout();
 
 function handleUpdateCollapsed() {
   appStore.setSiderCollapsed(!collapsed.value);
@@ -84,11 +82,8 @@ function checkMode() {
   appStore.setTheme(mode);
 }
 
-/* 当前的对话组id */
-const chatGroupId = computed(() => chatStore.active);
-
 /* 修改对话组模型配置 */
-async function switchModel(option) {
+async function switchModel(option: any) {
   const { modelTypeInfo, modelInfo } = chatStore.activeConfig;
   const config = {
     modelInfo: {
@@ -123,23 +118,20 @@ async function queryModelsList() {
     if (!res.success) return;
     const { modelMaps, modelTypeList } = res.data;
     modelMapsCache.value = modelMaps;
-    console.log('modelMaps', modelMaps);
     modelTypeListCache.value = modelTypeList;
-    modelOptions.value = Object.values(modelMaps)
-      .flat()
-      .map((model: Model) => ({
-        label: model.modelName,
-        value: model.model,
-        deductType: model.deductType,
-        maxRounds: model.maxRounds,
-        deduct: model.deduct,
-      }));
+    // 使用类型断言来告诉 TypeScript flatModelArray 是 Model[] 类型
+    const flatModelArray = Object.values(modelMaps).flat() as Model[];
+    modelOptions.value = flatModelArray.map((model) => ({
+      label: model.modelName,
+      value: model.model,
+      deductType: model.deductType,
+      maxRounds: model.maxRounds,
+      deduct: model.deduct,
+    }));
   } catch (error) {
     console.error('Error in queryModelsList:', error);
   }
 }
-
-const isLogin = computed(() => authStore.isLogin);
 
 function handleSignIn() {
   if (!isLogin.value) {
@@ -295,18 +287,6 @@ onMounted(() => {
                       清空本页
                     </a>
                   </MenuItem>
-                  <!-- <MenuItem v-slot="{ active }">
-                    <a
-                      href="#"
-                      :class="[
-                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                        'group flex items-center px-4 py-2 text-sm',
-                      ]"
-                      @click="handleScrollBtm"
-                    >
-                      滚动到底部
-                    </a>
-                  </MenuItem> -->
                 </div>
               </MenuItems>
             </transition>

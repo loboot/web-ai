@@ -317,76 +317,76 @@ export class ChatgptService implements OnModuleInit {
         });
 
         /* openAi */
-        if (Number(keyType) === 1) {
-          const { key, maxToken, maxTokenRes, proxyResUrl } = await this.formatModelToken(currentRequestModelKey);
-          const { parentMessageId, completionParams, systemMessage } = mergedOptions;
-          const { model, temperature } = completionParams;
-          const { context: messagesHistory } = await this.nineStore.buildMessageFromParentMessageId(usingNetwork ? netWorkPrompt : prompt, {
-            parentMessageId,
-            systemMessage,
-            maxModelToken: maxToken,
-            maxResponseTokens: maxTokenRes,
-            maxRounds: addOneIfOdd(rounds),
-            fileInfo: fileInfo,
-            model: model
-          });
-          let firstChunk = true;
-          response = await sendMessageFromOpenAi(messagesHistory, {
-            maxToken,
-            maxTokenRes,
-            apiKey: modelKey,
-            model,
-            fileInfo,
-            temperature,
-            proxyUrl: proxyResUrl,
-            onProgress: (chat) => {
-              res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`);
-              lastChat = chat;
-              firstChunk = false;
-            },
-          });
-          isSuccess = true;
-        }
+        // if (Number(keyType) === 1) {
+        const { key, maxToken, maxTokenRes, proxyResUrl } = await this.formatModelToken(currentRequestModelKey);
+        const { parentMessageId, completionParams, systemMessage } = mergedOptions;
+        const { model, temperature } = completionParams;
+        const { context: messagesHistory } = await this.nineStore.buildMessageFromParentMessageId(usingNetwork ? netWorkPrompt : prompt, {
+          parentMessageId,
+          systemMessage,
+          maxModelToken: maxToken,
+          maxResponseTokens: maxTokenRes,
+          maxRounds: addOneIfOdd(rounds),
+          fileInfo: fileInfo,
+          model: model
+        });
+        let firstChunk = true;
+        response = await sendMessageFromOpenAi(messagesHistory, {
+          maxToken,
+          maxTokenRes,
+          apiKey: modelKey,
+          model,
+          fileInfo,
+          temperature,
+          proxyUrl: proxyResUrl,
+          onProgress: (chat) => {
+            res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`);
+            lastChat = chat;
+            firstChunk = false;
+          },
+        });
+        isSuccess = true;
+        // }
 
-        /* 百度文心 */
-        if (Number(keyType) === 2) {
-          let firstChunk = true;
-          const { context: messagesHistory } = await this.nineStore.buildMessageFromParentMessageId(usingNetwork ? netWorkPrompt : prompt, {
-            parentMessageId,
-            maxRounds: addOneIfOdd(rounds),
-          });
-          response = await sendMessageFromBaidu(usingNetwork ? netWorkPrompt : messagesHistory, {
-            temperature,
-            accessToken,
-            model,
-            onProgress: (data) => {
-              res.write(firstChunk ? JSON.stringify(data) : `\n${JSON.stringify(data)}`);
-              firstChunk = false;
-              lastChat = data;
-            },
-          });
-          isSuccess = true;
-        }
+        // /* 百度文心 */
+        // if (Number(keyType) === 2) {
+        //   let firstChunk = true;
+        //   const { context: messagesHistory } = await this.nineStore.buildMessageFromParentMessageId(usingNetwork ? netWorkPrompt : prompt, {
+        //     parentMessageId,
+        //     maxRounds: addOneIfOdd(rounds),
+        //   });
+        //   response = await sendMessageFromBaidu(usingNetwork ? netWorkPrompt : messagesHistory, {
+        //     temperature,
+        //     accessToken,
+        //     model,
+        //     onProgress: (data) => {
+        //       res.write(firstChunk ? JSON.stringify(data) : `\n${JSON.stringify(data)}`);
+        //       firstChunk = false;
+        //       lastChat = data;
+        //     },
+        //   });
+        //   isSuccess = true;
+        // }
 
-        /* 清华智谱 */
-        if (Number(keyType) === 3) {
-          let firstChunk = true;
-          const { context: messagesHistory } = await this.nineStore.buildMessageFromParentMessageId(usingNetwork ? netWorkPrompt : prompt, {
-            parentMessageId,
-            maxRounds: addOneIfOdd(rounds),
-          });
-          response = await sendMessageFromZhipu(usingNetwork ? netWorkPrompt : messagesHistory, {
-            temperature,
-            key,
-            model,
-            onProgress: (data) => {
-              res.write(firstChunk ? JSON.stringify(data) : `\n${JSON.stringify(data)}`);
-              firstChunk = false;
-              lastChat = data;
-            },
-          });
-          isSuccess = true;
-        }
+        // /* 清华智谱 */
+        // if (Number(keyType) === 3) {
+        //   let firstChunk = true;
+        //   const { context: messagesHistory } = await this.nineStore.buildMessageFromParentMessageId(usingNetwork ? netWorkPrompt : prompt, {
+        //     parentMessageId,
+        //     maxRounds: addOneIfOdd(rounds),
+        //   });
+        //   response = await sendMessageFromZhipu(usingNetwork ? netWorkPrompt : messagesHistory, {
+        //     temperature,
+        //     key,
+        //     model,
+        //     onProgress: (data) => {
+        //       res.write(firstChunk ? JSON.stringify(data) : `\n${JSON.stringify(data)}`);
+        //       firstChunk = false;
+        //       lastChat = data;
+        //     },
+        //   });
+        //   isSuccess = true;
+        // }
 
         /* 分别将本次用户输入的 和 机器人返回的分两次存入到 store */
         const userMessageData: MessageInfo = {
@@ -395,6 +395,7 @@ export class ChatgptService implements OnModuleInit {
           role: 'user',
           name: undefined,
           usage: null,
+          fileInfo: fileInfo,
           parentMessageId: parentMessageId,
           conversationId: response?.conversationId,
         };
@@ -435,9 +436,12 @@ export class ChatgptService implements OnModuleInit {
         });
       }
 
-      /* 统一最终输出格式 */
-      const formatResponse = await unifiedFormattingResponse(keyType, response, othersInfo);
-      const { prompt_tokens = 0, completion_tokens = 0, total_tokens = 0 } = formatResponse.usage;
+      // /* 统一最终输出格式 */
+      // const formatResponse = await unifiedFormattingResponse(keyType, response, othersInfo);
+      // const { prompt_tokens = 0, completion_tokens = 0, total_tokens = 0 } = formatResponse.usage;
+      let prompt_tokens = response.prompt_tokens || 0;
+      let completion_tokens = response.completion_tokens || 0;
+      let total_tokens = response.total_tokens || 0;
 
       /* 区分扣除普通还是高级余额  model3: 普通余额  model4： 高级余额 */
       let charge = deduct;
@@ -463,7 +467,7 @@ export class ChatgptService implements OnModuleInit {
         promptTokens: prompt_tokens,
         completionTokens: 0,
         totalTokens: total_tokens,
-        model: formatResponse.model,
+        model: model,
         role: 'user',
         groupId,
         requestOptions: JSON.stringify({
@@ -479,7 +483,7 @@ export class ChatgptService implements OnModuleInit {
         userId: req.user.id,
         type: DeductionKey.CHAT_TYPE,
         prompt: prompt,
-        answer: formatResponse?.text,
+        answer: response.text,
         promptTokens: prompt_tokens,
         completionTokens: completion_tokens,
         totalTokens: total_tokens,

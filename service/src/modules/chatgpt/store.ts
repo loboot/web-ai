@@ -2,6 +2,7 @@ import Keyv from 'keyv'
 import { v4 as uuidv4 } from "uuid";
 import { get_encoding } from '@dqbd/tiktoken'
 import { Logger } from '@nestjs/common';
+import { includes } from 'lodash';
 
 const tokenizer = get_encoding('cl100k_base')
 
@@ -20,6 +21,7 @@ export interface MessageInfo {
   text: string
   role: Role
   name?: string
+  fileInfo?: string
   usage: {
     prompt_tokens?: number
     completion_tokens?: number
@@ -71,7 +73,7 @@ export class NineStore implements NineStoreInterface {
     return { store, namespace, expires }
   }
 
-  public generateKey(key) {
+  public generateKey(key: any) {
     return this.namespace ? `${this.namespace}-${key}` : key
   }
 
@@ -80,7 +82,7 @@ export class NineStore implements NineStoreInterface {
     return res
   }
 
-  public async setData(message, expires = this.expires): Promise<void> {
+  public async setData(message: MessageInfo, expires = this.expires): Promise<void> {
     await this.store.set(message.id, message, expires)
   }
 
@@ -93,7 +95,17 @@ export class NineStore implements NineStoreInterface {
     let { parentMessageId } = options
     let messages = []
     let nextNumTokensEstimate = 0
-
+    // messages.push({ role: 'system', content: systemMessage, name })
+    if (systemMessage) {
+      const specialModels = ['gemini-pro', 'ERNIE', 'qwen', 'SparkDesk', 'hunyuan'];
+      const isSpecialModel = specialModels.some(specialModel => model.includes(specialModel));
+      if (isSpecialModel) {
+        messages.push({ role: 'user', content: systemMessage })
+        messages.push({ role: 'assistant', content: "好的" })
+      } else {
+        messages.push({ role: 'system', content: systemMessage, name })
+      }
+    }
     const systemMessageOffset = messages.length
     let round = 0
     // 特殊处理 gpt-4-vision-preview 模型
@@ -119,9 +131,8 @@ export class NineStore implements NineStoreInterface {
       messages.push({ role: 'user', content: text, name });
     }
     Logger.debug(`发送的参数：${messages}`)
-    if (systemMessage) {
-      messages.push({ role: 'system', content: systemMessage })
-    }
+
+
     let nextMessages = messages;
     do {
       // let parentId = '1bf30262-8f25-4a03-88ad-9d42d55e6f0b'
@@ -130,12 +141,13 @@ export class NineStore implements NineStoreInterface {
         break;
       }
       const parentMessage = await this.getData(parentMessageId)
-
       if (!parentMessage) {
         break;
       }
-      const { text, name, role, fileInfo } = parentMessage
-      let content = text;
+      const { text, name, role, fileInfo } = parentMessage;
+      let content = text; // 默认情况下使用text作为content
+
+
       // 特别处理包含 fileInfo 的消息
       if (role === 'user' && fileInfo) {
         if (model === 'gpt-4-vision-preview') {
@@ -150,9 +162,12 @@ export class NineStore implements NineStoreInterface {
 
       /* 将本轮消息插入到列表中 */
       nextMessages = nextMessages.slice(0, systemMessageOffset).concat([
-        { role, content: text, name },
+        { role, content, name }, // 使用调整后的content
         ...nextMessages.slice(systemMessageOffset)
-      ])
+      ]);
+
+      // Logger.debug(`nextMessages：${JSON.stringify(nextMessages, null, 2)}`);
+
       round++
       /* 如果超出了限制的最大轮次 就退出 不包含本次发送的本身 */
       if (maxRounds && round >= maxRounds) {
@@ -183,11 +198,24 @@ export class NineStore implements NineStoreInterface {
 
   protected _getTokenCount(messages: any[]) {
     let text = messages.reduce((pre: string, cur: any) => {
-      return pre += cur.content
-    }, '')
-    text = text.replace(/<\|endoftext\|>/g, '')
-    return tokenizer.encode(text).length
+      // 检查cur.content是否为数组
+      if (Array.isArray(cur.content)) {
+        // 提取并连接数组中的文本元素
+        const contentText = cur.content
+          .filter((item: { type: string; }) => item.type === 'text')
+          .map((item: { text: any; }) => item.text)
+          .join(' ');
+        return pre + contentText;
+      } else {
+        // 如果不是数组，则直接添加
+        return pre + (cur.content || '');
+      }
+    }, '');
+
+    text = text.replace(/<\|endoftext\|>/g, '');
+    return tokenizer.encode(text).length;
   }
+
 
 
   /* 递归删除 当token超过模型限制容量  删除到在限制区域内  */

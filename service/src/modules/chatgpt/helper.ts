@@ -3,10 +3,9 @@
  * @param keyType 模型key类型
  * @param response 模型返回的整体内容
  */
-export function unifiedFormattingResponse(keyType, response, others){
+export function unifiedFormattingResponse(keyType, response, others) {
   let formatRes = {
     keyType, // 模型类型
-    model: '', // 调用模型名称
     parentMessageId: '', // 父级对话id
     text: '', //本次回复内容
     usage: {
@@ -16,47 +15,46 @@ export function unifiedFormattingResponse(keyType, response, others){
     }
   }
   /* openai */
-  if([1].includes(Number(keyType))){
-    const { model, parentMessageId } = response?.detail
-    let { usage } = response?.detail
-    if(!usage){
-      usage = {
-        prompt_tokens: 0,
-        completion_tokens: 0,
-        total_tokens: 0
-      }
-    }
-    const { prompt_tokens, completion_tokens, total_tokens } = usage
-    formatRes = {
-      keyType,
-      model,
-      parentMessageId,
-      text: response.text,
-      usage: {
-        prompt_tokens,
-        completion_tokens,
-        total_tokens
-      }
+  // if([1].includes(Number(keyType))){
+  const { parentMessageId } = response?.detail
+  let { usage } = response?.detail
+  if (!usage) {
+    usage = {
+      prompt_tokens: 0,
+      completion_tokens: 0,
+      total_tokens: 0
     }
   }
+  const { prompt_tokens, completion_tokens, total_tokens } = usage
+  formatRes = {
+    keyType,
+    parentMessageId,
+    text: response.text,
+    usage: {
+      prompt_tokens,
+      completion_tokens,
+      total_tokens
+    }
+  }
+  // }
 
   /* 百度 */
-  if([2, 3].includes(Number(keyType))) {
-    const { usage, text } = response
-    const { prompt_tokens, completion_tokens, total_tokens } = usage
-    const { model, parentMessageId } = others
-    formatRes = {
-      keyType,
-      model,
-      parentMessageId,
-      text,
-      usage: {
-        prompt_tokens,
-        completion_tokens,
-        total_tokens
-      }
-    }
-  }
+  // if([2, 3].includes(Number(keyType))) {
+  //   const { usage, text } = response
+  //   const { prompt_tokens, completion_tokens, total_tokens } = usage
+  //   const { model, parentMessageId } = others
+  //   formatRes = {
+  //     keyType,
+  //     model,
+  //     parentMessageId,
+  //     text,
+  //     usage: {
+  //       prompt_tokens,
+  //       completion_tokens,
+  //       total_tokens
+  //     }
+  //   }
+  // }
 
   return formatRes;
 }

@@ -55,13 +55,14 @@ const activeGroupInfo = computed(() =>
   <!-- 机器人头像逻辑 -->
   <template v-else>
     <!-- 如果 robotAvatar 是有效字符串，则显示 img 元素，否则显示带有 "AI" 文字的标签 -->
-    <!-- <img
+    <img
       v-if="isString(robotAvatar) && robotAvatar.length > 0"
       class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-100 border-solid shadow-sm"
       :src="robotAvatar"
       alt="Robot Avatar"
-    /> -->
+    />
     <span
+      v-else
       class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-100 border-solid shadow-sm bg-green-600"
     >
       <CpuChipIcon class="text-xs font-small leading-none text-white p-1" />
