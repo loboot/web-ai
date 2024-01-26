@@ -206,7 +206,7 @@ watch(
             <List />
           </div>
           <div
-            class="p-4 pb-0 pt-1 border-t border-t-gray-100 dark:border-t-gray-800 flex flex-col"
+            class="p-4 pb-1 pt-1 border-t border-t-gray-100 dark:border-t-gray-800 flex flex-col"
           >
             <div class="flex justify-between my-3">
               <button

@@ -274,14 +274,17 @@ async function uploadFile() {
     return null;
   } finally {
     isUploading.value = false;
+    dataBase64.value = '';
+    curFile = null;
   }
 }
 
 /* 按钮发送消息 */
 async function onConversation(msg?: string) {
   let fileUrl = '';
-  if (dataBase64.value || curFile) fileUrl = await uploadFile();
-  dataBase64.value = '';
+  if (dataBase64.value || curFile) {
+    fileUrl = await uploadFile();
+  }
 
   let message = msg || prompt.value;
 
@@ -550,6 +553,7 @@ async function onConversation(msg?: string) {
   } finally {
     loading.value = false;
     isStreamIn.value = false;
+    typingStatusEnd.value = true;
   }
 }
 
@@ -732,8 +736,8 @@ onUnmounted(() => {
       >
         <div
           id="image-wrapper"
-          class="w-full max-w-4xl m-auto dark:bg-gray-900 h-full"
-          :class="[isMobile ? 'p-2' : 'p-6']"
+          class="w-full m-auto dark:bg-gray-900 h-full"
+          :class="[isMobile ? 'p-2' : 'p-12 w-full']"
         >
           <template v-if="!dataSources.length && !activeAppId">
             <div
@@ -828,19 +832,17 @@ onUnmounted(() => {
       </div>
 
       <div
-        class="flex flex-col m-auto block rounded-lg shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-primary-600 py-2 text-gray-900 placeholder:text-gray-400 border-0 bg-transparent sm:text-sm sm:leading-6 resize-none dark:focus:ring-primary-800 dark:ring-inset dark:ring-primary-800 dark:bg-gray-800"
+        class="flex justify-center flex-col m-auto block rounded-lg shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-primary-600 py-2 text-gray-900 placeholder:text-gray-400 border-0 bg-transparent sm:text-sm sm:leading-6 resize-none dark:focus:ring-primary-800 dark:ring-inset dark:ring-primary-800 dark:bg-gray-800"
         :class="[
-          isMobile ? 'px-1  pb-1 mx-2' : 'px-2  pb-2 pt-1 max-w-4xl w-full',
+          isMobile ? 'px-1  pb-1 mx-2' : 'px-2  pb-2 pt-1 mx-10 max-w-full',
         ]"
       >
-        <!-- 文本输入区域的容器 -->
-
         <!-- 文本输入区域 -->
         <textarea
           ref="inputRef"
           v-model="prompt"
           :placeholder="placeholder"
-          :rows="isMobile ? 2 : 3"
+          :rows="isMobile ? 2 : 2"
           class="flex block w-full border-0 text-gray-700 placeholder:text-gray-400 bg-transparent sm:text-sm sm:leading-6 resize-none dark:text-gray-400 px-1"
           @keypress="handleEnter"
         ></textarea>
@@ -896,7 +898,7 @@ onUnmounted(() => {
                 <!-- 清除图标 -->
                 <div
                   v-show="showDeleteIcon"
-                  class="absolute top-0 right-0 transform cursor-pointer"
+                  class="absolute right-0 transform cursor-pointer"
                   @click="dataBase64 = ''"
                 >
                   <XMarkIcon

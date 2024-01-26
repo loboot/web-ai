@@ -99,10 +99,10 @@ async function switchModel(option) {
       maxResponseTokens: modelInfo.maxResponseTokens,
       systemMessage: modelInfo.systemMessage,
       topN: modelInfo.topN,
-      deductType: modelInfo.deductType,
-      deduct: modelInfo.deduct,
-      maxRounds: modelInfo.maxRounds,
-      rounds: modelInfo.rounds,
+      deductType: option.deductType,
+      deduct: option.deduct,
+      maxRounds: option.maxRounds,
+      rounds: option.rounds,
     },
     modelTypeInfo: modelTypeInfo,
   };
@@ -130,6 +130,9 @@ async function queryModelsList() {
       .map((model: Model) => ({
         label: model.modelName,
         value: model.model,
+        deductType: model.deductType,
+        maxRounds: model.maxRounds,
+        deduct: model.deduct,
       }));
   } catch (error) {
     console.error('Error in queryModelsList:', error);
