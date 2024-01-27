@@ -2,7 +2,6 @@ import Keyv from 'keyv'
 import { v4 as uuidv4 } from "uuid";
 import { get_encoding } from '@dqbd/tiktoken'
 import { Logger } from '@nestjs/common';
-import { includes } from 'lodash';
 
 const tokenizer = get_encoding('cl100k_base')
 
@@ -98,12 +97,12 @@ export class NineStore implements NineStoreInterface {
     // messages.push({ role: 'system', content: systemMessage, name })
     if (systemMessage) {
       const specialModels = ['gemini-pro', 'ERNIE', 'qwen', 'SparkDesk', 'hunyuan'];
-      const isSpecialModel = specialModels.some(specialModel => model.includes(specialModel));
+      const isSpecialModel = model && specialModels.some(specialModel => model.includes(specialModel));
       if (isSpecialModel) {
-        messages.push({ role: 'user', content: systemMessage })
-        messages.push({ role: 'assistant', content: "好的" })
+        messages.push({ role: 'user', content: systemMessage, name });
+        messages.push({ role: 'assistant', content: "好的", name });
       } else {
-        messages.push({ role: 'system', content: systemMessage, name })
+        messages.push({ role: 'system', content: systemMessage, name });
       }
     }
     const systemMessageOffset = messages.length
