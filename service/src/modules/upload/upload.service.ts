@@ -10,10 +10,10 @@ import * as FormData from 'form-data';
 
 @Injectable()
 export class UploadService implements OnModuleInit {
-  constructor(private readonly globalConfigService: GlobalConfigService) {}
+  constructor(private readonly globalConfigService: GlobalConfigService) { }
   private tencentCos: any;
 
-  onModuleInit() {}
+  onModuleInit() { }
 
   async uploadFile(file) {
     const { filename: name, originalname, buffer, dir = 'ai', mimetype } = file;
@@ -122,23 +122,10 @@ export class UploadService implements OnModuleInit {
     this.tencentCos = new TENCENTCOS({ SecretId, SecretKey, FileParallelLimit: 10 });
     try {
       const proxyMj = (await this.globalConfigService.getConfigs(['mjProxy'])) || 0;
-      /* 开启代理 */
-      if (Number(proxyMj) === 1) {
-        const data = { cosType: 'tencent', url, cosParams: { Bucket, Region, SecretId, SecretKey } };
-        const mjProxyUrl = (await this.globalConfigService.getConfigs(['mjProxyUrl'])) || 'http://172.247.48.137:8000';
-        const res = await axios.post(`${mjProxyUrl}/mj/replaceUpload`, data);
-        if (!res.data) throw new HttpException('上传图片失败[ten][url]', HttpStatus.BAD_REQUEST);
-        let locationUrl = res.data.replace(/^(http:\/\/|https:\/\/|\/\/|)(.*)/, 'https://$2');
-        const { acceleratedDomain } = await this.getUploadConfig('tencent');
-        if (acceleratedDomain) {
-          locationUrl = locationUrl.replace(/^(https:\/\/[^/]+)(\/.*)$/, `https://${acceleratedDomain}$2`);
-          console.log('当前已开启全球加速----------------->');
-        }
-        return locationUrl;
-      } else {
-        const buffer = await this.getBufferFromUrl(url);
-        return await this.uploadFileByTencentCos({ filename, buffer, dir, fileTyle: '' });
-      }
+
+      const buffer = await this.getBufferFromUrl(url);
+      return await this.uploadFileByTencentCos({ filename, buffer, dir, fileTyle: '' });
+
     } catch (error) {
       console.log('TODO->error:  ', error);
       throw new HttpException('上传图片失败[ten][url]', HttpStatus.BAD_REQUEST);

@@ -34,10 +34,10 @@ import * as dayjs from 'dayjs';
 import { AppEntity } from '../app/app.entity';
 import { ChatGroupService } from '../chatGroup/chatGroup.service';
 import { ModelsService } from '../models/models.service';
-import { sendMessageFromBaidu } from './baidu';
+// import { sendMessageFromBaidu } from './baidu';
 import { addOneIfOdd, unifiedFormattingResponse } from './helper';
 import { MessageInfo, NineStore, NineStoreInterface } from './store';
-import { sendMessageFromZhipu } from './zhipu';
+// import { sendMessageFromZhipu } from './zhipu';
 import { getTokenCount, sendMessageFromOpenAi } from './openai';
 import { ChatBoxTypeEntity } from './chatBoxType.entity';
 import { ChatBoxEntity } from './chatBox.entity';
@@ -200,11 +200,6 @@ export class ChatgptService implements OnModuleInit {
       return res.end();
     }
 
-    // // 如果模型是 gpt-4-all，将 url 拼接到 prompt 前面
-    // if (model === 'gpt-4-all' && url) {
-    //   prompt = `${url}\n${prompt}`;
-    // }
-
     /* 如果传入了appId 那么appId优先级更高 */
     if (appId) {
       const appInfo = await this.appEntity.findOne({ where: { id: appId, status: In([1, 3, 4, 5]) } });
@@ -317,7 +312,6 @@ export class ChatgptService implements OnModuleInit {
         });
 
         /* openAi */
-        // if (Number(keyType) === 1) {
         const { key, maxToken, maxTokenRes, proxyResUrl } = await this.formatModelToken(currentRequestModelKey);
         const { parentMessageId, completionParams, systemMessage } = mergedOptions;
         const { model, temperature } = completionParams;
@@ -346,49 +340,6 @@ export class ChatgptService implements OnModuleInit {
           },
         });
         isSuccess = true;
-        // }
-
-        // /* 百度文心 */
-        // if (Number(keyType) === 2) {
-        //   let firstChunk = true;
-        //   const { context: messagesHistory } = await this.nineStore.buildMessageFromParentMessageId(usingNetwork ? netWorkPrompt : prompt, {
-        //     parentMessageId,
-        //     maxRounds: addOneIfOdd(rounds),
-        //   });
-        //   response = await sendMessageFromBaidu(usingNetwork ? netWorkPrompt : messagesHistory, {
-        //     temperature,
-        //     accessToken,
-        //     model,
-        //     onProgress: (data) => {
-        //       res.write(firstChunk ? JSON.stringify(data) : `\n${JSON.stringify(data)}`);
-        //       firstChunk = false;
-        //       lastChat = data;
-        //     },
-        //   });
-        //   isSuccess = true;
-        // }
-
-        // /* 清华智谱 */
-        // if (Number(keyType) === 3) {
-        //   let firstChunk = true;
-        //   const { context: messagesHistory } = await this.nineStore.buildMessageFromParentMessageId(usingNetwork ? netWorkPrompt : prompt, {
-        //     parentMessageId,
-        //     maxRounds: addOneIfOdd(rounds),
-        //   });
-        //   response = await sendMessageFromZhipu(usingNetwork ? netWorkPrompt : messagesHistory, {
-        //     temperature,
-        //     key,
-        //     model,
-        //     onProgress: (data) => {
-        //       res.write(firstChunk ? JSON.stringify(data) : `\n${JSON.stringify(data)}`);
-        //       firstChunk = false;
-        //       lastChat = data;
-        //     },
-        //   });
-        //   isSuccess = true;
-        // }
-
-        /* 分别将本次用户输入的 和 机器人返回的分两次存入到 store */
         const userMessageData: MessageInfo = {
           id: this.nineStore.getUuid(),
           text: prompt,
@@ -409,7 +360,8 @@ export class ChatgptService implements OnModuleInit {
           text: response.text,
           role: 'assistant',
           name: undefined,
-          usage: response.usage,
+          usage: response?.usage,
+          fileInfo: fileInfo,
           parentMessageId: userMessageData.id,
           conversationId: response?.conversationId,
         };
@@ -436,13 +388,8 @@ export class ChatgptService implements OnModuleInit {
         });
       }
 
-      // /* 统一最终输出格式 */
-      // const formatResponse = await unifiedFormattingResponse(keyType, response, othersInfo);
-      // const { prompt_tokens = 0, completion_tokens = 0, total_tokens = 0 } = formatResponse.usage;
-      let prompt_tokens = response.prompt_tokens || 0;
-      let completion_tokens = response.completion_tokens || 0;
-      let total_tokens = response.total_tokens || 0;
-
+      /* 获取tokens消耗 */
+      const { prompt_tokens = 0, completion_tokens = 0, total_tokens = 0 } = response.detail.usage;
       /* 区分扣除普通还是高级余额  model3: 普通余额  model4： 高级余额 */
       let charge = deduct;
       if (isTokenBased === true) {
@@ -454,6 +401,7 @@ export class ChatgptService implements OnModuleInit {
       await this.modelsService.saveUseLog(keyId, total_tokens);
 
       const curIp = getClientIp(req);
+
 
       /* 用户询问 */
       await this.chatLogService.saveChatLog({
@@ -505,7 +453,7 @@ export class ChatgptService implements OnModuleInit {
         }),
       });
       Logger.debug(
-        `本次调用: ${req.user.id} model: ${model} key -> ${key}, 模型名称: ${modelName}, 最大回复token: ${maxResponseTokens}`,
+        `用户ID: ${req.user.id} 模型名称: ${modelName}-${model}, 消耗token: ${total_tokens}, 消耗积分： ${charge}`,
         'ChatgptService',
       );
       const userBalance = await this.userBalanceService.queryUserBalance(req.user.id);
@@ -603,7 +551,7 @@ export class ChatgptService implements OnModuleInit {
     await this.userBalanceService.validateBalance(req, 'mjDraw', money);
     let images = [];
     /* 从3的卡池随机拿一个key */
-    const detailKeyInfo = await this.modelsService.getRandomDrawKey();
+    const detailKeyInfo = await this.modelsService.getCurrentModelKeyInfo('dall-e-3');
     const keyId = detailKeyInfo?.id;
     const { key, proxyResUrl } = await this.formatModelToken(detailKeyInfo);
     Logger.log(`draw paompt info <==**==> ${body.prompt}, key ===> ${key}`, 'DrawService');

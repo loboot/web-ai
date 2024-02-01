@@ -38,6 +38,7 @@
     "logprobs",
     "mdhljs",
     "mila",
+    "MODELSMAPLIST",
     "modelvalue",
     "newconfig",
     "nodata",
@@ -63,4 +64,3 @@
     // 每个键是工作区的相对路径，值是一个数组，包含该路径下的 tsconfig.json 文件
   }
 }
-

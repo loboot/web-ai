@@ -96,7 +96,7 @@ export class NineStore implements NineStoreInterface {
     let nextNumTokensEstimate = 0
     // messages.push({ role: 'system', content: systemMessage, name })
     if (systemMessage) {
-      const specialModels = ['gemini-pro', 'ERNIE', 'qwen', 'SparkDesk', 'hunyuan'];
+      const specialModels = ['gemini-pro', 'ERNIE', 'hunyuan'];
       const isSpecialModel = model && specialModels.some(specialModel => model.includes(specialModel));
       if (isSpecialModel) {
         messages.push({ role: 'user', content: systemMessage, name });
@@ -129,8 +129,6 @@ export class NineStore implements NineStoreInterface {
       }
       messages.push({ role: 'user', content: text, name });
     }
-    Logger.debug(`发送的参数：${messages}`)
-
 
     let nextMessages = messages;
     do {
@@ -148,7 +146,7 @@ export class NineStore implements NineStoreInterface {
 
 
       // 特别处理包含 fileInfo 的消息
-      if (role === 'user' && fileInfo) {
+      if (fileInfo) {
         if (model === 'gpt-4-vision-preview') {
           content = [
             { "type": "text", "text": text },
@@ -165,7 +163,6 @@ export class NineStore implements NineStoreInterface {
         ...nextMessages.slice(systemMessageOffset)
       ]);
 
-      // Logger.debug(`nextMessages：${JSON.stringify(nextMessages, null, 2)}`);
 
       round++
       /* 如果超出了限制的最大轮次 就退出 不包含本次发送的本身 */

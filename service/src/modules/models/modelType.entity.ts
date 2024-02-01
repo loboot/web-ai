@@ -25,6 +25,9 @@ export class ModelsTypeEntity extends BaseEntity {
   @Column({ comment: '模型总计使用的token数量', default: 0 })
   useToken: number;
 
+  @Column({ comment: '模型排序', default: 1 })
+  modelOrder: number;
+
   @Column({ comment: '单词调用扣除的次数', default: 1 })
   deduct: number;
 

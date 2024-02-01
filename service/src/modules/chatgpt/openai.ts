@@ -1,6 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { get_encoding } from '@dqbd/tiktoken'
 import { removeSpecialCharacters } from '@/common/utils';
+import { ConsoleLogger } from '@nestjs/common';
 
 const tokenizer = get_encoding('cl100k_base')
 
@@ -19,8 +20,7 @@ function getFullUrl(proxyUrl) {
 
 export function sendMessageFromOpenAi(messagesHistory, inputs) {
   const { onProgress, maxToken, apiKey, model, temperature = 0.95, proxyUrl } = inputs
-  // console.log('current request options: ', apiKey, model, maxToken, proxyUrl);
-  const max_tokens = compilerToken(model, maxToken)
+  // console.debug(`完整提问参数：${JSON.stringify(messagesHistory, null, 2)}`);
   const options: AxiosRequestConfig = {
     method: 'POST',
     url: getFullUrl(proxyUrl),
@@ -30,14 +30,14 @@ export function sendMessageFromOpenAi(messagesHistory, inputs) {
       Authorization: `Bearer ${removeSpecialCharacters(apiKey)}`,
     },
     data: {
-      max_tokens,
+      // max_tokens,
       stream: true,
       temperature,
       model,
       messages: messagesHistory
     },
   };
-  const prompt = messagesHistory[messagesHistory.length - 1]?.content
+
   return new Promise(async (resolve, reject) => {
     try {
       const response: any = await axios(options);
@@ -59,30 +59,36 @@ export function sendMessageFromOpenAi(messagesHistory, inputs) {
             return result;
           }
           try {
-            const parsedData = JSON.parse(data);
-            if (parsedData.id) {
-              result.id = parsedData.id;
-            }
-            if (parsedData.choices?.length) {
-              const delta = parsedData.choices[0].delta;
-              result.delta = delta.content;
-              if (delta?.content) result.text += delta.content;
-              if (delta.role) {
-                result.role = delta.role;
+            if (data !== " [DONE]" && data !== "[DONE]" && data != "[DONE] ") {
+              const parsedData = JSON.parse(data);
+              if (parsedData.id) {
+                result.id = parsedData.id;
               }
-              result.detail = parsedData;
+              if (parsedData.choices?.length) {
+                const delta = parsedData.choices[0].delta;
+                result.delta = delta.content;
+                if (delta?.content) result.text += delta.content;
+                if (delta.role) {
+                  result.role = delta.role;
+                }
+                result.detail = parsedData;
+              }
+              onProgress && onProgress({ text: result.text })
             }
-            onProgress && onProgress({ text: result.text })
           } catch (error) {
             console.log('parse Error', data)
           }
         }
       });
 
+      let totalText = '';
+      messagesHistory.forEach(message => {
+        totalText += message.content + ' ';
+      });
       stream.on('end', () => {
         // 手动计算token
         if (result.detail && result.text) {
-          const promptTokens = getTokenCount(prompt)
+          const promptTokens = getTokenCount(totalText)
           const completionTokens = getTokenCount(result.text)
           result.detail.usage = {
             prompt_tokens: promptTokens,
@@ -107,30 +113,4 @@ export function getTokenCount(text: string) {
   }
   text = text.replace(/<\|endoftext\|>/g, '')
   return tokenizer.encode(text).length
-}
-
-function compilerToken(model, maxToken) {
-  let max = 0
-
-  /* 3.5 */
-  if (model.includes(3.5)) {
-    max = maxToken > 4096 ? 4096 : maxToken
-  }
-
-  /* 4.0 */
-  if (model.includes('gpt-4')) {
-    max = maxToken > 8192 ? 8192 : maxToken
-  }
-
-  /* 4.0 preview */
-  if (model.includes('preview')) {
-    max = maxToken > 4096 ? 4096 : maxToken
-  }
-
-  /* 4.0 32k */
-  if (model.includes('32k')) {
-    max = maxToken > 32768 ? 32768 : maxToken
-  }
-
-  return max
 }

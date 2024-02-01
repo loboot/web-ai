@@ -83,4 +83,4 @@ import { ModelsModule } from './modules/models/models.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

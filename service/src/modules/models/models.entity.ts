@@ -31,6 +31,9 @@ export class ModelsEntity extends BaseEntity {
   @Column({ comment: 'key权重', default: 1 })
   keyWeight: number;
 
+  @Column({ comment: 'key权重', default: 1 })
+  modelOrder: number;
+
   @Column({ comment: 'key的使用次数', default: 0 })
   useCount: number;
 

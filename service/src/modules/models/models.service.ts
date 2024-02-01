@@ -5,7 +5,7 @@ import { ModelsEntity } from './models.entity';
 import { SetModelDto } from './dto/setModel.dto';
 import { QueryModelDto } from './dto/queryModel.dto';
 import { ModelsMapCn } from '@/common/constants/status.constant';
-import { getAccessToken } from '../chatgpt/baidu';
+// import { getAccessToken } from '../chatgpt/baidu';
 import { getRandomItemFromArray, hideString } from '@/common/utils';
 import { ModelsTypeEntity } from './modelType.entity';
 import { SetModelTypeDto } from './dto/setModelType.dto';
@@ -30,7 +30,6 @@ export class ModelsService {
 
   async onModuleInit() {
     await this.initCalcKey()
-    this.refreshBaiduAccesstoken()
   }
 
   /* 初始化整理所有key 进行分类并且默认一个初始模型配置 默认是配置的第一个分类的第一个key为准 */
@@ -54,6 +53,7 @@ export class ModelsService {
     })
     this.modelMaps = keyTypes
     this.keyList = {}
+
     allKeys.forEach(keyDetail => {
       const { keyType, model, keyWeight } = keyDetail
       if (!this.keyPoolMap[model]) this.keyPoolMap[model] = []
@@ -115,9 +115,6 @@ export class ModelsService {
         if (Number(keyType !== 1)) {
           const res = await this.modelsEntity.save(params)
           await this.initCalcKey()
-          if (keyType === 2) { //百度的需要刷新token
-            this.refreshBaiduAccesstoken()
-          }
           return res
         } else {
           const data = key.map(k => {
@@ -162,6 +159,9 @@ export class ModelsService {
     key && (where.key = Like(`%${key}%`))
     const [rows, count] = await this.modelsEntity.findAndCount({
       where: where,
+      order: {
+        modelOrder: 'ASC'
+      },
       skip: (page - 1) * size,
       take: size,
     })
@@ -177,19 +177,24 @@ export class ModelsService {
 
   /* 客户端查询到的所有的配置的模型类别 以及类别下自定义的多少中文模型名称 */
   async modelsList() {
-    const cloneModelMaps = JSON.parse(JSON.stringify(this.modelMaps))
+    const cloneModelMaps = JSON.parse(JSON.stringify(this.modelMaps));
     Object.keys(cloneModelMaps).forEach(key => {
+      // 对每个模型进行排序
+      cloneModelMaps[key] = cloneModelMaps[key].sort((a, b) => a.modelOrder - b.modelOrder);
       cloneModelMaps[key] = Array.from(
-        cloneModelMaps[key].map(t => {
-          const { modelName, model, deduct, deductType, maxRounds } = t
-          return { modelName, model, deduct, deductType, maxRounds }
-        }).reduce((map, obj) => map.set(obj.modelName, obj), new Map()).values()
+        cloneModelMaps[key]
+          .map(t => {
+            const { modelName, model, deduct, deductType, maxRounds } = t;
+            return { modelName, model, deduct, deductType, maxRounds };
+          })
+          .reduce((map, obj) => map.set(obj.modelName, obj), new Map()).values()
       );
-    })
+    });
+
     return {
       modelTypeList: this.modelTypes,
       modelMaps: cloneModelMaps
-    }
+    };
   }
 
   /* 记录使用次数和使用的token数量 */
@@ -200,28 +205,6 @@ export class ModelsService {
       .set({ useCount: () => 'useCount + 1', useToken: () => `useToken + ${useToken}` })
       .where('id = :id', { id })
       .execute();
-  }
-
-  async refreshBaiduAccesstoken() {
-    const allKeys = await this.modelsEntity.find({ where: { keyType: 2 } })
-    const keysMap: any = {}
-    allKeys.forEach(keyInfo => {
-      const { key, secret } = keyInfo
-      if (!keysMap.key) {
-        keysMap[key] = [{ keyInfo }]
-      } else {
-        keysMap[key].push(keyInfo)
-      }
-    })
-    Object.keys(keysMap).forEach(async key => {
-      const { secret, id } = keysMap[key][0]['keyInfo']
-      const accessToken: any = await getAccessToken(key, secret)
-      await this.modelsEntity.update({ key }, { accessToken })
-    })
-
-    setTimeout(() => {
-      this.initCalcKey()
-    }, 1000)
   }
 
   /* 获取一张绘画key */

@@ -27,6 +27,9 @@ export class SetModelDto {
   @ApiProperty({ example: 1, description: 'key的权重' })
   keyWeight: number;
 
+  @ApiProperty({ example: 1, description: '模型排序' })
+  modelOrder: number;
+
   @ApiProperty({ example: 4096, description: '模型支持的最大TOken数量', required: true })
   maxModelTokens: number;
 

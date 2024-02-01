@@ -18,6 +18,6 @@ export enum MidjourneyActionEnum {
   VARIATION = 3,
   GENERATE = 4,
   REGENERATE = 5,
-  ZOOM = 6,
-  VARY = 7,
+  VARY = 6,
+  ZOOM = 7,
 }

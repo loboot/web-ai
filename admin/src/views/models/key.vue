@@ -4,10 +4,10 @@ meta:
 </route>
 
 <script lang="ts" setup>
-import { computed, onMounted, reactive } from "vue";
-import { ElMessage, type FormInstance, type FormRules } from "element-plus";
-import ApiModels from "@/api/modules/models";
-import { utcToShanghaiTime } from "@/utils/utcformatTime";
+import { computed, onMounted, reactive } from 'vue';
+import { ElMessage, type FormInstance, type FormRules } from 'element-plus';
+import ApiModels from '@/api/modules/models';
+import { utcToShanghaiTime } from '@/utils/utcformatTime';
 
 import {
   MODEL_LIST,
@@ -17,7 +17,7 @@ import {
   MODELSMAP,
   DEDUCTTYPELIST,
   MODELSMAPLIST,
-} from "@/constants/index";
+} from '@/constants/index';
 
 const formBlukRef = ref<FormInstance>();
 const formRef = ref<FormInstance>();
@@ -28,8 +28,8 @@ const modelLoading = ref(false);
 const bulkVisible = ref(false);
 
 const formInline = reactive({
-  keyType: "",
-  model: "",
+  keyType: '',
+  model: '',
   status: null,
   page: 1,
   size: 10,
@@ -39,18 +39,19 @@ const formPackageRef = ref<FormInstance>();
 const activeModelKeyId = ref(0);
 const formPackage = reactive({
   keyType: 1,
-  modelName: "",
-  key: "",
+  modelName: '',
+  key: '',
   secret: null,
   status: true,
-  model: "",
+  model: '',
   isDraw: false,
   isTokenBased: false,
   tokenFeeRatio: 1000,
   keyWeight: 1,
+  modelOrder: 1,
   maxModelTokens: 4000,
   maxResponseTokens: 2000,
-  proxyUrl: "",
+  proxyUrl: '',
   timeout: 300,
   deduct: 1,
   deductType: 1,
@@ -59,80 +60,80 @@ const formPackage = reactive({
 
 const rules = reactive<FormRules>({
   keyType: [
-    { required: true, message: "请填写您的调用模型类型", trigger: "blur" },
+    { required: true, message: '请填写您的调用模型类型', trigger: 'blur' },
   ],
   modelName: [
-    { required: true, message: "请填写您的模型名称", trigger: "blur" },
+    { required: true, message: '请填写您的模型名称', trigger: 'blur' },
   ],
-  key: [{ required: true, message: "请填写您的调用模型key", trigger: "blur" }],
+  key: [{ required: true, message: '请填写您的调用模型key', trigger: 'blur' }],
   secret: [
-    { required: true, message: "请填写您的调用模型的secret", trigger: "blur" },
+    { required: true, message: '请填写您的调用模型的secret', trigger: 'blur' },
   ],
   status: [
-    { required: true, message: "请选择key的启用状态", trigger: "change" },
+    { required: true, message: '请选择key的启用状态', trigger: 'change' },
   ],
   isDraw: [
     {
       required: true,
-      message: "请选择当前key是否作为基础绘画key",
-      trigger: "change",
+      message: '请选择当前key是否作为基础绘画key',
+      trigger: 'change',
     },
   ],
   isTokenBased: [
     {
       required: true,
-      message: "请选择当前key是否基于token计费",
-      trigger: "change",
+      message: '请选择当前key是否基于token计费',
+      trigger: 'change',
     },
   ],
   tokenFeeRatio: [
-    { required: true, message: "token计费比例", trigger: "change" },
+    { required: true, message: 'token计费比例', trigger: 'change' },
   ],
   model: [
     {
       required: true,
-      message: "请选择当前key需要绑定的模型",
-      trigger: "change",
+      message: '请选择当前key需要绑定的模型',
+      trigger: 'change',
     },
   ],
   keyWeight: [
-    { required: true, message: "请填写key的权重值", trigger: "blur" },
+    { required: true, message: '请填写key的权重值', trigger: 'blur' },
   ],
   maxModelTokens: [
-    { required: true, message: "请填写模型最大token数", trigger: "blur" },
+    { required: true, message: '请填写模型最大token数', trigger: 'blur' },
   ],
   maxResponseTokens: [
     {
       required: true,
-      message: "请填写允许用户使用的最大回复token数",
-      trigger: "blur",
+      message: '请填写允许用户使用的最大回复token数',
+      trigger: 'blur',
     },
   ],
   proxyUrl: [
-    { required: false, message: "请填写指定代理地址", trigger: "blur" },
+    { required: false, message: '请填写指定代理地址', trigger: 'blur' },
   ],
   timeout: [
     {
       required: true,
-      message: "请填写超时时间 默认 60 单位（秒）",
-      trigger: "blur",
+      message: '请填写超时时间 默认 60 单位（秒）',
+      trigger: 'blur',
     },
   ],
   deductType: [
-    { required: true, message: "请选择当前模型扣费类型", trigger: "change" },
+    { required: true, message: '请选择当前模型扣费类型', trigger: 'change' },
   ],
   deduct: [
     {
       required: true,
-      message: "请填写当前模型扣费金额（需要是正整数）",
-      trigger: "blur",
+      message: '请填写当前模型扣费金额（需要是正整数）',
+      trigger: 'blur',
     },
   ],
   maxRounds: [
     {
       required: true,
-      message: "请填写允许用户选择的最大上下文轮次",
-      trigger: "blur",
+      message: '请填写允许用户选择的最大上下文轮次',
+      trigger: 'blur',
     },
   ],
 });
@@ -145,13 +146,13 @@ function handlerCloseDialog(formEl: FormInstance | undefined) {
 const modelList = computed(() => MODELSMAPLIST[formPackage.keyType]);
 
 const dialogTitle = computed(() => {
-  return activeModelKeyId.value ? "更新秘钥" : "新增秘钥";
+  return activeModelKeyId.value ? '更新秘钥' : '新增秘钥';
 });
 
 const labelKeyName = computed(() => ModelTypeLabelMap[formPackage.keyType]);
 
 const dialogButton = computed(() => {
-  return activeModelKeyId.value ? "确认更新" : "确认新增";
+  return activeModelKeyId.value ? '确认更新' : '确认新增';
 });
 
 const tableData = ref([]);
@@ -172,7 +173,7 @@ async function queryModelsList() {
 async function handleDeleteKey(row: any) {
   const { id } = row;
   await ApiModels.delModels({ id });
-  ElMessage({ type: "success", message: "操作完成！" });
+  ElMessage({ type: 'success', message: '操作完成！' });
   queryModelsList();
 }
 
@@ -186,6 +187,7 @@ function handleEditKey(row: any) {
     status,
     model,
     keyWeight,
+    modelOrder,
     maxModelTokens,
     maxResponseTokens,
     proxyUrl,
@@ -234,11 +236,11 @@ async function handlerSubmit(formEl: FormInstance | undefined) {
       activeModelKeyId.value && (params.id = activeModelKeyId.value);
       if (Number(formPackage.keyType) === 1) {
         const key = JSON.parse(JSON.stringify(formPackage.key));
-        const formatKeyArr = key.split("\n");
+        const formatKeyArr = key.split('\n');
         params.key = formatKeyArr;
       }
       await ApiModels.setModels(params);
-      ElMessage({ type: "success", message: "操作成功！" });
+      ElMessage({ type: 'success', message: '操作成功！' });
       activeModelKeyId.value = 0;
       visible.value = false;
       queryModelsList();
@@ -331,13 +333,19 @@ onMounted(() => {
         style="width: 100%"
         size="large"
       >
-        <el-table-column prop="keyType" label="模型类型" width="120">
+        <!-- <el-table-column prop="keyType" label="模型类型" width="120">
           <template #default="scope">
             <el-tag type="success">
               {{ MODELSMAP[scope.row.keyType] }}
             </el-tag>
           </template>
-        </el-table-column>
+        </el-table-column> -->
+        <el-table-column
+          prop="modelOrder"
+          label="模型排序"
+          width="90"
+          align="center"
+        />
         <el-table-column prop="modelName" label="模型名称" width="180" />
         <el-table-column
           prop="status"
@@ -347,7 +355,7 @@ onMounted(() => {
         >
           <template #default="scope">
             <el-tag :type="scope.row.status ? 'success' : 'danger'">
-              {{ scope.row.status ? "使用中" : "已暂停" }}
+              {{ scope.row.status ? '使用中' : '已暂停' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -389,7 +397,7 @@ onMounted(() => {
         >
           <template #default="scope">
             <el-tag :type="scope.row.isDraw ? 'success' : 'danger'">
-              {{ scope.row.isDraw ? "是" : "否" }}
+              {{ scope.row.isDraw ? '是' : '否' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -401,7 +409,7 @@ onMounted(() => {
         >
           <template #default="scope">
             <el-tag :type="scope.row.isTokenBased ? 'success' : 'danger'">
-              {{ scope.row.isTokenBased ? "是" : "否" }}
+              {{ scope.row.isTokenBased ? '是' : '否' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -413,7 +421,7 @@ onMounted(() => {
         >
           <template #default="scope">
             <el-tag :type="scope.row.deductType === 1 ? 'success' : 'warning'">
-              {{ scope.row.deductType === 1 ? "普通余额" : "高级余额" }}
+              {{ scope.row.deductType === 1 ? '普通积分' : '高级积分' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -425,7 +433,7 @@ onMounted(() => {
         >
           <template #default="scope">
             <el-tag :type="scope.row.deductType === 1 ? 'success' : 'warning'">
-              {{ `${scope.row.deduct} 余额` }}
+              {{ `${scope.row.deduct} 积分` }}
             </el-tag>
           </template>
         </el-table-column>
@@ -451,10 +459,10 @@ onMounted(() => {
             <el-tag :type="scope.row.keyStatus === 1 ? 'success' : 'danger'">
               {{
                 scope.row.keyStatus === 1
-                  ? "正常工作"
+                  ? '正常工作'
                   : scope.row.keyStatus === -1
-                  ? "已被封禁"
-                  : "余额耗尽 "
+                  ? '已被封禁'
+                  : '余额耗尽 '
               }}
             </el-tag>
           </template>
@@ -467,7 +475,7 @@ onMounted(() => {
         >
           <template #default="scope">
             <el-button type="info" text>
-              {{ scope.row.maxModelTokens || "-" }}
+              {{ scope.row.maxModelTokens || '-' }}
             </el-button>
           </template>
         </el-table-column>
@@ -479,7 +487,7 @@ onMounted(() => {
         >
           <template #default="scope">
             <el-button type="info" text>
-              {{ scope.row.maxResponseTokens || "-" }}
+              {{ scope.row.maxResponseTokens || '-' }}
             </el-button>
           </template>
         </el-table-column>
@@ -491,7 +499,7 @@ onMounted(() => {
         >
           <template #default="scope">
             <el-button type="info" text>
-              {{ scope.row.proxyUrl || "-" }}
+              {{ scope.row.proxyUrl || '-' }}
             </el-button>
           </template>
         </el-table-column>
@@ -502,7 +510,7 @@ onMounted(() => {
           width="180"
         >
           <template #default="scope">
-            {{ scope.row.remark || "-" }}
+            {{ scope.row.remark || '-' }}
           </template>
         </el-table-column>
         <el-table-column
@@ -512,7 +520,7 @@ onMounted(() => {
           width="120"
         >
           <template #default="scope">
-            {{ utcToShanghaiTime(scope.row.createdAt, "YYYY-MM-DD") }}
+            {{ utcToShanghaiTime(scope.row.createdAt, 'YYYY-MM-DD') }}
           </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="200">
@@ -569,7 +577,7 @@ onMounted(() => {
         :model="formPackage"
         :rules="rules"
       >
-        <el-form-item label="模型类型选择" prop="keyType">
+        <!-- <el-form-item label="模型类型选择" prop="keyType">
           <el-select
             v-model="formPackage.keyType"
             placeholder="请选择模型类型"
@@ -582,6 +590,27 @@ onMounted(() => {
               :value="item.value"
             />
           </el-select>
+        </el-form-item> -->
+        <el-form-item label="模型中文名称" prop="modelName">
+          <el-input
+            v-model="formPackage.modelName"
+            placeholder="请填写模型中文名称（用户选择的）"
+          />
+        </el-form-item>
+        <el-form-item label="模型排序" prop="modelOrder">
+          <el-input
+            v-model.number="formPackage.modelOrder"
+            placeholder="模型排序，越大越靠前。"
+          />
+          <!-- <el-tooltip class="box-item" effect="dark" placement="right">
+            <template #content>
+              <div style="width: 250px">
+                填写此配置可以限制用户在选择模型时候的高级配置中的最大上下文轮次、可以通过限制此数量减少token的损耗、减低上下文的损耗量、
+                如果设置了模型的最大token和返回量、那么两个限制会同时生效！
+              </div>
+            </template>
+            <el-icon class="ml-3 cursor-pointer"><QuestionFilled /></el-icon>
+          </el-tooltip> -->
         </el-form-item>
         <el-form-item label="模型启用状态" prop="status">
           <el-switch v-model="formPackage.status" />
@@ -594,18 +623,13 @@ onMounted(() => {
             <el-icon class="ml-3 cursor-pointer"><QuestionFilled /></el-icon>
           </el-tooltip>
         </el-form-item>
-        <el-form-item label="模型中文名称" prop="modelName">
-          <el-input
-            v-model="formPackage.modelName"
-            placeholder="请填写模型中文名称（用户选择的）"
-          />
-        </el-form-item>
+
         <el-form-item :label="labelKeyName" prop="key">
           <el-input
             v-model="formPackage.key"
             :type="Number(formPackage.keyType) === 1 ? 'textarea' : 'text'"
             :rows="5"
-            placeholder="请填写模型Key|clientId|AppId"
+            placeholder="请填写模型Key"
             style="width: 95%"
           />
           <el-tooltip class="box-item" effect="dark" placement="right">
@@ -680,7 +704,7 @@ onMounted(() => {
           <el-tooltip class="box-item" effect="dark" placement="right">
             <template #content>
               <div style="width: 250px">
-                设置当前key的扣费类型、扣除普通余额或是高级余额。
+                设置当前key的扣费类型、扣除普通积分或是高级积分。
               </div>
             </template>
             <el-icon class="ml-3 cursor-pointer"><QuestionFilled /></el-icon>
@@ -695,7 +719,7 @@ onMounted(() => {
           <el-tooltip class="box-item" effect="dark" placement="right">
             <template #content>
               <div style="width: 250px">
-                设置当前key的单次调用扣除余额、建议同模型或名称key设置相同的金额、避免扣费发生异常！
+                设置当前key的单次调用扣除积分、建议同模型或名称key设置相同的金额、避免扣费发生异常！
               </div>
             </template>
             <el-icon class="ml-3 cursor-pointer"><QuestionFilled /></el-icon>
