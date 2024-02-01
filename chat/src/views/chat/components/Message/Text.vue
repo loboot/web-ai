@@ -4,7 +4,7 @@ import MarkdownIt from 'markdown-it';
 import mdKatex from '@traptitech/markdown-it-katex';
 import mila from 'markdown-it-link-attributes';
 import hljs from 'highlight.js';
-import { NButton, NIcon } from 'naive-ui';
+import { NButton, NIcon, NImage } from 'naive-ui';
 import { Copy, Delete, Refresh } from '@icon-park/vue-next';
 import { SvgIcon } from '@/components/common';
 import { ClipboardIcon, ArrowPathIcon } from '@heroicons/vue/24/outline';
@@ -108,14 +108,14 @@ defineExpose({ textRef });
   <div class="flex flex-col group max-w-full">
     <div :class="wrapClass">
       <div v-if="fileInfo && isImageUrl">
-        <img
+        <NImage
           :src="fileInfo"
+          :preview-src="fileInfo"
           alt="文件"
-          class="h-auto rounded-md mb-1"
-          :class="{ 'max-w-full': isMobile, 'max-w-sm': !isMobile }"
+          class="h-md rounded-md m-1"
+          :style="{ 'max-width': isMobile ? '100%' : '30vw' }"
         />
       </div>
-
       <div
         v-if="fileInfo && !isImageUrl"
         class="flex items-center justify-center border border-gray-300 rounded-lg h-8 hover:bg-primary-400 dark:hover:bg-primary-900 mb-1 max-w-[100px]"

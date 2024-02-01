@@ -1,12 +1,9 @@
 {
   "apps": {
-    "name": "nineai-v2.5.0",
+    "name": "aiweb-v2.5.1",
     "script": "./dist/main.js",
     "watch": true,
-    "ignore_watch": [
-      "node_modules",
-      "logs"
-    ],
+    "ignore_watch": ["node_modules", "logs"],
     "env": {
       "TZ": "Asia/Shanghai"
     },

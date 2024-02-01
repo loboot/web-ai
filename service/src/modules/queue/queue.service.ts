@@ -27,22 +27,17 @@ export class QueueService implements OnApplicationBootstrap {
 
   /* 提交绘画任务 */
   async addMjDrawQueue(body: MjDrawDto, req: Request) {
-    console.log('addMjDrawQueue called with params:', body);
-
     const { imgUrl, orderId, action, drawId } = body;
     /* 限制普通用户队列最多可以有两个任务在排队或者等待中 */
     await this.midjourneyService.checkLimit(req);
     /* 检测余额 */
     await this.userBalanceService.validateBalance(req, 'mjDraw', action === 'UPSCALE' ? 1 : 4);
-    console.log(`Action type: ${action}`);
-
     /* 绘图或者图生图 */
     if (action === 'IMAGINE') {
       /* 绘图或者图生图是相同的 区分一个action即可 */
       const randomDrawId = `${createRandomUid()}`;
       const params = { ...body, userId: req.user.id, randomDrawId };
       /* 添加绘制任务进入到db */
-      console.log('Submitting IMAGINE draw task to database with params:', params);
       const res = await this.midjourneyService.addDrawQueue(params);
       const timeout = (await this.globalConfigService.getConfigs(['mjTimeoutMs'])) || 200000;
       /* 添加任务到队列 通过imgUrl判断是不是图生图 */
@@ -56,14 +51,10 @@ export class QueueService implements OnApplicationBootstrap {
       return true;
     } else {
       const { orderId, action, drawId } = body;
-      console.log(drawId, action, orderId)
       const actionDetail = await this.midjourneyService.getDrawActionDetail(action, drawId, orderId);
-      console.log(`Obtained action details for action: ${action}, drawId: ${drawId}, orderId: ${orderId}`, actionDetail);
       const params = { ...body, userId: req.user.id, ...actionDetail };
-      console.log('Submitting draw task to database with params:', params);
       const res = await this.midjourneyService.addDrawQueue(params);
       const timeout = (await this.globalConfigService.getConfigs(['mjTimeoutMs'])) || 200000;
-      console.log('Adding task to draw queue with job details:', { id: res.id, action, userId: req.user.id });
       const job = await this.mjDrawQueue.add('mjDraw', { id: res.id, action, userId: req.user.id }, { delay: 1000, timeout: +timeout });
       this.jobIds.push(job.id);
       return;

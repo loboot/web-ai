@@ -57,7 +57,6 @@ export class MidjourneyService {
   /* MJ 绘画 */
   async draw(jobData, jobId) {
     const { id, action, drawId } = jobData;
-    Logger.debug(`action: ${action}`, 'MidjourneyService');
     const drawInfo = await this.midjourneyEntity.findOne({ where: { id } });
     const { customId } = drawInfo
     try {
@@ -84,11 +83,8 @@ export class MidjourneyService {
   /* 添加一条等待中的绘制任务 */
   async addDrawQueue(params) {
     try {
-      console.log('addDrawQueue called with params:', params);
       const { prompt, imgUrl = '', extraParam = '', action, userId, orderId, customId, drawId } = params;
       const fullPrompt = imgUrl ? `${imgUrl} ${prompt} ${extraParam}` : `${prompt} ${extraParam}`;
-      console.log('Prepared drawInfo:', { userId, drawId, extraParam, prompt, imgUrl, fullPrompt, action, orderId, customId });
-
       const drawInfo = {
         userId,
         drawId,
@@ -103,7 +99,6 @@ export class MidjourneyService {
       };
 
       const res = await this.midjourneyEntity.save(drawInfo);
-      console.log('Draw task added to the database with result:', res);
       return res;
     } catch (error) {
       console.error('Error in addDrawQueue:', error);
@@ -162,7 +157,6 @@ export class MidjourneyService {
 
       await this.midjourneyEntity.update({ id: jobData.id }, drawInfo);
     } catch (error) {
-      Logger.error(`更新绘画数据失败: ${error}`, 'MidjourneyService');
       throw new HttpException('更新绘画数据失败', HttpStatus.BAD_REQUEST);
     }
   }
@@ -187,7 +181,6 @@ export class MidjourneyService {
 
     while (retryCount < MAX_RETRIES) {
       try {
-        Logger.debug(`action: ${action}`, 'MidjourneyService');
         if (action === 'IMAGINE') {
           url = `${mjProxyUrl}/mj/submit/imagine`;
           payloadJson = { prompt: prompt };
@@ -196,21 +189,16 @@ export class MidjourneyService {
           payloadJson = { taskId: drawId, customId: customId };
         }
         const headers = { "mj-api-secret": mjKey };
-
-        Logger.debug(`提交参数: ${JSON.stringify({ url, payloadJson, headers })}`, 'MidjourneyService');
         const res = await axios.post(url, payloadJson, { headers });
-        Logger.debug(`响应数据: ${JSON.stringify(res.data)}`, 'MidjourneyService');
-
         const { result } = res.data;
         if (result) {
-          Logger.debug(`绘画ID: ${result}`, 'MidjourneyService');
+          Logger.log(`绘画ID: ${result}`, 'MidjourneyService');
           return result;
         } else {
           throw new Error('未能获取结果数据');
         }
       } catch (error) {
         retryCount++;
-        Logger.error(`发送绘画指令失败，重试次数: ${retryCount}/${MAX_RETRIES}: ${error}`, 'MidjourneyService');
         if (retryCount >= MAX_RETRIES) {
           await this.updateDrawStatus(id, MidjourneyStatusEnum.DRAWFAIL);
           throw new HttpException('发送绘图指令失败、请联系管理员检测绘画配置！', HttpStatus.BAD_REQUEST);
@@ -221,7 +209,6 @@ export class MidjourneyService {
 
   /* 等待绘画结果 */
   async pollComparisonResultDraw(id, drawInfo) {
-    Logger.debug(`开始查询绘画结果`, 'MidjourneyService');
     const mjProxyUrl = (await this.globalConfigService.getConfigs(['mjProxyUrl']));
     const mjKey = (await this.globalConfigService.getConfigs(['mjKey']));
     const startTime = Date.now();
@@ -235,7 +222,7 @@ export class MidjourneyService {
     try {
       while (Date.now() - startTime < TIMEOUT && retryCount < MAX_RETRIES) {
         await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
-        Logger.debug(`【绘制图片】第 ${pollingCount + 1} 次开始查询, 使用 drawId: ${drawId}`, 'MidjourneyService');
+        // Logger.debug(`【绘制图片】第 ${pollingCount + 1} 次开始查询, 使用 drawId: ${drawId}`, 'MidjourneyService');
 
         try {
           const headers = {
@@ -245,12 +232,12 @@ export class MidjourneyService {
           const url = `${mjProxyUrl}/mj/task/${drawId}/fetch`;
           const res = await axios.get(url, { headers });
           const responses = res.data;
-          Logger.debug(`【绘制图片】第 ${pollingCount + 1} 次查询结果: ${JSON.stringify(responses)}`, 'MidjourneyService');
+          // Logger.debug(`【绘制图片】第 ${pollingCount + 1} 次查询结果: ${JSON.stringify(responses)}`, 'MidjourneyService');
 
           const progress = responses.process;
           await this.midjourneyEntity.update({ id }, { progress: progress });
           if (responses.status === 'SUCCESS') {
-            Logger.debug(`绘制成功, URL: ${responses.imageUrl}`, 'MidjourneyService');
+            Logger.log(`绘制成功, URL: ${responses.imageUrl}`, 'MidjourneyService');
             return responses; // 返回成功的响应
           }
         } catch (error) {
@@ -261,7 +248,6 @@ export class MidjourneyService {
       }
 
       if (retryCount >= MAX_RETRIES) {
-        Logger.error('轮询失败次数过多，请稍后再试！', 'MidjourneyService');
         await this.updateDrawStatus(id, MidjourneyStatusEnum.DRAWFAIL);
         throw new HttpException('轮询失败次数过多，请稍后再试！', HttpStatus.BAD_REQUEST);
       }
@@ -375,9 +361,7 @@ export class MidjourneyService {
 
   /* 操作的时候去获取需要的信息 */
   async getDrawActionDetail(action, drawId, orderId) {
-    console.log(`getDrawActionDetail - 请求参数: action=${action}, drawId=${drawId}, orderId=${orderId}`);
     const detailInfo = await this.midjourneyEntity.findOne({ where: { drawId: drawId } });
-    console.log(`getDrawActionDetail - 查询结果:`, detailInfo);
     // if (!detailInfo) {
     //   throw new HttpException('当前绘画信息不存在！', HttpStatus.BAD_REQUEST);
     // }
@@ -385,17 +369,14 @@ export class MidjourneyService {
     const { extend, prompt, imgUrl, extraParam } = detailInfo;
     const extendObj = JSON.parse(extend);
     const buttons = extendObj.buttons || [];
-    Logger.debug(`绘画详情: ${JSON.stringify({ drawId, prompt, imgUrl, extraParam, action })}`, 'MidjourneyService');
+    // Logger.debug(`绘画详情: ${JSON.stringify({ drawId, prompt, imgUrl, extraParam, action })}`, 'MidjourneyService');
 
     let currentButton;
     if (action === 'UPSCALE') {
       currentButton = buttons.find(button => {
-        // 检查是否为V1, V2, V3, V4格式的标签
-        console.log('Action:', action);
-        console.log('Order ID:', orderId);
-        console.log('Buttons:', buttons);
+        // 检查是否为U1, U2, U3, U4格式的标签
         const isStandardUpscale = button.label.startsWith(`U${orderId}`);
-        // 检查是否为Vary (Strong) 或 Vary (Region)格式的标签，无论是否包含其他文字
+        // 检查是否为Upscale (Subtle) 或 Upscale (Creative)格式的标签，无论是否包含其他文字
         const isUpscaleUpscale = (orderId === 1 && /(Redo )?Upscale \(Subtle\)/.test(button.label)) ||
           (orderId === 2 && /(Redo )?Upscale \(Creative\)/.test(button.label));
         return isStandardUpscale || isUpscaleUpscale;
@@ -427,7 +408,6 @@ export class MidjourneyService {
     }
 
     const { customId } = currentButton;
-    Logger.debug(`选中的按钮信息: ${currentButton.customId}`, 'MidjourneyService');
 
     return { customId, prompt, extraParam, drawId };
   }
@@ -507,7 +487,7 @@ export class MidjourneyService {
       order: { id: 'DESC' },
       take: size,
       skip: (page - 1) * size,
-      select: ['id', 'drawId', 'drawUrl', 'drawRatio', 'prompt', 'fullPrompt', 'createdAt', 'action', 'status'],
+      select: ['id', 'drawId', 'drawUrl', 'drawRatio', 'prompt', 'fullPrompt', 'rec', 'createdAt', 'action', 'status'],
     });
 
     if (Number(size) === 999) {

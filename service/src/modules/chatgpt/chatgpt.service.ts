@@ -330,6 +330,7 @@ export class ChatgptService implements OnModuleInit {
           maxTokenRes,
           apiKey: modelKey,
           model,
+          prompt,
           fileInfo,
           temperature,
           proxyUrl: proxyResUrl,
@@ -339,6 +340,7 @@ export class ChatgptService implements OnModuleInit {
             firstChunk = false;
           },
         });
+
         isSuccess = true;
         const userMessageData: MessageInfo = {
           id: this.nineStore.getUuid(),
@@ -361,10 +363,11 @@ export class ChatgptService implements OnModuleInit {
           role: 'assistant',
           name: undefined,
           usage: response?.usage,
-          fileInfo: fileInfo,
+          fileInfo: response?.fileInfo,
           parentMessageId: userMessageData.id,
           conversationId: response?.conversationId,
         };
+
 
         await this.nineStore.setData(assistantMessageData);
 
@@ -385,11 +388,31 @@ export class ChatgptService implements OnModuleInit {
           temperature,
           proxyUrl: proxyResUrl,
           onProgress: null,
+          prompt,
         });
       }
 
-      /* 获取tokens消耗 */
-      const { prompt_tokens = 0, completion_tokens = 0, total_tokens = 0 } = response.detail.usage;
+      let imgUrl = '';
+      // const task = [];
+      // for (const item of images) {
+      //   const filename = uuid.v4().slice(0, 10) + '.png';
+      //   const buffer = Buffer.from(item.b64_json, 'base64');
+      //   task.push(this.uploadService.uploadFile({ filename, buffer }));
+      // }
+
+      if (model.includes('dall')) {
+        try {
+          const filename = uuid.v4().slice(0, 10) + '.png';
+          Logger.debug(`------> 开始上传图片！！！`, 'MidjourneyService');
+          imgUrl = await this.uploadService.uploadFileFromUrl({ filename, url: response?.fileInfo });
+        } catch (uploadError) {
+          Logger.error('存储图片失败，使用原始图片链接', 'MidjourneyService');
+          imgUrl = response?.fileInfo; // 使用原始图片链接
+        }
+      }
+      const usage = response.detail?.usage || { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 };
+      const { prompt_tokens, completion_tokens, total_tokens } = usage;
+
       /* 区分扣除普通还是高级余额  model3: 普通余额  model4： 高级余额 */
       let charge = deduct;
       if (isTokenBased === true) {
@@ -431,6 +454,7 @@ export class ChatgptService implements OnModuleInit {
         userId: req.user.id,
         type: DeductionKey.CHAT_TYPE,
         prompt: prompt,
+        fileInfo: imgUrl,
         answer: response.text,
         promptTokens: prompt_tokens,
         completionTokens: completion_tokens,

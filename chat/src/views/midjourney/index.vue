@@ -841,7 +841,7 @@ onMounted(() => {
                   type="primary"
                   :loading="false"
                   :disabled="submitDisabled"
-                  @click="checkHasChinese"
+                  @click="handleSubmit()"
                 >
                   <template #icon>
                     <SvgIcon icon="ri:ai-generate" class="text-base" />

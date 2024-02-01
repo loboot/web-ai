@@ -236,13 +236,10 @@ function handleFileSelect(event: any) {
     // 处理图像文件
     isImageFile.value = true;
     handleSetFile(file);
-  } else if (file.type === 'application/pdf') {
+  } else {
     // 处理 PDF 文件
     isImageFile.value = false;
     handleSetFile(file);
-  } else {
-    // 处理其他类型的文件或显示错误消息
-    console.log('不支持的文件类型');
   }
 }
 
@@ -848,7 +845,7 @@ onUnmounted(() => {
           type="file"
           class="hidden"
           @change="handleFileSelect"
-          accept="image/*, application/pdf"
+          accept="image/*, application/pdf, text/plain, text/html, text/css, text/csv, application/xml, application/vnd.ms-excel, application/x-sh, application/javascript, application/xslt+xml, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         />
         <!-- 按钮容器 -->
         <div class="flex justify-between items-center">

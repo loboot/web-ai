@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { get_encoding } from '@dqbd/tiktoken'
 import { removeSpecialCharacters } from '@/common/utils';
-import { ConsoleLogger } from '@nestjs/common';
+import { ConsoleLogger, HttpException, HttpStatus, Logger } from '@nestjs/common';
 
 const tokenizer = get_encoding('cl100k_base')
 
@@ -18,9 +18,58 @@ function getFullUrl(proxyUrl) {
   return `${baseUrl}/v1/chat/completions`
 }
 
-export function sendMessageFromOpenAi(messagesHistory, inputs) {
-  const { onProgress, maxToken, apiKey, model, temperature = 0.95, proxyUrl } = inputs
-  // console.debug(`完整提问参数：${JSON.stringify(messagesHistory, null, 2)}`);
+export async function sendMessageFromOpenAi(messagesHistory, inputs) {
+  const { onProgress, maxToken, apiKey, model, temperature = 0.95, proxyUrl, prompt } = inputs
+  let result: any = { text: '', fileInfo: null };
+  if (model.includes('dall')) {
+    try {
+      const options: AxiosRequestConfig = {
+        method: 'POST',
+        url: `${proxyUrl}/v1/images/generations`,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        data: {
+          prompt: prompt,
+          model: model,
+          // response_format: 'b64_json'
+        },
+      }
+      const response: any = await axios(options);
+      const { url, revised_prompt } = response.data.data[0]
+      result.text = revised_prompt;
+      result.fileInfo = url
+      return result;
+    } catch (error) {
+      const status = error?.response?.status || 500;
+      console.log('openai-draw error: ', JSON.stringify(error), status);
+      const message = error?.response?.data?.error?.message;
+      if (status === 429) {
+        result.text = '当前请求已过载、请稍等会儿再试试吧！';
+        return result;
+      }
+      if (status === 400 && message.includes('This request has been blocked by our content filters')) {
+        result.text = '您的请求已被系统拒绝。您的提示可能存在一些非法的文本。';
+        return result;
+      }
+      if (status === 400 && message.includes('Billing hard limit has been reached')) {
+        result.text = '当前模型key已被封禁、已冻结当前调用Key、尝试重新对话试试吧！';
+        return result;
+      }
+      if (status === 500) {
+        result.text = '绘制图片失败，请检查你的提示词是否有非法描述！';
+        return result;
+      }
+      if (status === 401) {
+        result.text = '绘制图片失败，此次绘画被拒绝了！';
+        return result;
+      }
+      result.text = '绘制图片失败，请稍后试试吧！';
+      return result;
+    }
+  }
+
   const options: AxiosRequestConfig = {
     method: 'POST',
     url: getFullUrl(proxyUrl),
@@ -42,7 +91,7 @@ export function sendMessageFromOpenAi(messagesHistory, inputs) {
     try {
       const response: any = await axios(options);
       const stream = response.data;
-      let result: any = { text: '' };
+
       stream.on('data', (chunk) => {
         const splitArr = chunk.toString().split('\n\n').filter((line) => line.trim() !== '');
         for (const line of splitArr) {

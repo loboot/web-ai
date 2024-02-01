@@ -206,7 +206,12 @@ onUnmounted(() => {
 <template>
   <div class="min-h-full overflow-hidden flex flex-col">
     <div class="flex-1 min-h-full p-4 relative">
-      <div id="wapper" ref="wapperRef" class="wapper">
+      <div
+        id="wapper"
+        ref="wapperRef"
+        class="wapper"
+        :style="{ height: `${wapperHeigth}px` }"
+      >
         <div
           v-for="(item, index) in dataList"
           :id="item.id.toString()"

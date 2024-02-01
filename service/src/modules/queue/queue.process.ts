@@ -18,7 +18,7 @@ import { MidjourneyService } from '../midjourney/midjourney.service';
 
 @Processor('MJDRAW')
 export class QueueProcessor {
-  constructor(private readonly midjourneyService: MidjourneyService) {}
+  constructor(private readonly midjourneyService: MidjourneyService) { }
   private readonly logger = new Logger(QueueProcessor.name);
 
   @Process({
