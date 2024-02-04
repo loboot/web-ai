@@ -1,6 +1,6 @@
 {
   "apps": {
-    "name": "aiweb-v2.5.1",
+    "name": "aiweb-v2.5.2",
     "script": "./dist/main.js",
     "watch": true,
     "ignore_watch": ["node_modules", "logs"],

@@ -314,32 +314,32 @@ function handleSelectPrompt(item: any) {
   carryOptions.value = isCarryParams ? 1 : 0;
 }
 
-function checkHasChinese() {
-  const isHasPromptChinese = hasChinese(prompt.value);
-  const isHasNoPromptChinese = hasChinese(noPrompt.value);
-  if (isHasPromptChinese || isHasNoPromptChinese) {
-    const d = dialog.warning({
-      title: '温馨提示',
-      content:
-        '您的提示词中包含中文、绘画AI可能无法识别您的中文、我们建议您翻译后进行绘画得到更准确的结果、请问需要翻译后提交么？',
-      positiveText: '翻译提示词',
-      negativeText: '不需要',
-      onPositiveClick: async () => {
-        d.loading = true;
-        const task = [];
-        isHasPromptChinese && task.push(handleFanyiPrompt());
-        isHasNoPromptChinese && task.push(handleFanyiNoPrompt());
-        await Promise.all(task);
-        handleSubmit();
-      },
-      onNegativeClick: () => {
-        handleSubmit();
-      },
-    });
-  } else {
-    handleSubmit();
-  }
-}
+// function checkHasChinese() {
+//   const isHasPromptChinese = hasChinese(prompt.value);
+//   const isHasNoPromptChinese = hasChinese(noPrompt.value);
+//   if (isHasPromptChinese || isHasNoPromptChinese) {
+//     const d = dialog.warning({
+//       title: '温馨提示',
+//       content:
+//         '您的提示词中包含中文、绘画AI可能无法识别您的中文、我们建议您翻译后进行绘画得到更准确的结果、请问需要翻译后提交么？',
+//       positiveText: '翻译提示词',
+//       negativeText: '不需要',
+//       onPositiveClick: async () => {
+//         d.loading = true;
+//         const task = [];
+//         isHasPromptChinese && task.push(handleFanyiPrompt());
+//         isHasNoPromptChinese && task.push(handleFanyiNoPrompt());
+//         await Promise.all(task);
+//         handleSubmit();
+//       },
+//       onNegativeClick: () => {
+//         handleSubmit();
+//       },
+//     });
+//   } else {
+//     handleSubmit();
+//   }
+// }
 
 /* 提交绘制任务|图生图 */
 async function handleSubmit() {
@@ -453,6 +453,9 @@ onMounted(() => {
       <div
         class="p-4 sm:pt-6 bg-[#f8f8f8] p-4 dark:bg-[#18181c] overflow-y-auto w-full sm:w-[20rem] shrink-0 border-r-2 border-[#ffffff17]"
       >
+        <h3 class="text-lg sm:text-2xl font-bold leading-6" v-if="isMobile">
+          专业绘图
+        </h3>
         <div class="mt-4 text-sm flex items-center">
           <div class="text-sm mr-1">图片尺寸</div>
 
@@ -721,7 +724,7 @@ onMounted(() => {
                     class="text-base ml-2"
                   />
                 </template>
-                绘画账户信息
+                账户信息
               </NTooltip>
             </span>
           </div>
@@ -748,48 +751,56 @@ onMounted(() => {
         :class="[isMobile ? '' : 'overflow-y-auto overflow-hidden']"
       >
         <div class="m-auto max-w-screen-4xl">
-          <div class="space-y-6 p-4">
-            <h3 class="text-lg sm:text-2xl font-bold leading-6">Midjourney</h3>
+          <div class="space-y-4 p-4">
+            <h3
+              class="text-lg sm:text-2xl font-bold leading-6"
+              v-if="!isMobile"
+            >
+              专业绘图
+            </h3>
             <!-- <p>图生图：生成类似风格或类型图像；图生文：上传一张图片生成对应的提示词；融图：融合图片风格</p> -->
             <div>
               <div class="flex justify-between items-end">
-                <b>你想生成什么图像?</b>
-                <NSpace>
-                  <NButton
-                    type="primary"
-                    :loading="translateLoading"
-                    @click="handleFanyiPrompt"
-                  >
-                    <template #icon>
-                      <SvgIcon icon="ri:translate" class="text-base" />
-                    </template>
-                    翻译
-                  </NButton>
-                  <NButton
-                    type="primary"
-                    :loading="associateLoading"
-                    @click="handleAssociatePrompt"
-                  >
-                    <template #icon>
-                      <SvgIcon
-                        icon="material-symbols:mindfulness-outline-rounded"
-                        class="text-base"
-                      />
-                    </template>
-                    联想
-                  </NButton>
-                </NSpace>
+                <b>输入关键词，提交绘制任务</b>
+                <div v-if="Number(authStore.globalConfig.mjHideNotBlock) !== 1">
+                  <NSpace>
+                    <NButton
+                      type="primary"
+                      :loading="translateLoading"
+                      @click="handleFanyiPrompt"
+                    >
+                      <template #icon>
+                        <SvgIcon icon="ri:translate" class="text-base" />
+                      </template>
+                      翻译
+                    </NButton>
+                    <NButton
+                      type="primary"
+                      :loading="associateLoading"
+                      @click="handleAssociatePrompt"
+                    >
+                      <template #icon>
+                        <SvgIcon
+                          icon="material-symbols:mindfulness-outline-rounded"
+                          class="text-base"
+                        />
+                      </template>
+                      联想
+                    </NButton>
+                  </NSpace>
+                </div>
               </div>
               <div class="mt-4">
                 <NInput
                   v-model:value="prompt"
+                  clearable
                   type="textarea"
                   :disabled="associateLoading || translateLoading"
                   :autosize="{
-                    minRows: 4,
+                    minRows: 3,
                     maxRows: 6,
                   }"
-                  placeholder="例如: A cute little cat (Midjourney对中文描述词有一定限制、我们建议您点击右侧翻译将您的描述词转为英文再进行提交、联想则是会将您的描述词交由GPT让其发挥想象空间为您在此基础创建更为详细的描述！)"
+                  placeholder="输入绘图关键词。例如：一只五颜六色的猫，可爱，卡通"
                 />
                 <div
                   v-if="Number(authStore.globalConfig.mjHideNotBlock) !== 1"
@@ -846,14 +857,14 @@ onMounted(() => {
                   <template #icon>
                     <SvgIcon icon="ri:ai-generate" class="text-base" />
                   </template>
-                  提交绘画任务
+                  提交任务
                 </NButton>
               </div>
             </div>
           </div>
 
           <div class="space-y-2 p-4">
-            <div v-if="Number(authStore.globalConfig.mjHideWorkIn) !== 1">
+            <div v-if="Number(authStore.globalConfig.mjHideNotBlock) !== 1">
               <div class="mt-6 mb-4 flex flex-col">
                 <span class="text-xl font-bold flex items-end">
                   <b>工作中的内容</b>
@@ -869,7 +880,7 @@ onMounted(() => {
                 <img class="w-18" :src="marketImg" />
                 <span class="mt-4">
                   <NButton text size="small" @click="readMore"
-                    >点击前往市场看看别人的作品吧！</NButton
+                    >点击前往 AI 绘画广场</NButton
                   >
                 </span>
               </div>
@@ -897,11 +908,11 @@ onMounted(() => {
                     >[{{ drawList.length }}]</span
                   ></span
                 >
-                <span class="mt-2 text-xs font-bold text-[#444]"
+                <!-- <span class="mt-2 text-xs font-bold text-[#444]"
                   >点击下面的编号按钮以获取升级版（U:
                   放大图片更细节）或变化版（V:
                   在此基础上变体）。绘画失败不扣除积分，请重试直到绘画成功为止。</span
-                >
+                > -->
               </div>
               <div v-if="!drawList || !drawList.length" class="w-full py-28">
                 <img

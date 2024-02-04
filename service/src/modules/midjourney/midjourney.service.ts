@@ -62,7 +62,7 @@ export class MidjourneyService {
     try {
       /* 把任务ID绑定到DB去 */
       await this.bindJobId(id, jobId);
-      // await this.updateDrawStatus(id, MidjourneyStatusEnum.DRAWING);
+      await this.updateDrawStatus(id, MidjourneyStatusEnum.DRAWING);
       const result = await this.sendDrawCommand(drawInfo, action);
       /* 开始执行检测逻辑 */
       drawInfo.drawId = result;

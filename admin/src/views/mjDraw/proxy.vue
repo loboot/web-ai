@@ -77,7 +77,7 @@ onMounted(() => {
         :closable="false"
         show-icon
         title="MJ参数说明"
-        description="如果您是海外服务器则不强制开启代理、反之则需要开启代理、代理为系统配套项目、非常规代理、如果您想自己搭建代理请查看教程、如果您想使用系统提供的默认代理、那么选择开启代理并且不填写代理地址即可使用默认地址、如果想获取默认地址请在售后群获取地址！"
+        description="已支持使用 MJ-PROXY-PLUS 的第三方中转，代理地址填中转地址，Key 填在中转获取到的 Key。第三方中转推荐使用：https://api.lightai.io"
         type="success"
       />
     </page-main>
@@ -196,7 +196,7 @@ onMounted(() => {
         <el-row>
           <el-col :xs="24" :md="20" :lg="15" :xl="12">
             <el-form-item
-              label="隐藏不需要元素模块"
+              label="隐藏页面高级功能"
               prop="mjHideNotBlock"
               label-width="150"
             >
@@ -208,32 +208,7 @@ onMounted(() => {
               <el-tooltip class="box-item" effect="dark" placement="right">
                 <template #content>
                   <div style="width: 250px">
-                    隐藏客户端绘图页面的不需要的元素模块、隐藏后用户不可选择无法选中模块
-                  </div>
-                </template>
-                <el-icon class="ml-3 cursor-pointer"
-                  ><QuestionFilled
-                /></el-icon>
-              </el-tooltip>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :xs="24" :md="20" :lg="15" :xl="12">
-            <el-form-item
-              label="隐藏工作中内容模块"
-              prop="mjHideWorkIn"
-              label-width="150"
-            >
-              <el-switch
-                v-model="formInline.mjHideWorkIn"
-                active-value="1"
-                inactive-value="0"
-              />
-              <el-tooltip class="box-item" effect="dark" placement="right">
-                <template #content>
-                  <div style="width: 250px">
-                    客户端绘图页面隐藏掉工作中模块、将不再展示给用户此模块。
+                    隐藏客户端绘图页面的【不需要的元素模块】【翻译联想模块】。隐藏后用户不可选择无法选中模块
                   </div>
                 </template>
                 <el-icon class="ml-3 cursor-pointer"

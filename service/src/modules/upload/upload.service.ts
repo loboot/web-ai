@@ -19,24 +19,37 @@ export class UploadService implements OnModuleInit {
     const { filename: name, originalname, buffer, dir = 'ai', mimetype } = file;
     const fileTyle = mimetype ? mimetype.split('/')[1] : '';
     const filename = originalname || name
+    Logger.debug(`准备上传文件: ${filename}, 类型: ${fileTyle}`, 'UploadService');
+
     const {
       tencentCosStatus = 0,
       aliOssStatus = 0,
       cheveretoStatus = 0,
     } = await this.globalConfigService.getConfigs(['tencentCosStatus', 'aliOssStatus', 'cheveretoStatus']);
 
+
+    Logger.debug(`上传配置状态 - 腾讯云: ${tencentCosStatus}, 阿里云: ${aliOssStatus}, Chevereto: ${cheveretoStatus}`, 'UploadService');
+
     if (!Number(tencentCosStatus) && !Number(aliOssStatus) && !Number(cheveretoStatus)) {
       throw new HttpException('请先前往后台配置上传图片的方式', HttpStatus.BAD_REQUEST);
     }
-    if (Number(tencentCosStatus)) {
-      return this.uploadFileByTencentCos({ filename, buffer, dir, fileTyle });
-    }
-    if (Number(aliOssStatus)) {
-      return await this.uploadFileByAliOss({ filename, buffer, dir, fileTyle });
-    }
-    if (Number(cheveretoStatus)) {
-      const { filename, buffer: fromBuffer, dir } = file;
-      return await this.uploadFileByChevereto({ filename, buffer: fromBuffer.toString('base64'), dir, fileTyle });
+    try {
+      if (Number(tencentCosStatus)) {
+        Logger.debug(`使用腾讯云COS上传`, 'UploadService');
+        return await this.uploadFileByTencentCos({ filename, buffer, dir, fileTyle });
+      }
+      if (Number(aliOssStatus)) {
+        Logger.debug(`使用阿里云OSS上传`, 'UploadService');
+        return await this.uploadFileByAliOss({ filename, buffer, dir, fileTyle });
+      }
+      if (Number(cheveretoStatus)) {
+        Logger.debug(`使用Chevereto上传`, 'UploadService');
+        const { filename, buffer: fromBuffer, dir } = file;
+        return await this.uploadFileByChevereto({ filename, buffer: fromBuffer.toString('base64'), dir, fileTyle });
+      }
+    } catch (error) {
+      Logger.error(`上传失败: ${error.message}`, 'UploadService');
+      throw error; // 重新抛出异常，以便调用方可以处理
     }
   }
 

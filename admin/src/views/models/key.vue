@@ -208,6 +208,7 @@ function handleEditKey(row: any) {
       status,
       model,
       keyWeight,
+      modelOrder,
       maxModelTokens,
       maxResponseTokens,
       proxyUrl,

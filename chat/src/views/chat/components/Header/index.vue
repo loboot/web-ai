@@ -121,7 +121,11 @@ async function queryModelsList() {
     modelTypeListCache.value = modelTypeList;
     // 使用类型断言来告诉 TypeScript flatModelArray 是 Model[] 类型
     const flatModelArray = Object.values(modelMaps).flat() as Model[];
-    modelOptions.value = flatModelArray.map((model) => ({
+    // 过滤dall-e-3模型
+    const filteredModelArray = flatModelArray.filter(
+      (model) => model.model !== ''
+    );
+    modelOptions.value = filteredModelArray.map((model) => ({
       label: model.modelName,
       value: model.model,
       deductType: model.deductType,
@@ -205,7 +209,6 @@ onMounted(() => {
                       >
                         {{ option.label }}
                       </a>
-
                       <!-- <p
                         class="mt-1 p-5 text-gray-600 group-hover:bg-gray-100 dark:group-hover:bg-gray-700"
                       >

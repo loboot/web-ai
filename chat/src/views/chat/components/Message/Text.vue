@@ -113,7 +113,7 @@ defineExpose({ textRef });
           :preview-src="fileInfo"
           alt="文件"
           class="h-md rounded-md m-1"
-          :style="{ 'max-width': isMobile ? '100%' : '30vw' }"
+          :style="{ 'max-width': isMobile ? '100%' : '20vw' }"
         />
       </div>
       <div

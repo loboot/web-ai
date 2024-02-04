@@ -37,7 +37,7 @@ const routes: RouteRecordRaw = {
       name: 'mjProxyManage',
       component: () => import('@/views/mjDraw/proxy.vue'),
       meta: {
-        title: '参数配置',
+        title: '参数设置',
         icon: 'menu-proxy',
       },
     },

@@ -229,7 +229,10 @@ watch(
                 <span>清空对话</span>
               </button>
             </div>
-            <div v-if="activeModelKeyDeductType === 1">
+            <div
+              v-if="activeModelKeyDeductType === 1"
+              @click="useGlobalStore.updateGoodsDialog(true)"
+            >
               <button
                 type="button"
                 class="inline-flex justify-center items-center rounded-md bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-500 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 w-full"
@@ -241,7 +244,10 @@ watch(
               </button>
             </div>
 
-            <div v-if="activeModelKeyDeductType === 2">
+            <div
+              v-if="activeModelKeyDeductType === 2"
+              @click="useGlobalStore.updateGoodsDialog(true)"
+            >
               <button
                 type="button"
                 class="inline-flex justify-center items-center rounded-md bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-500 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 w-full"

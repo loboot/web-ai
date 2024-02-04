@@ -20,7 +20,7 @@ const getMobileClass = computed(() => {
   <RouterLink :to="homePage">
     <img
       v-if="!logoPath"
-      src="/logo.png"
+      src="/logo.ico"
       :class="getMobileClass"
       class="cursor-pointer px-0 dark:border-[#ffffff17] border-#ebebeb-400"
       alt=""

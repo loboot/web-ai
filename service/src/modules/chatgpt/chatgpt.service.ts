@@ -27,7 +27,7 @@ import { In, Like, MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BadwordsService } from '../badwords/badwords.service';
 import { AutoreplyService } from '../autoreply/autoreply.service';
-import { GptKeysEntity } from './gptkeys.entity';
+import { GptKeysEntity } from './gptKeys.entity';
 import { GlobalConfigService } from '../globalConfig/globalConfig.service';
 import { FanyiService } from '../fanyi/fanyi.service';
 import * as dayjs from 'dayjs';
@@ -229,12 +229,8 @@ export class ChatgptService implements OnModuleInit {
       const systemPreMessage = await this.globalConfigService.getConfigs(['systemPreMessage']);
       setSystemMessage = systemPreMessage + `\n Current date: ${currentDate}`;
     }
-
     /* 整理本次请求全部数据 */
     const mergedOptions: any = await this.getRequestParams(options, setSystemMessage, currentRequestModelKey, groupConfig.modelInfo);
-
-    const { maxModelTokens = 8000, maxResponseTokens = 4096, key } = currentRequestModelKey;
-
     res && res.status(200);
     let response = null;
     let othersInfo = null;
@@ -325,6 +321,7 @@ export class ChatgptService implements OnModuleInit {
           model: model
         });
         let firstChunk = true;
+
         response = await sendMessageFromOpenAi(messagesHistory, {
           maxToken,
           maxTokenRes,
@@ -338,8 +335,8 @@ export class ChatgptService implements OnModuleInit {
             res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`);
             lastChat = chat;
             firstChunk = false;
-          },
-        });
+          }
+        }, this.uploadService);
 
         isSuccess = true;
         const userMessageData: MessageInfo = {
@@ -391,40 +388,16 @@ export class ChatgptService implements OnModuleInit {
           prompt,
         });
       }
-
-      let imgUrl = '';
-      // const task = [];
-      // for (const item of images) {
-      //   const filename = uuid.v4().slice(0, 10) + '.png';
-      //   const buffer = Buffer.from(item.b64_json, 'base64');
-      //   task.push(this.uploadService.uploadFile({ filename, buffer }));
-      // }
-
-      if (model.includes('dall')) {
-        try {
-          const filename = uuid.v4().slice(0, 10) + '.png';
-          Logger.debug(`------> 开始上传图片！！！`, 'MidjourneyService');
-          imgUrl = await this.uploadService.uploadFileFromUrl({ filename, url: response?.fileInfo });
-        } catch (uploadError) {
-          Logger.error('存储图片失败，使用原始图片链接', 'MidjourneyService');
-          imgUrl = response?.fileInfo; // 使用原始图片链接
-        }
-      }
       const usage = response.detail?.usage || { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 };
       const { prompt_tokens, completion_tokens, total_tokens } = usage;
-
-      /* 区分扣除普通还是高级余额  model3: 普通余额  model4： 高级余额 */
       let charge = deduct;
       if (isTokenBased === true) {
         charge = Math.ceil((deduct * total_tokens) / tokenFeeRatio);
       }
       await this.userBalanceService.deductFromBalance(req.user.id, `model${deductType === 1 ? 3 : 4}`, charge, total_tokens);
-
       /* 记录key的使用次数 和使用token */
       await this.modelsService.saveUseLog(keyId, total_tokens);
-
       const curIp = getClientIp(req);
-
 
       /* 用户询问 */
       await this.chatLogService.saveChatLog({
@@ -454,7 +427,7 @@ export class ChatgptService implements OnModuleInit {
         userId: req.user.id,
         type: DeductionKey.CHAT_TYPE,
         prompt: prompt,
-        fileInfo: imgUrl,
+        fileInfo: response?.fileInfo,
         answer: response.text,
         promptTokens: prompt_tokens,
         completionTokens: completion_tokens,

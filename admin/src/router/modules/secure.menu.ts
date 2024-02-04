@@ -32,15 +32,15 @@ const routes: RouteRecordRaw = {
         icon: 'menu-baiduyunminganci',
       },
     },
-    {
-      path: 'sensitive-builtIn',
-      name: 'SensitiveBuiltIn',
-      component: () => import('@/views/sensitive/builtIn.vue'),
-      meta: {
-        title: 'NineAi敏感词',
-        icon: 'menu-minganci',
-      },
-    },
+    // {
+    //   path: 'sensitive-builtIn',
+    //   name: 'SensitiveBuiltIn',
+    //   component: () => import('@/views/sensitive/builtIn.vue'),
+    //   meta: {
+    //     title: 'NineAi敏感词',
+    //     icon: 'menu-minganci',
+    //   },
+    // },
     {
       path: 'sensitive-custom',
       name: 'SensitiveCuston',

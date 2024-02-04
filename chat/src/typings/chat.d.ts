@@ -33,6 +33,7 @@ declare namespace Chat {
     chatList: Chat[]
     groupKeyWord?: string
     activeConfig?: any
+    activeModelName?: string
     activeModelKeyDeductType?: number
     activeModelKeyPrice?: number
     activeModelKeyType?: number

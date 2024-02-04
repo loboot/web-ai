@@ -58,15 +58,15 @@ const routes: RouteRecordRaw = {
         icon: 'menu-copyright',
       },
     },
-    {
-      path: 'upgrade',
-      name: 'upgradeConfig',
-      component: () => import('@/views/system/upgrade.vue'),
-      meta: {
-        title: '迁移助手',
-        icon: 'menu-qianyizhushou',
-      },
-    },
+    // {
+    //   path: 'upgrade',
+    //   name: 'upgradeConfig',
+    //   component: () => import('@/views/system/upgrade.vue'),
+    //   meta: {
+    //     title: '迁移助手',
+    //     icon: 'menu-qianyizhushou',
+    //   },
+    // },
   ],
 }
 

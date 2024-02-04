@@ -29,9 +29,14 @@ export function useScroll(): ScrollReturn {
   const scrollRef = ref<ScrollElement>(null)
 
   const scrollToBottom = async () => {
-    await nextTick()
-    if (scrollRef.value)
-      scrollRef.value.scrollTop = scrollRef.value.scrollHeight
+    let previous = 0
+    let now = Date.now();
+    if (now - previous > 1000) {
+      previous = now
+      await nextTick()
+      if (scrollRef.value)
+        scrollRef.value.scrollTop = scrollRef.value.scrollHeight
+    }
   }
 
   const scrollToTop = async () => {

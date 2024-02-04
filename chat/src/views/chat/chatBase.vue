@@ -5,6 +5,7 @@ import { NCascader, NPopover, NTooltip, useDialog, useMessage } from 'naive-ui';
 import html2canvas from 'html2canvas';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
+
 import { Message } from './components';
 import { useScroll } from './hooks/useScroll';
 import { useCopyCode } from './hooks/useCopyCode';
@@ -35,6 +36,7 @@ import { fetchChatAPIProcess } from '@/api';
 import { t } from '@/locales';
 import { router } from '@/router';
 import { url } from 'inspector';
+import ModelDialog from '@/layout/components/modelDialog.vue';
 const useGlobalStore = useGlobalStoreWithOut();
 const authStore = useAuthStore();
 const route = useRoute();
@@ -318,10 +320,15 @@ async function onConversation(msg?: string) {
   if (lastContext.value && usingContext.value && !usingNetwork.value)
     options = { ...lastContext.value, ...options };
 
+  let thinkingText = 'AI思考中';
+  if (chatStore?.activeModelName === 'dall-e-3') {
+    thinkingText = 'AI绘制中，请稍候';
+  }
+
   /* 虚拟增加一条ai记录 */
   addGroupChat({
     dateTime: new Date().toLocaleString(),
-    text: 'AI思考中',
+    text: thinkingText,
     loading: true,
     inversion: false,
     error: false,
@@ -365,6 +372,7 @@ async function onConversation(msg?: string) {
               usage: data?.detail?.usage,
               error: false,
               loading: true,
+              fileInfo: data?.fileInfo,
               conversationOptions: {
                 conversationId: data?.conversationId,
                 parentMessageId: data?.id,
@@ -448,40 +456,11 @@ async function onConversation(msg?: string) {
             }
           }
 
-          /* 处理和百度一样格式的模型消息解析 */
-          if ([2, 3].includes(activeModelKeyType.value)) {
-            const lines = responseText
-              .toString()
-              .split('\n')
-              .filter((line: string) => line.trim() !== '');
-
-            let cacheResult = ''; // 拿到本轮传入的所有字段信息
-            let tem: any = {};
-            for (const line of lines) {
-              try {
-                const parseData = JSON.parse(line);
-                cacheResult += parseData.result;
-                tem = parseData;
-              } catch (error) {
-                console.log('Json parse 2 3 type error: ');
-              }
-            }
-            tem.result = cacheResult;
-            data = tem;
-          }
-
           try {
             /* 如果出现输出内容不一致就需要处理了 */
             if (activeModelKeyType.value === 1) {
               cacheResText = data.text;
               if (data?.userBanance) userBanance = data?.userBanance;
-            }
-
-            if ([2, 3].includes(activeModelKeyType.value)) {
-              const { result, is_end } = data;
-              cacheResText = result;
-              isStreamIn.value = !is_end;
-              data?.userBanance && (userBanance = data?.userBanance);
             }
           } catch (error: any) {
             // 检查错误是否为 AbortError
@@ -530,7 +509,10 @@ async function onConversation(msg?: string) {
     if (currentChat?.text && currentChat.text !== '') {
       updateGroupChatSome(dataSources.value.length - 1, {
         text: `${
-          currentChat.text === 'AI思考中' ? '' : currentChat.text
+          currentChat.text === 'AI思考中' ||
+          currentChat.text === 'AI绘制中，请稍候'
+            ? ''
+            : currentChat.text
         }\n[${errorMessage}]`,
         error: false,
         loading: false,
@@ -543,6 +525,7 @@ async function onConversation(msg?: string) {
       inversion: false,
       error: true,
       loading: false,
+      fileInfo: data?.fileInfo,
       conversationOptions: null,
       requestOptions: { prompt: message, options: { ...options } },
     });
@@ -551,6 +534,7 @@ async function onConversation(msg?: string) {
     loading.value = false;
     isStreamIn.value = false;
     typingStatusEnd.value = true;
+    scrollToBottom();
   }
 }
 
@@ -776,7 +760,7 @@ onUnmounted(() => {
       </div>
     </main>
     <footer>
-      <div :class="[isMobile ? 'px-2' : 'px-4']" class="flex space-x-2">
+      <!-- <div :class="[isMobile ? 'px-2' : 'px-4']" class="flex space-x-2">
         <NPopover
           v-if="chatStore.chatPreList?.length"
           placement="top-start"
@@ -822,7 +806,7 @@ onUnmounted(() => {
             />
           </div>
         </NPopover>
-      </div>
+      </div> -->
 
       <div
         class="flex justify-center flex-col m-auto block rounded-lg shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-primary-600 py-2 text-gray-900 placeholder:text-gray-400 border-0 bg-transparent sm:text-sm sm:leading-6 resize-none dark:focus:ring-primary-800 dark:ring-inset dark:ring-primary-800 dark:bg-gray-800"

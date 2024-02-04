@@ -1,6 +1,6 @@
 <script lang="ts" setup name="Logo">
-import imgLogo from '@/assets/images/logo.png'
-import useSettingsStore from '@/store/modules/settings'
+import imgLogo from '@/assets/images/logo.png';
+import useSettingsStore from '@/store/modules/settings';
 
 defineProps({
   showLogo: {
@@ -11,27 +11,32 @@ defineProps({
     type: Boolean,
     default: true,
   },
-})
+});
 
-const settingsStore = useSettingsStore()
+const settingsStore = useSettingsStore();
 
-const title = ref(import.meta.env.VITE_APP_TITLE)
-const logo = ref(imgLogo)
+const title = ref(import.meta.env.VITE_APP_TITLE);
+const logo = ref(imgLogo);
 
 const to = computed(() => {
   const rtn: {
-    name?: string
-  } = {}
+    name?: string;
+  } = {};
   if (settingsStore.settings.home.enable) {
-    rtn.name = 'home'
+    rtn.name = 'home';
   }
-  return rtn
-})
+  return rtn;
+});
 </script>
 
 <template>
-  <router-link :to="to" class="title" :class="{ 'is-link': settingsStore.settings.home.enable }" :title="title">
-    <img v-if="showLogo" :src="logo" class="logo">
+  <router-link
+    :to="to"
+    class="title"
+    :class="{ 'is-link': settingsStore.settings.home.enable }"
+    :title="title"
+  >
+    <!-- <img v-if="showLogo" :src="logo" class="logo"> -->
     <span v-if="showTitle">{{ title }}</span>
   </router-link>
 </template>

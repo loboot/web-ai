@@ -24,9 +24,9 @@ function createMainWindow() {
     },
   })
 
-	if (app.isPackaged) {
+  if (app.isPackaged) {
     // mainWindow.loadFile(filePath)
-    mainWindow.loadURL('https://ai.jiangly.com')
+    // mainWindow.loadURL('https://ai.jiangly.com')
   }
   else {
     mainWindow.loadURL('http://127.0.0.1:1002')
@@ -45,7 +45,7 @@ function createMainWindow() {
     mainWindow.webContents.openDevTools();
   });
 
-	return mainWindow;
+  return mainWindow;
 }
 
 module.exports = { createMainWindow };
