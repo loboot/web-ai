@@ -14,7 +14,7 @@
   ],
   "main": "electron/main.js",
   "scripts": {
-    "start:h": "pnpm run -C service dev",
+    "start:h": "pnpm run -C ../service dev",
     "start:f": "vite",
     "all": "npm-run-all --parallel start:h start:f",
     "dev": "vite",
