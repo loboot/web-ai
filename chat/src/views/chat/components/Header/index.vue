@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref, onMounted, Ref, defineProps } from 'vue';
+import { computed, ref, onMounted, Ref } from 'vue';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue';
 import { SvgIcon } from '@/components/common';
 import {
