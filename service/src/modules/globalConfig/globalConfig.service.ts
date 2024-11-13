@@ -1,7 +1,14 @@
 import { UserService } from './../user/user.service';
 import { ModelsService } from './../models/models.service';
 import { ChatLogEntity } from './../chatLog/chatLog.entity';
-import { Global, HttpException, HttpStatus, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  Global,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import { SetConfigDto } from './dto/setConfig.dto';
 import { ConfigEntity } from './config.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -23,7 +30,7 @@ export class GlobalConfigService implements OnModuleInit {
     private readonly configEntity: Repository<ConfigEntity>,
     @InjectRepository(ChatLogEntity)
     private readonly chatLogEntity: Repository<ChatLogEntity>,
-    private readonly modelsService: ModelsService,
+    private readonly modelsService: ModelsService
   ) {}
   private globalConfigs: any = {};
   private wechatAccessToken: string;
@@ -65,34 +72,62 @@ export class GlobalConfigService implements OnModuleInit {
 
   /* 初始化百度敏感词 拿到百度的access_token isInit: 初始化报错不检测  管理端手动修改则提示 */
   async initBaiduSensitive(isInit = true) {
-    const { baiduTextApiKey, baiduTextSecretKey } = await this.getConfigs(['baiduTextApiKey', 'baiduTextSecretKey']);
+    const { baiduTextApiKey, baiduTextSecretKey } = await this.getConfigs([
+      'baiduTextApiKey',
+      'baiduTextSecretKey',
+    ]);
     if (!baiduTextApiKey || !baiduTextSecretKey) {
-      Logger.error('百度敏感词初始化失败，如果需要敏感检测、请前往后台系统配置!', 'GlobalConfigService');
+      Logger.error(
+        '百度敏感词初始化失败，如果需要敏感检测、请前往后台系统配置!',
+        'GlobalConfigService'
+      );
       return;
     }
-    const headers = { 'Content-Type': 'application/json', Accept: 'application/json' };
+    const headers = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
     const url = `https://aip.baidubce.com/oauth/2.0/token?client_id=${baiduTextApiKey}&client_secret=${baiduTextSecretKey}&grant_type=client_credentials`;
     try {
       const response = await axios.post(url, { headers });
       this.globalConfigs.baiduTextAccessToken = response.data.access_token;
     } catch (error) {
       if (isInit) {
-        Logger.error('百度敏感词配置检测失败，您的参数可能配置的不正确!', 'GlobalConfigService');
+        Logger.error(
+          '百度敏感词配置检测失败，您的参数可能配置的不正确!',
+          'GlobalConfigService'
+        );
       } else {
-        throw new HttpException(error.response.data.error_description, HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          error.response.data.error_description,
+          HttpStatus.BAD_REQUEST
+        );
       }
     }
   }
 
   /* 定时刷新 access_token */
   async getWechatAccessToken(isInit = false) {
-    const { wechatOfficialAppId: appId, wechatOfficialAppSecret: secret } = await this.getConfigs(['wechatOfficialAppId', 'wechatOfficialAppSecret']);
+    const { wechatOfficialAppId: appId, wechatOfficialAppSecret: secret } =
+      await this.getConfigs(['wechatOfficialAppId', 'wechatOfficialAppSecret']);
     if (!appId || !secret) {
-      return Logger.error('还未配置微信的appId和secret、配置后才可进行微信扫码登录！！！', 'OfficialService');
+      return Logger.error(
+        '还未配置微信的appId和secret、配置后才可进行微信扫码登录！！！',
+        'OfficialService'
+      );
     }
-    this.wechatAccessToken = await this.fetchBaseAccessToken(appId, secret, isInit);
-    this.wechatJsapiTicket = await this.fetchJsapiTicket(this.wechatAccessToken);
-    Logger.log(`wechat refresh access_token  ==> ${this.wechatAccessToken}`, 'OfficialService');
+    this.wechatAccessToken = await this.fetchBaseAccessToken(
+      appId,
+      secret,
+      isInit
+    );
+    this.wechatJsapiTicket = await this.fetchJsapiTicket(
+      this.wechatAccessToken
+    );
+    Logger.log(
+      `wechat refresh access_token  ==> ${this.wechatAccessToken}`,
+      'OfficialService'
+    );
   }
 
   /* 获取微信access_token */
@@ -103,12 +138,20 @@ export class GlobalConfigService implements OnModuleInit {
     }
     const {
       data: { errmsg, access_token },
-    } = await axios.get(`https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${appId}&secret=${secret}`);
+    } = await axios.get(
+      `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${appId}&secret=${secret}`
+    );
     if (errmsg) {
       if (isInit) {
-        Logger.error(`获取微信access_token失败、错误信息：${errmsg}`, 'OfficialService');
+        Logger.error(
+          `获取微信access_token失败、错误信息：${errmsg}`,
+          'OfficialService'
+        );
       } else {
-        throw new HttpException('请配置正确的秘钥、当前秘钥检测不通过！', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          '请配置正确的秘钥、当前秘钥检测不通过！',
+          HttpStatus.BAD_REQUEST
+        );
       }
       return '';
     }
@@ -121,7 +164,9 @@ export class GlobalConfigService implements OnModuleInit {
       this.wechatJsapiTicket = '';
       return;
     }
-    const res = await axios.get(`https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=${accessToken}&type=jsapi`);
+    const res = await axios.get(
+      `https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=${accessToken}&type=jsapi`
+    );
     return res?.data?.ticket;
   }
 
@@ -186,18 +231,29 @@ export class GlobalConfigService implements OnModuleInit {
       'signInModel3Count',
       'signInModel4Count',
       'signInMjDrawToken',
+      // UI显示设置
       'appMenuHeaderTips',
       'appMenuHeaderBgUrl',
+      'homeTitle',
+      'homeSubTitle',
+      'functionSwitch',
+      'homeEndingSubTitle',
       'mjUseBaiduFy',
       'mjHideNotBlock',
       'mjHideWorkIn',
       'isVerifyEmail',
     ];
-    const data = await this.configEntity.find({ where: { configKey: In(allowKeys) } });
+    const data = await this.configEntity.find({
+      where: { configKey: In(allowKeys) },
+    });
     const { domain } = query;
     const domainDb = this.globalConfigs['domain'];
     if (domainDb !== domain) {
-      this.createOrUpdate({ configKey: `domain`, configVal: domain, status: 1 });
+      this.createOrUpdate({
+        configKey: `domain`,
+        configVal: domain,
+        status: 1,
+      });
       await this.initGetAllConfig();
     }
     const publicConfig = data.reduce((prev, cur) => {
@@ -205,7 +261,8 @@ export class GlobalConfigService implements OnModuleInit {
       return prev;
     }, {});
     /* 追加一些自定义的配置 */
-    const { wechatOfficialAppId, wechatOfficialAppSecret } = await this.getConfigs(['wechatOfficialAppId', 'wechatOfficialAppSecret']);
+    const { wechatOfficialAppId, wechatOfficialAppSecret } =
+      await this.getConfigs(['wechatOfficialAppId', 'wechatOfficialAppSecret']);
     const isUseWxLogin = !!(wechatOfficialAppId && wechatOfficialAppSecret);
 
     /* 查看是否有本机未同步数据 */
@@ -215,10 +272,14 @@ export class GlobalConfigService implements OnModuleInit {
   /* 查询所有gptkey */
   async queryGptKeys(req: Request) {
     const { role } = req.user;
-    const data = await this.configEntity.find({ where: { configKey: Like(`%${'chatGptKey'}%`) } });
+    const data = await this.configEntity.find({
+      where: { configKey: Like(`%${'chatGptKey'}%`) },
+    });
     if (role === 'super') return data;
     return data.map((t) => {
-      t.configVal = hideString(t.configVal);
+      if (typeof t.configVal === 'string') {
+        t.configVal = hideString(t.configVal);
+      }
       return t;
     });
   }
@@ -229,10 +290,16 @@ export class GlobalConfigService implements OnModuleInit {
     const keys = effectiveConfig.map((t) => t.configKey);
     for (const [index, value] of effectiveConfig.entries()) {
       const { configKey, configVal, status } = value;
-      await this.createOrUpdate({ configKey: `chatGptKey:${index + 1}`, configVal, status });
+      await this.createOrUpdate({
+        configKey: `chatGptKey:${index + 1}`,
+        configVal,
+        status,
+      });
     }
 
-    const likeChatGptKeys = await this.configEntity.find({ where: { configKey: Like(`%${'chatGptKey'}%`) } });
+    const likeChatGptKeys = await this.configEntity.find({
+      where: { configKey: Like(`%${'chatGptKey'}%`) },
+    });
     const allKey = likeChatGptKeys.map((t) => t.configKey);
 
     if (allKey.length > keys.length) {
@@ -249,7 +316,9 @@ export class GlobalConfigService implements OnModuleInit {
   async queryConfig(body: QueryConfigDto, req: Request) {
     const { role } = req.user;
     const { keys } = body;
-    const data = await this.configEntity.find({ where: { configKey: In(keys) } });
+    const data = await this.configEntity.find({
+      where: { configKey: In(keys) },
+    });
     /* 对演示账户的一些敏感配置修改处理 */
     if (role !== 'super') {
       // data = data.filter((t) => !t.configKey.includes('Key'));
@@ -269,12 +338,23 @@ export class GlobalConfigService implements OnModuleInit {
         ) {
           /* 比较长的隐藏内容自定义 */
           const longKeys = ['payWeChatPublicKey', 'payWeChatPrivateKey'];
-          if (longKeys.includes(item.configKey)) {
-            return (item.configVal = hideString(item.configVal, '隐私内容、非超级管理员无权查看'));
+          if (
+            longKeys.includes(item.configKey) &&
+            typeof item.configVal === 'string'
+          ) {
+            return (item.configVal = hideString(
+              item.configVal,
+              '隐私内容、非超级管理员无权查看'
+            ));
           }
           const whiteListKey = ['payEpayStatus', 'payHupiStatus', 'mjProxy'];
-          if (!whiteListKey.includes(item.configKey) && !item.configKey.includes('Status')) {
-            item.configVal = hideString(item.configVal);
+          if (
+            !whiteListKey.includes(item.configKey) &&
+            !item.configKey.includes('Status')
+          ) {
+            if (typeof item.configVal === 'string') {
+              item.configVal = hideString(item.configVal);
+            }
           }
         }
       });
@@ -303,11 +383,17 @@ export class GlobalConfigService implements OnModuleInit {
       await this.initGetAllConfig();
       const keys = settings.map((t) => t.configKey);
       /* 如果修改的包含了百度云文本检测选择、则需要触发更新重新获取token */
-      if (keys.includes('baiduTextApiKey') || keys.includes('baiduTextSecretKey')) {
+      if (
+        keys.includes('baiduTextApiKey') ||
+        keys.includes('baiduTextSecretKey')
+      ) {
         await this.initBaiduSensitive(false);
       }
       /* 如果变更微信配置 则需要手动刷新微信 access_token */
-      if (keys.includes('wechatOfficialAppId') || keys.includes('wechatOfficialAppSecret')) {
+      if (
+        keys.includes('wechatOfficialAppId') ||
+        keys.includes('wechatOfficialAppSecret')
+      ) {
         await this.getWechatAccessToken();
       }
 
@@ -324,9 +410,16 @@ export class GlobalConfigService implements OnModuleInit {
       const { configKey, configVal, status = 1 } = setting;
       const c = await this.configEntity.findOne({ where: { configKey } });
       if (c) {
-        const res = await this.configEntity.update({ configKey }, { configVal, status });
+        const res = await this.configEntity.update(
+          { configKey },
+          { configVal, status }
+        );
       } else {
-        const save = await this.configEntity.save({ configKey, configVal, status });
+        const save = await this.configEntity.save({
+          configKey,
+          configVal,
+          status,
+        });
       }
     } catch (error) {
       console.log('error: ', error);
@@ -351,8 +444,17 @@ export class GlobalConfigService implements OnModuleInit {
       payEpayStatus = 0,
       payWechatStatus = 0,
       payMpayStatus = 0,
-    } = await this.getConfigs(['payHupiStatus', 'payEpayStatus', 'payMpayStatus', 'payWechatStatus']);
-    if ([payHupiStatus, payEpayStatus, payWechatStatus, payMpayStatus].every((status) => status === 0)) {
+    } = await this.getConfigs([
+      'payHupiStatus',
+      'payEpayStatus',
+      'payMpayStatus',
+      'payWechatStatus',
+    ]);
+    if (
+      [payHupiStatus, payEpayStatus, payWechatStatus, payMpayStatus].every(
+        (status) => status === 0
+      )
+    ) {
       throw new HttpException('支付功能暂未开放!', HttpStatus.BAD_REQUEST);
     }
     if (Number(payWechatStatus) === 1) {
@@ -371,19 +473,26 @@ export class GlobalConfigService implements OnModuleInit {
 
   /* get auth info */
   async getAuthInfo() {
-    const { siteName, qqNumber, vxNumber, registerBaseUrl, domain } = await this.getConfigs([
-      'siteName',
-      'qqNumber',
-      'vxNumber',
-      'registerBaseUrl',
-      'domain',
-    ]);
+    const { siteName, qqNumber, vxNumber, registerBaseUrl, domain } =
+      await this.getConfigs([
+        'siteName',
+        'qqNumber',
+        'vxNumber',
+        'registerBaseUrl',
+        'domain',
+      ]);
     return { siteName, qqNumber, vxNumber, registerBaseUrl, domain };
   }
 
   /* get phone verify config */
   async getPhoneVerifyConfig() {
-    const { phoneRegisterStatus, aliPhoneAccessKeyId, aliPhoneAccessKeySecret, aliPhoneSignName, aliPhoneTemplateCode } = await this.getConfigs([
+    const {
+      phoneRegisterStatus,
+      aliPhoneAccessKeyId,
+      aliPhoneAccessKeySecret,
+      aliPhoneSignName,
+      aliPhoneTemplateCode,
+    } = await this.getConfigs([
       'phoneRegisterStatus',
       'aliPhoneAccessKeyId',
       'aliPhoneAccessKeySecret',
@@ -391,7 +500,10 @@ export class GlobalConfigService implements OnModuleInit {
       'aliPhoneTemplateCode',
     ]);
     if (Number(phoneRegisterStatus) !== 1) {
-      throw new HttpException('手机验证码功能暂未开放!', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '手机验证码功能暂未开放!',
+        HttpStatus.BAD_REQUEST
+      );
     }
     return {
       accessKeyId: aliPhoneAccessKeyId,
@@ -413,7 +525,12 @@ export class GlobalConfigService implements OnModuleInit {
       signInModel3Count = 0,
       signInModel4Count = 0,
       signInMjDrawToken = 0,
-    } = await this.getConfigs(['signInStatus', 'signInModel3Count', 'signInModel4Count', 'signInMjDrawToken']);
+    } = await this.getConfigs([
+      'signInStatus',
+      'signInModel3Count',
+      'signInModel4Count',
+      'signInMjDrawToken',
+    ]);
     if (Number(signInStatus) !== 1) {
       throw new HttpException('签到功能暂未开放!', HttpStatus.BAD_REQUEST);
     }
