@@ -13,8 +13,8 @@ export class ConfigEntity extends BaseEntity {
   @Column({ length: 255, comment: '配置名称', nullable: true })
   configKey: string;
 
-  @Column({ type: 'json', comment: '配置内容', nullable: true })
-  configVal: string | string[];
+  @Column({ comment: '配置内容', nullable: true })
+  configVal: string;
 
   @Column({
     default: 0,

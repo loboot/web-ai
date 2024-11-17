@@ -14,7 +14,7 @@ const formInline = reactive({
   appMenuHeaderBgUrl: null,
   homeTitle: null,
   homeSubTitle: null,
-  functionSwitch: [],
+  functionSwitch: '',
   homeEndingSubTitle: null,
 });
 
@@ -33,6 +33,8 @@ const rules = ref<FormRules>({
 
 const formRef = ref<FormInstance>();
 
+const functionSwitch = ref<string[]>();
+
 async function queryAllconfig() {
   const res = await apiConfig.queryConfig({
     keys: [
@@ -45,9 +47,16 @@ async function queryAllconfig() {
     ],
   });
 
-  Object.assign(formInline, res.data, {
-    functionSwitch: res.data.functionSwitch ?? [],
-  });
+  functionSwitch.value = res.data.functionSwitch
+    ? res.data.functionSwitch.split(',')
+    : [];
+  console.log(functionSwitch.value);
+
+  Object.assign(formInline, res.data);
+}
+
+function handleFunctionSwitchChange(val: string[]) {
+  formInline.functionSwitch = val.join(',');
 }
 
 function handlerUpdateConfig() {
@@ -196,8 +205,9 @@ onMounted(() => {
           <el-col :xs="24" :md="20" :lg="15" :xl="12">
             <el-form-item label="功能开关（可多选）" prop="maxRounds">
               <el-checkbox-group
-                v-model="formInline.functionSwitch"
+                v-model="functionSwitch"
                 style="width: 80%"
+                @change="handleFunctionSwitchChange"
               >
                 <el-checkbox label="AI对话"></el-checkbox>
                 <el-checkbox label="AI绘画"></el-checkbox>
