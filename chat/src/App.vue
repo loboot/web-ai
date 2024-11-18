@@ -82,6 +82,7 @@ onMounted(async () => {
 <template>
   <NConfigProvider
     class="h-full"
+    :class="{ 'bg-darkBg': $route.name === 'Home' }"
     :theme="theme"
     :theme-overrides="themeOverrides"
     :locale="language"

@@ -38,6 +38,7 @@ module.exports = {
       backgroundColor: {
         lightBg:
           'linear-gradient(145deg, #F7F9FA 0%, #D9E9F0 50%, #F7F9FA 100%)',
+        darkBg: 'rgb(20, 23, 24)',
       },
       colors: {
         primary: {
