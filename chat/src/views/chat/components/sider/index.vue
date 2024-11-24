@@ -166,12 +166,12 @@ watch(
       @update-collapsed="handleUpdateCollapsed"
     >
       <div
-        class="flex flex-col h-full bg-white dark:bg-gray-900"
+        class="flex flex-col h-full bg-white dark:bg-darkBg"
         :style="mobileSafeArea"
       >
         <main class="flex flex-col h-full flex-1">
           <div
-            class="flex items-center space-x-2 bg-white dark:bg-gray-900 h-14 px-3 border-b border-t-gray-100 dark:border-b dark:border-b-gray-800 text-lg"
+            class="flex items-center space-x-2 bg-white dark:bg-darkBg h-14 px-3 border-b border-t-gray-100 dark:border-b dark:border-b-gray-800 text-lg"
           >
             <!-- 搜索框 -->
             <div class="flex-1 relative">
@@ -187,7 +187,7 @@ watch(
                   v-model="groupKeyWord"
                   type="text"
                   placeholder="搜索历史对话"
-                  class="block h-full w-full border-0 py-0 pl-8 pr-0 text-gray-700 placeholder:text-gray-400 sm:text-sm dark:bg-gray-900 dark:text-gray-400"
+                  class="block h-full w-full border-0 py-0 pl-8 pr-0 text-gray-700 placeholder:text-gray-400 sm:text-sm dark:bg-darkBg dark:text-gray-400"
                   @blur="handleBlurInput"
                   @input="handleInputGroupSearch"
                 />
@@ -211,7 +211,7 @@ watch(
             <div class="flex justify-between my-3">
               <button
                 type="button"
-                class="inline-flex justify-center items-center rounded-md bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-500 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800"
+                class="inline-flex justify-center items-center rounded-md bg-white dark:bg-darkBg px-3 py-2 text-sm text-gray-500 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800"
                 @click="handleOpenRole"
               >
                 <SvgIcon
@@ -222,7 +222,7 @@ watch(
               </button>
               <button
                 type="button"
-                class="inline-flex justify-center items-center rounded-md bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-500 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800"
+                class="inline-flex justify-center items-center rounded-md bg-white dark:bg-darkBg px-3 py-2 text-sm text-gray-500 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800"
                 @click="handleDelGroup"
               >
                 <SvgIcon icon="mdi:notice-board" class="ml-0 mr-3 text-sm" />
@@ -235,7 +235,7 @@ watch(
             >
               <button
                 type="button"
-                class="inline-flex justify-center items-center rounded-md bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-500 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 w-full"
+                class="inline-flex justify-center items-center rounded-md bg-white dark:bg-darkBg px-3 py-2 text-sm text-gray-500 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 w-full"
               >
                 <span
                   >剩余：
@@ -250,7 +250,7 @@ watch(
             >
               <button
                 type="button"
-                class="inline-flex justify-center items-center rounded-md bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-500 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 w-full"
+                class="inline-flex justify-center items-center rounded-md bg-white dark:bg-darkBg px-3 py-2 text-sm text-gray-500 shadow-sm ring-1 ring-inset ring-gray-200 dark:ring-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 w-full"
               >
                 <span
                   >剩余：

@@ -1,16 +1,21 @@
-import type { App } from 'vue'
-import type { RouteRecordRaw } from 'vue-router'
-import { createRouter, createWebHistory } from 'vue-router'
-import { setupPageGuard } from './permission'
-import { Layout } from '@/layout'
+import type { App } from 'vue';
+import type { RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
+import { setupPageGuard } from './permission';
+import { Layout } from '@/layout';
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Layout',
     component: Layout,
-    redirect: '/chat',
+    redirect: '/home',
     children: [
+      {
+        path: '/home',
+        name: 'Home',
+        component: () => import('@/views/home/index.vue'),
+      },
       {
         path: '/market',
         name: 'Market',
@@ -61,12 +66,12 @@ const routes: RouteRecordRaw[] = [
         name: 'Share',
         component: () => import('@/views/share/index.vue'),
       },
-			{
+      {
         path: 'extend',
         name: 'Extend',
         component: () => import('@/views/extend/index.vue'),
       },
-			{
+      {
         path: 'inpaint',
         name: 'Inpaint',
         component: () => import('@/views/inpaint/index.vue'),
@@ -93,18 +98,18 @@ const routes: RouteRecordRaw[] = [
     name: 'notFound',
     redirect: '/404',
   },
-]
+];
 
 export const router = createRouter({
   history: createWebHistory(),
   // history: createWebHashHistory(),
   routes,
   scrollBehavior: () => ({ left: 0, top: 0 }),
-})
+});
 
-setupPageGuard(router)
+setupPageGuard(router);
 
 export async function setupRouter(app: App) {
-  app.use(router)
-  await router.isReady()
+  app.use(router);
+  await router.isReady();
 }

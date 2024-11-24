@@ -11,7 +11,7 @@ const homePage = computed(() => authStore.globalConfig.clientHomePath || '/');
 const { isMobile } = useBasicLayout();
 
 const getMobileClass = computed(() => {
-  if (isMobile.value) return ['py-2', 'w-8', 'ml-3'];
+  if (isMobile.value) return ['py-2', 'w-8'];
   return ['py-4', 'px-2', 'w-full'];
 });
 </script>
@@ -19,15 +19,7 @@ const getMobileClass = computed(() => {
 <template>
   <RouterLink :to="homePage">
     <img
-      v-if="!logoPath"
-      src="/logo.ico"
-      :class="getMobileClass"
-      class="cursor-pointer px-0 dark:border-[#ffffff17] border-#ebebeb-400"
-      alt=""
-    />
-    <img
-      v-if="logoPath"
-      :src="logoPath"
+      :src="logoPath ? logoPath : '/logo.ico'"
       :class="getMobileClass"
       class="cursor-pointer px-0 dark:border-[#ffffff17] border-#ebebeb-400"
       alt=""

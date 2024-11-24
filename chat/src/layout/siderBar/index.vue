@@ -30,15 +30,12 @@ const message = useMessage();
 const track = ref(null);
 appStore.setEnv();
 
-const avatar = computed(() => authStore.userInfo.avatar);
 const route = useRoute();
 const router = useRouter();
 const show = ref(false);
 const isLogin = computed(() => authStore.isLogin);
 const darkMode = computed(() => appStore.theme === 'dark');
 const env = computed(() => appStore.env);
-const logInIcon = shallowRef(PersonAddOutline);
-const logOutIcon = shallowRef(PersonRemoveOutline);
 
 async function queryMenu() {
   const res: any = await fetchQueryMenuAPI({ menuPlatform: 1 });
@@ -70,11 +67,6 @@ const signInStatus = computed(
   () => Number(authStore.globalConfig?.signInStatus) === 1
 );
 
-function toggleLogin() {
-  if (isLogin.value) authStore.logOut();
-  else authStore.setLoginDialog(true);
-}
-
 function checkMode() {
   const mode = darkMode.value ? 'light' : 'dark';
   appStore.setTheme(mode);
@@ -89,10 +81,6 @@ const { isMobile } = useBasicLayout();
 const activeRoutePath = computed(() => {
   return route.path;
 });
-
-function toPath(name: string) {
-  router.push({ name });
-}
 
 const mobileSafeArea = computed(() => {
   if (isMobile.value) {
@@ -174,14 +162,14 @@ watch(
 
 <template>
   <div
-    class="flex min-w-sm bg-gray-50 pb-2 dark:bg-gray-900 border-gray-100 dark:border-gray-800"
+    class="flex min-w-sm bg-gray-50 pb-2 dark:bg-darkBg border-gray-100 dark:border-gray-800"
     :class="getMobileLayoutClass"
     :style="mobileSafeArea"
   >
     <macTablebar v-if="env === 'electron'" />
-    <div class="px-2 w-full ele-drag">
+    <!-- <div class="px-2 w-full ele-drag">
       <Logo />
-    </div>
+    </div> -->
     <main
       ref="track"
       :class="[
@@ -280,33 +268,6 @@ watch(
         </template>
         主题切换
       </NTooltip>
-
-      <NTooltip v-if="isLogin" trigger="hover" placement="right">
-        <template #trigger>
-          <NAvatar
-            :size="42"
-            :src="avatar"
-            round
-            bordered
-            :fallback-src="defaultAvatar"
-            class="cursor-pointer"
-            @click="toPath('UserCenter')"
-          />
-        </template>
-        个人中心
-      </NTooltip>
-
-      <HoverButton
-        v-if="!isLogin"
-        tooltip="登录账户"
-        :placement="isMobile ? 'bottom' : 'right'"
-        :class="isMobile ? 'mb-0' : 'mb-5'"
-        @click="toggleLogin"
-      >
-        <NIcon size="20" color="#555">
-          <component :is="logInIcon" />
-        </NIcon>
-      </HoverButton>
     </div>
   </div>
   <Setting v-if="show" v-model:visible="show" />
