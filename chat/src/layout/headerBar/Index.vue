@@ -5,10 +5,9 @@ import { computed, ref, shallowRef } from 'vue';
 import { useAuthStore, useGlobalStoreWithOut } from '@/store';
 import Logo from '../siderBar/Logo.vue';
 import defaultAvatar from '@/assets/avatar.png';
-import { NAvatar, NIcon, NTooltip } from 'naive-ui';
+import { NAvatar, NIcon, NTooltip, NButton } from 'naive-ui';
 import { useBasicLayout } from '@/hooks/useBasicLayout';
 import { PersonAddOutline, PersonRemoveOutline } from '@vicons/ionicons5';
-import { HoverButton } from '@/components/common';
 import NoticeDialog from '../components/NoticeDialog.vue';
 
 type MenuItem = {
@@ -18,16 +17,55 @@ type MenuItem = {
 };
 
 const siteName = computed(() => authStore.globalConfig.siteName ?? 'BingoAI');
-const menuList = ref<MenuItem[]>([
-  {
-    name: '新人必读',
-    onClick: () => useGlobalStore.updateNoticeDialog(true),
-  },
-  {
-    name: '充值',
-    routeName: 'Pay',
-  },
-]);
+const menuList = computed(() => {
+  const defaultArr = [
+    {
+      name: '新人必读',
+      onClick: () => useGlobalStore.updateNoticeDialog(true),
+    },
+    {
+      name: '充值',
+      routeName: 'Pay',
+    },
+  ];
+
+  const targetArr: MenuItem[] = [];
+  if (isHome.value) {
+    type MenuItemType = 'AI对话' | 'AI音乐' | 'AI绘画' | 'AI视频';
+    const menus = authStore.globalConfig.functionSwitch;
+
+    const menusOptions: (Omit<MenuItem, 'name'> & {
+      name: MenuItemType | (string & {});
+    })[] = [
+      {
+        name: 'AI对话',
+        routeName: 'Chat',
+      },
+      {
+        name: 'AI音乐',
+      },
+      {
+        name: 'AI绘画',
+        routeName: 'Midjourney',
+      },
+      {
+        name: 'AI视频',
+      },
+    ];
+
+    targetArr.push(
+      ...[
+        ...menusOptions.filter((v) => menus.includes(v.name)),
+        {
+          name: '客服',
+        },
+      ]
+    );
+  } else {
+    targetArr.push(...defaultArr);
+  }
+  return targetArr;
+});
 
 const router = useRouter();
 function handleMenuClick(menu: MenuItem) {
@@ -76,26 +114,30 @@ const isHome = computed(() => route.name === 'Home');
         <Logo />
       </div>
       <div
-        class="font-semibold text-2xl text-center border-[#25272c] dark:border-white"
-        :class="[
-          isHome ? 'border-dashed ml-20 w-[141px]  h-9 leading-9 border ' : '',
-        ]"
+        class="font-semibold text-2xl text-center"
+        :class="[isHome ? ' ml-20 w-[141px]  h-9 leading-9 ' : '']"
       >
         {{ siteName }}
       </div>
     </div>
 
-    <div class="flex items-center gap-x-4" :class="isMobile ? 'mr-4' : 'mr-16'">
-      <template v-if="isLogin">
-        <div
-          v-for="menu in menuList"
-          :key="menu.name"
-          @click="handleMenuClick(menu)"
-          class="text-lg font-semibold cursor-pointer"
-        >
-          {{ menu.name }}
-        </div>
+    <div
+      class="flex items-center"
+      :class="[
+        isMobile ? 'mr-4' : 'mr-16',
+        isMobile ? 'gap-x-4' : isHome ? 'gap-x-[50px]' : 'gap-x-[36px]',
+      ]"
+    >
+      <div
+        v-for="menu in menuList"
+        :key="menu.name"
+        @click="handleMenuClick(menu)"
+        class="text-lg font-semibold cursor-pointer"
+      >
+        {{ menu.name }}
+      </div>
 
+      <template v-if="isLogin">
         <NTooltip trigger="hover" placement="bottom">
           <template #trigger>
             <div
@@ -119,11 +161,17 @@ const isHome = computed(() => route.name === 'Home');
         </NTooltip>
       </template>
       <template v-else>
-        <HoverButton tooltip="登录账户" placement="bottom" @click="toggleLogin">
+        <!-- <HoverButton tooltip="登录账户" placement="bottom" @click="toggleLogin">
           <NIcon size="32" color="#555">
             <component :is="logInIcon" />
           </NIcon>
-        </HoverButton>
+        </HoverButton> -->
+        <button
+          class="w-[125px] h-[48px] border border-[rgba(255,255,255,0.4)] bg-gradient-to-b from-[rgb(62,144,240)] to-[rgb(27,110,207)] flex items-center justify-center rounded-[50px] color-[rgb(254,254,254)] text-[17px] font-[600]"
+          @click="toggleLogin"
+        >
+          注册/登录
+        </button>
       </template>
     </div>
   </header>

@@ -88,6 +88,9 @@ export interface GlobalConfig {
 	mjUseBaiduFy: string
 	mjHideWorkIn: string
 	isVerifyEmail: string
+	functionSwitch: string
+	homeTitle: string
+	homeSubTitle: string
 }
 export interface AuthState {
   token: string | undefined
