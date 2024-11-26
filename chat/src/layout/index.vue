@@ -111,6 +111,7 @@ const getMobileLayoutClass = computed(() => {
         <SiderBar v-if="!isMobile" />
         <NLayoutContent
           class="h-full"
+          content-class="bg-darkBg"
           style="flex: 1"
           :class="getMobileMainClass"
         >

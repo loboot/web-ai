@@ -32,7 +32,7 @@ const menuList = computed(() => {
   const targetArr: MenuItem[] = [];
   if (isHome.value) {
     type MenuItemType = 'AI对话' | 'AI音乐' | 'AI绘画' | 'AI视频';
-    const menus = authStore.globalConfig.functionSwitch;
+    const menus = authStore.globalConfig.functionSwitch ?? '';
 
     const menusOptions: (Omit<MenuItem, 'name'> & {
       name: MenuItemType | (string & {});
@@ -69,6 +69,10 @@ const menuList = computed(() => {
 
 const router = useRouter();
 function handleMenuClick(menu: MenuItem) {
+  if (isHome.value && !isLogin.value) {
+    authStore.setLoginDialog(true);
+    return;
+  }
   if (menu.onClick) {
     menu.onClick();
   } else if (menu.routeName) {
@@ -137,7 +141,7 @@ const isHome = computed(() => route.name === 'Home');
         {{ menu.name }}
       </div>
 
-      <template v-if="isLogin">
+      <template v-if="!isHome">
         <NTooltip trigger="hover" placement="bottom">
           <template #trigger>
             <div
@@ -167,10 +171,10 @@ const isHome = computed(() => route.name === 'Home');
           </NIcon>
         </HoverButton> -->
         <button
-          class="w-[125px] h-[48px] border border-[rgba(255,255,255,0.4)] bg-gradient-to-b from-[rgb(62,144,240)] to-[rgb(27,110,207)] flex items-center justify-center rounded-[50px] color-[rgb(254,254,254)] text-[17px] font-[600]"
+          class="py-2 px-6 border border-[rgba(255,255,255,0.4)] bg-gradient-to-b from-[rgb(62,144,240)] to-[rgb(27,110,207)] flex items-center justify-center rounded-[50px] color-[rgb(254,254,254)] text-[17px] font-[600]"
           @click="toggleLogin"
         >
-          注册/登录
+          {{ userInfo.username || '注册/登录' }}
         </button>
       </template>
     </div>

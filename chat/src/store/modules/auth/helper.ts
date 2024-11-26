@@ -91,6 +91,7 @@ export interface GlobalConfig {
 	functionSwitch: string
 	homeTitle: string
 	homeSubTitle: string
+	homeEndingSubTitle: string
 }
 export interface AuthState {
   token: string | undefined
