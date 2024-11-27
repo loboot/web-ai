@@ -4,7 +4,7 @@ import { NLayoutContent, useMessage } from 'naive-ui';
 import { useRoute, useRouter } from 'vue-router';
 import SiderBar from './siderBar/index.vue';
 import FooterBar from './footerBar/index.vue';
-import HeaderBar from './HeaderBar/index.vue';
+import HeaderBar from './headerBar/index.vue';
 import Login from './components/Login.vue';
 import PayDialog from './components/PayDialog.vue';
 import GoodsDialog from './components/GoodsDialog.vue';
