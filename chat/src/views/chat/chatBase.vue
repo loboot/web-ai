@@ -696,15 +696,15 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="h-full flex flex-col bg-white dark:bg-gray-900 pb-2">
-    <HeaderComponent
+  <div class="h-full flex flex-col bg-white dark:bg-[rgb(35,38,39)] pb-2">
+    <!-- <HeaderComponent
       :using-context="usingContext"
       :dark-mode="darkMode"
       @export="handleExport"
       @toggle-using-context="toggleUsingContext"
       @clear="handleClear"
       @scroll-btn="handleScrollBtm"
-    />
+    /> -->
     <main class="flex-1 overflow-hidden">
       <div
         id="scrollRef"
@@ -713,17 +713,17 @@ onUnmounted(() => {
       >
         <div
           id="image-wrapper"
-          class="w-full m-auto dark:bg-gray-900 h-full"
+          class="w-full m-auto h-full"
           :class="[isMobile ? 'p-2' : 'p-12 w-full']"
         >
-          <template v-if="!dataSources.length && !activeAppId">
+          <!-- <template v-if="!dataSources.length && !activeAppId">
             <div
               class="flex justify-center items-center text-center"
               :class="[isMobile ? 'h-full' : 'h-4/5 ']"
             >
               <AiBotComponent @prompt="handlePrompt" />
             </div>
-          </template>
+          </template> -->
           <template v-if="!dataSources.length && activeAppId">
             <div class="flex justify-center items-center">
               <AppTips :app-info="appDetail" @prompt="handlePrompt" />
@@ -745,13 +745,13 @@ onUnmounted(() => {
                 @delete="handleDelete(item)"
               />
               <div class="sticky bottom-0 left-0 flex justify-center mb-1 p-1">
-                <Button
+                <button
                   v-if="!isAtBottom"
                   class="bg-white rounded-full p-1 ring-1 text-gray-700 ring-gray-200 dark:ring-gray-600 dark:bg-gray-800 dark:text-gray-500"
                   @click="handleScrollBtm"
                 >
                   <ArrowDownIcon class="h-5 w-5 font-bold" />
-                </Button>
+                </button>
               </div>
             </div>
           </template>
@@ -809,7 +809,7 @@ onUnmounted(() => {
       </div> -->
 
       <div
-        class="flex justify-center flex-col m-auto block rounded-lg shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-primary-600 py-2 text-gray-900 placeholder:text-gray-400 border-0 bg-transparent sm:text-sm sm:leading-6 resize-none dark:focus:ring-primary-800 dark:ring-inset dark:ring-primary-800 dark:bg-gray-800"
+        class="flex justify-center flex-col m-auto rounded-lg shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-primary-600 py-2 text-gray-900 placeholder:text-gray-400 border-0 bg-transparent sm:text-sm sm:leading-6 resize-none dark:focus:ring-[rgb(51,52,52)] dark:ring-inset dark:ring-[rgb(51,52,52)] dark:bg-[rgb(51,52,52)]"
         :class="[
           isMobile ? 'px-1  pb-1 mx-2' : 'px-2  pb-2 pt-1 mx-10 max-w-full',
         ]"
@@ -891,12 +891,12 @@ onUnmounted(() => {
           <button
             v-if="!isStreamIn"
             type="button"
-            class="rounded-md text-sm font-semibold text-white dark:hover:text-gray-200 shadow-sm p-2 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 hover:bg-primary-500 dark:bg-primary-900 hover:dark:border-primary-500 dark:hover:bg-primary-800 dark:text-gray-400"
+            class="rounded-md py-1 px-[18px] text-sm font-semibold text-white dark:hover:text-gray-200 shadow-sm cursor-pointer p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 hover:bg-primary-500 dark:bg-[rgb(17,24,39)] hover:dark:border-[rgba(17,24,39,0.7)] dark:hover:bg-[rgba(17,24,39,0.5)] dark:text-gray-400"
             :class="{ 'bg-primary-600': prompt, 'bg-primary-200': !prompt }"
             :disabled="buttonDisabled"
             @click="handleSubmit()"
           >
-            <PaperAirplaneIcon class="h-4 w-4" />
+            发送
           </button>
 
           <!-- 当在加载状态时显示这个按钮，用于停止 -->

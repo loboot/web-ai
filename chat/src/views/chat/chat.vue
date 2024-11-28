@@ -1,4 +1,4 @@
-<script setup lang='ts'>
+<script setup lang="ts">
 import { computed, watch, onMounted } from 'vue';
 import { NLayout } from 'naive-ui';
 import Sider from './components/sider/index.vue';
@@ -53,7 +53,11 @@ onMounted(() => {
 <template>
   <div class="h-full bg-white dark:bg-gray-900 transition-all">
     <div class="h-full overflow-hidden" :class="getMobileClass">
-      <NLayout class="z-40 transition dark:bg-darkBg" :class="getContainerClass" has-sider>
+      <NLayout
+        class="z-40 transition dark:bg-darkBg"
+        :class="getContainerClass"
+        has-sider
+      >
         <Sider class="h-full" />
         <!-- <NLayoutContent class="h-full"> -->
         <div class="w-full flex-1">
