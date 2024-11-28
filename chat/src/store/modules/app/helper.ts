@@ -33,7 +33,7 @@ export interface AppState {
 }
 
 export function defaultSetting(): AppState {
-  return { siderCollapsed: false, theme: 'auto', language: 'zh-CN', env: detectEnvironment() }
+  return { siderCollapsed: false, theme: 'dark', language: 'zh-CN', env: detectEnvironment() }
 }
 
 export function getLocalSetting(): AppState {
