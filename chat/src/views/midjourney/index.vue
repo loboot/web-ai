@@ -1030,7 +1030,9 @@ onMounted(() => {
       <div
         class="flex-shrink-0 overflow-hidden text-center text-xs bg-[rgb(16,23,37)] px-2 py-3 rounded-[12px] text-white space-y-2"
       >
-        <div class="w-[30px] h-[30px] rounded-full mx-auto">logo占位</div>
+        <div class="rounded-full mx-auto -mb-2">
+          <Logo image-class="w-[30px] h-[30px] mx-auto" not-jump></Logo>
+        </div>
         <div class="text-base font-[500]">欢迎体验</div>
         <div class="text-base font-[500]">Midjourney中文版</div>
         <div>bingaiart.com</div>
