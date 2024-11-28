@@ -122,7 +122,7 @@ const isHome = computed(() => route.name === 'Home');
       </div>
       <div
         class="font-semibold text-2xl text-center"
-        :class="[isHome ? ' ml-20 w-[141px]  h-9 leading-9 ' : '']"
+        :class="[isHome ? ' ml-20 w-[180px] line-clamp-1  h-9 leading-9 ' : '']"
       >
         {{ siteName }}
       </div>
