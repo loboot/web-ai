@@ -16,6 +16,8 @@ import Start from '@/assets/home/start.png';
 import Stop from '@/assets/home/stop.png';
 import VideoBg from '@/assets/home/video-bg.png';
 import VideoImage from '@/assets/home/video-image.png';
+import BannerLeft from '@/assets/home/banner-left.png'
+import BannerRight from '@/assets/home/banner-right.png'
 import { useRouter } from 'vue-router';
 
 const $router = useRouter();
@@ -139,19 +141,22 @@ const footerMenus = reactive<
     ],
   },
 ]);
+
+function checkShow(name: string) {
+  return ~menuList.value.findIndex(v => v.name === name)
+}
 </script>
 <template>
   <div>
-    <div class="relative overflow-hidden min-w-[694px] w-max mx-auto">
+    <div class="relative min-w-[694px] w-max mx-auto">
       <img
         class="absolute w-full h-full object-cover rounded-[16px]"
         :src="TopBannerBg"
-        style="box-shadow: 0 0 20px 20px rgba(16, 16, 20, 0.8)"
         alt=""
       />
 
       <div class="relative z-20 pt-[87px] pb-[78px] text-center">
-        <div class="text-center">
+        <div class="text-center relative" v-show="topTitle.length">
           <div
             class="font-[700] text-[64px] text-white"
             v-for="text in topTitle"
@@ -159,6 +164,8 @@ const footerMenus = reactive<
           >
             {{ text }}
           </div>
+          <img class=" absolute -left-[40px] top-[40px]" :src="BannerLeft" alt="">
+          <img class=" absolute -right-[100px] -top-[10px]" :src="BannerRight" alt="">
         </div>
         <div class="my-6 text-[18px] font-[600] text-[rgb(108,114,117)]">
           {{ globalConfig.homeSubTitle }}
@@ -190,7 +197,8 @@ const footerMenus = reactive<
         <span class="text-white text-[24px] font-[700]">{{ item.name }}</span>
       </div>
     </div>
-    <div class="text-white font-[700] text-[48px] mb-6 text-center">
+    <template v-if="checkShow('AI对话')">
+      <div class="text-white font-[700] text-[48px] mb-6 text-center">
       AI 智能对话
     </div>
     <div
@@ -210,6 +218,8 @@ const footerMenus = reactive<
         <img :src="Card2" alt="" />
       </div>
     </div>
+    </template>
+   <template v-if="checkShow('AI绘画')">
     <div class="text-white font-[700] text-[48px] text-center mb-[41px]">
       <div>我们正在构建初学者</div>
       <div>最容易上手的 AI 绘画</div>
@@ -223,7 +233,9 @@ const footerMenus = reactive<
         ></div>
       </div>
     </div>
-    <div class="flex items-center justify-center gap-[202px] mb-[251px]">
+   </template>
+    <template v-if="checkShow('AI音乐')">
+      <div class="flex items-center justify-center gap-[202px] mb-[251px]">
       <div class="space-y-[13px]">
         <div
           class="flex items-center justify-center w-[667px] rounded-[24px] bg-gradient-to-b from-[rgb(32,35,36)] to-[rgb(20,23,24)] border border-[rgba(255,255,255,0.1)]"
@@ -260,7 +272,8 @@ const footerMenus = reactive<
         </div>
       </div>
     </div>
-    <div class="flex items-center justify-center gap-[100px]">
+    </template>
+    <div class="flex items-center justify-center gap-[100px]" v-if="checkShow('AI视频')">
       <div class="text-white space-y-[24px]">
         <div class="text-[48px] font-[700]">
           <div>{{ globalConfig.siteName || 'BingoAI' }}</div>
