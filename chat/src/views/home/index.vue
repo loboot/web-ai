@@ -299,7 +299,7 @@ function checkShow(name: string) {
           <div>开启你的 AI 探索之旅</div>
         </div>
         <div class="text-[17px]">{{ globalConfig.homeEndingSubTitle }}</div>
-        <div class="flex items-center justify-center gap-x-[10px]">
+        <div class="flex items-center gap-x-[10px]">
           <button
             class="btn-box border border-[rgba(255,255,255,0.4)] bg-gradient-to-b from-[rgb(62,144,240)] to-[rgb(27,110,207)]"
           >

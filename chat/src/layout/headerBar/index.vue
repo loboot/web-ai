@@ -174,7 +174,7 @@ const isHome = computed(() => route.name === 'Home');
           </NIcon>
         </HoverButton> -->
         <button
-          class="py-2 px-6 border border-[rgba(255,255,255,0.1)] bg-gradient-to-b from-[rgb(62,144,240)] to-[rgb(27,110,207)] flex items-center justify-center rounded-[50px] color-[rgb(254,254,254)] text-[17px] font-[600]"
+          class="py-2 px-6 border border-[rgba(255,255,255,0.1)] bg-gradient-to-b from-[rgb(62,144,240)] to-[rgb(27,110,207)] flex items-center justify-center rounded-[50px] color-[rgb(254,254,254)] text-[17px] font-[600] leading-7"
           @click="toggleLogin"
         >
           {{ userInfo.username || '注册/登录' }}
