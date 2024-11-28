@@ -162,7 +162,7 @@ watch(
 
 <template>
   <div
-    class="flex min-w-sm bg-gray-50 pb-2 dark:bg-darkBg border-gray-100 dark:border-gray-800"
+    class="flex min-w-[80px] bg-gray-50 pb-2 dark:bg-darkBg border-gray-100 dark:border-gray-800"
     :class="getMobileLayoutClass"
     :style="mobileSafeArea"
   >
@@ -178,7 +178,7 @@ watch(
       ]"
     >
       <NScrollbar :size="1">
-        <div class="flex h-full flex-col items-center space-y-3">
+        <div class="flex h-full flex-col items-center space-y-[34px]">
           <div
             v-for="item in menuList"
             :key="item.menuName"
@@ -187,25 +187,18 @@ watch(
             @click="handleClickMenu(item)"
           >
             <div
-              class="relative flex items-center justify-center h-10 w-10 rounded-md cursor-pointer duration-300"
+              class="relative flex flex-col items-center justify-center rounded-md cursor-pointer duration-300"
               :class="[
                 // 根据活动状态切换样式
                 isActive(item)
-                  ? [
-                      'bg-white',
-                      'text-primary-600',
-                      'dark:bg-gray-800',
-                      'dark:text-white',
-                    ]
-                  : ['bg-gray-50', 'dark:bg-gray-900', 'dark:text-gray-400'],
+                  ? ['text-primary-600', 'dark:text-white']
+                  : ['dark:text-[rgb(113,118,125)]'],
                 // 通用悬停效果
-                'hover:bg-white',
-                'hover:text-primary-600',
-                'dark:hover:bg-gray-800',
-                'dark:hover:text-white',
+                'hover:!text-white',
               ]"
             >
-              <SvgIcon :icon="item.menuIcon" class="text-2xl" />
+              <SvgIcon :icon="item.menuIcon" class="text-[28px]" />
+              <div class="mt-2">{{ item.menuTipText }}</div>
             </div>
 
             <!-- <div
@@ -238,7 +231,7 @@ watch(
       </NScrollbar>
     </main>
 
-    <div class="flex flex-col justify-between items-center">
+    <!-- <div class="flex flex-col justify-between items-center">
       <NTooltip
         v-if="!isMobile && signInStatus"
         trigger="hover"
@@ -268,7 +261,7 @@ watch(
         </template>
         主题切换
       </NTooltip>
-    </div>
+    </div> -->
   </div>
   <Setting v-if="show" v-model:visible="show" />
 </template>

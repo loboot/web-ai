@@ -602,7 +602,7 @@ onMounted(() => {
             class="mt-2 flex justify-between items-center space-x-2 text-xs"
           >
             <span class="block text-sm item-name">风格</span>
-            <span class="flex-1">
+            <span class="flex-1 flex justify-end">
               <!-- <NSelect
                 v-model:value="style"
                 size="small"
@@ -1044,7 +1044,10 @@ onMounted(() => {
         <div>影，纯黑背景。</div>
         <div>错误示范：</div>
         <div>把这个汽车变成宇宙飞船。</div>
-        <div>Mid journey｜ BingoAI ｜ Aimple to use。</div>
+        <div>
+          Mid journey｜ {{ authStore.globalConfig.siteName || 'BingoAI' }} ｜
+          Aimple to use。
+        </div>
       </div>
     </div>
   </div>

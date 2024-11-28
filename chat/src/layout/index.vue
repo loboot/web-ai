@@ -108,7 +108,7 @@ const getMobileLayoutClass = computed(() => {
         class="z-40 transition flex h-full relative"
         :class="getMobileLayoutClass"
       >
-        <SiderBar v-if="!isMobile" />
+        <SiderBar v-if="!isMobile && $route.name != 'Home'" />
         <NLayoutContent
           class="h-full"
           content-class="dark:bg-darkBg"
