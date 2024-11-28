@@ -1035,7 +1035,6 @@ onMounted(() => {
         </div>
         <div class="text-base font-[500]">欢迎体验</div>
         <div class="text-base font-[500]">Midjourney中文版</div>
-        <div>bingaiart.com</div>
         <div>普通模式1积分，快速模式4积 「</div>
         <div>严禁生产不良内容，违规将封号</div>
         <div>- - -</div>
