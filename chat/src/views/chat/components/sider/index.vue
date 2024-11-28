@@ -205,7 +205,7 @@ watch(
           <div class="flex-1 min-h-0 overflow-hidden">
             <List />
           </div>
-          <div
+          <!-- <div
             class="p-4 pb-1 pt-1 border-t border-t-gray-100 dark:border-t-gray-800 flex flex-col"
           >
             <div class="flex justify-between my-3">
@@ -258,7 +258,7 @@ watch(
                 >
               </button>
             </div>
-          </div>
+          </div> -->
           <div
             v-if="isSetBeian"
             class="w-full flex justify-center items-center py-2 text-xs text-gray-500"

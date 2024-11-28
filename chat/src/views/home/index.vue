@@ -170,10 +170,10 @@ function checkShow(name: string) {
         <div class="my-6 text-[18px] font-[600] text-[rgb(108,114,117)]">
           {{ globalConfig.homeSubTitle }}
         </div>
-        <div class="flex items-center justify-center gap-x-[10px]">
+        <div class="flex items-center justify-center gap-x-[10px]" v-if="menuList.length">
           <button
             class="btn-box border border-[rgba(255,255,255,0.4)] bg-gradient-to-b from-[rgb(62,144,240)] to-[rgb(27,110,207)]"
-            @click="handleMenuClick({ name: '', routeName: 'Chat' })"
+            @click="handleMenuClick(menuList[0])"
           >
             开始使用
           </button>
