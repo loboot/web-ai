@@ -1,5 +1,12 @@
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import {
+  computed,
+  CSSProperties,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from 'vue';
 import {
   NButton,
   NInput,
@@ -11,14 +18,16 @@ import {
   NTooltip,
   useDialog,
   useMessage,
+  NRadioGroup,
+  NRadioButton,
 } from 'naive-ui';
 import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
 import cardItem from './components/cardItem.vue';
 import { useBasicLayout } from '@/hooks/useBasicLayout';
 import { SvgIcon } from '@/components/common';
-import nijiImg from '@/assets/images/niji.png';
-import mjImg from '@/assets/images/mj.png';
+import nijiImg from '@/assets/draw/niji-icon.png';
+import mjImg from '@/assets/draw/mj-icon.png';
 import {
   fetchMidjourneyDrawList,
   fetchMidjourneyFullPrompt,
@@ -33,6 +42,8 @@ import {
 import Loading from '@/components/base/Loading.vue';
 import { useAppStore, useAuthStore } from '@/store';
 import marketImg from '@/assets/market.png';
+import CustomProgress from './components/custom-progress.vue';
+import CustomSwicth from './components/custom-swicth.vue';
 
 interface PromptItem {
   status: boolean;
@@ -89,7 +100,7 @@ const submitDisabled = computed(() => {
   );
 });
 
-const dataBase64 = ref('');
+const dataBase64 = ref<string | null>('');
 let curFile: File | null;
 
 watch(isLogin, async (newVal, oldVal) => {
@@ -99,18 +110,18 @@ watch(isLogin, async (newVal, oldVal) => {
 const isMore = computed(() => totalCount.value > size.value);
 
 const sizeList = [
-  { aspect: '1:1', width: '100%', height: '100%' },
-  { aspect: '4:3', width: '100%', height: '75%' },
-  { aspect: '3:4', width: '75%', height: '100%' },
-  { aspect: '16:9', width: '100%', height: '57%' },
-  { aspect: '9:16', width: '57%', height: '100%' },
+  { aspect: '1:1', width: '16px', height: '16px', name: '头像' },
+  { aspect: '4:3', width: '16px', height: '12px', name: '公众号配图' },
+  { aspect: '3:4', width: '12px', height: '16px', name: '社交媒体' },
+  { aspect: '16:9', width: '16px', height: '9px', name: '电脑壁纸' },
+  { aspect: '9:16', width: '9px', height: '16px', name: '海报图' },
 ];
-
+// 风格
 const styleOptions = [
-  { label: '默认风格', value: 0 },
-  { label: '表现力风格', value: 'expressive' },
-  { label: '可爱风格', value: 'cute' },
-  { label: '景观风格', value: 'scenic' },
+  { label: '默认', value: 0 },
+  { label: '表现力', value: 'expressive' },
+  { label: '可爱', value: 'cute' },
+  { label: '景观', value: 'scenic' },
 ];
 
 const qualityOptions = [
@@ -141,8 +152,8 @@ const versionOptions = computed(() => {
 });
 
 const modelList = [
-  { name: 'MJ', img: mjImg, val: 'mj' },
-  { name: 'NIJI', img: nijiImg, val: 'niji' },
+  { name: 'Midjourney', img: mjImg, val: 'MJ', desc: '真实风格' },
+  { name: 'NIJI', img: nijiImg, val: 'NIJI', desc: '动漫风格' },
 ];
 
 const activeAspect = computed(() => (item: string) => {
@@ -428,6 +439,28 @@ async function refreshUserInfo() {
   }
 }
 
+const railStyle = ({
+  focused,
+  checked,
+}: {
+  focused: boolean;
+  checked: boolean;
+}) => {
+  const style: CSSProperties = {};
+  if (checked) {
+    style.background = '#d03050';
+    if (focused) {
+      style.boxShadow = '0 0 0 2px #d0305040';
+    }
+  } else {
+    style.background = '#2080f0';
+    if (focused) {
+      style.boxShadow = '0 0 0 2px #2080f040';
+    }
+  }
+  return style;
+};
+
 onMounted(() => {
   queryDrawResult();
   drawLike();
@@ -448,59 +481,17 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="grow flex h-screen flex-col lg:pt-0">
+  <div class="grow flex h-full flex-col lg:pt-0 wrapper-box">
     <div class="flex grow flex-col sm:flex-row h-full">
       <div
-        class="p-4 sm:pt-6 bg-[#f8f8f8] p-4 dark:bg-[#18181c] overflow-y-auto w-full sm:w-[20rem] shrink-0 border-r-2 border-[#ffffff17]"
+        class="p-4 sm:pt-6 bg-[#f8f8f8] dark:bg-[#18181c] overflow-y-auto w-full sm:w-[20rem] shrink-0 border-r-2 border-[#ffffff17]"
       >
         <h3 class="text-lg sm:text-2xl font-bold leading-6" v-if="isMobile">
           专业绘图
         </h3>
-        <div class="mt-4 text-sm flex items-center">
-          <div class="text-sm mr-1">图片尺寸</div>
-
-          <div data-tool-target="tooltip-default">
-            <NTooltip placement="right-end" trigger="hover">
-              <template #trigger>
-                <SvgIcon icon="ri:error-warning-line" class="text-base" />
-              </template>
-              参数释义：生成图片尺寸比例
-            </NTooltip>
-          </div>
-        </div>
-        <div
-          class="flex mt-2 py-1 pb-2 space-x-1 overflow-x-auto justify-between scrollbar-none"
-        >
-          <button
-            v-for="(item, index) in sizeList"
-            :key="index"
-            class="flex-1 p-[2px] rounded-md"
-            @click="aspect = item.aspect"
-          >
-            <div
-              class="border-2 border-gray-300 box-borde rounded-md dark:bg-black flex flex-col items-center"
-              :class="[
-                activeAspect(item.aspect) ? 'aspect-active' : '',
-                isMobile ? 'py-3' : 'py-2',
-              ]"
-            >
-              <div class="flex items-center justify-center w-6 h-6">
-                <div
-                  class="border-gray-300 rounded border-2"
-                  :class="[activeAspect(item.aspect) ? 'aspect-active' : '']"
-                  :style="{ width: item.width, height: item.height }"
-                />
-              </div>
-              <div class="mt-2 text-center text-xs leading-none text-current">
-                {{ item.aspect }}
-              </div>
-            </div>
-          </button>
-        </div>
-
         <!-- 模型 -->
-        <div class="mt-4 text-sm flex items-center">
-          <div class="mr-1">模型选择</div>
+        <div class="text-sm flex items-center">
+          <div class="mr-1 item-name">模型选择</div>
           <div data-tool-target="tooltip-default">
             <NTooltip placement="right-end" trigger="hover">
               <template #trigger>
@@ -517,55 +508,117 @@ onMounted(() => {
           <li
             v-for="(item, index) in modelList"
             :key="index"
-            class="flex border-[3px] border-transparent justify-center items-center rounded-md m-1 m-bg-gradient"
-            :class="[activeModel(item.name) ? 'model-active' : '']"
-            @click="setModel(item.name)"
+            class="flex flex-col border-[3px] border-transparent justify-center rounded-md m-1 m-bg-gradient"
+            @click="setModel(item.val)"
           >
             <button
-              class="relative w-full h-full dark:bg-black rounded"
+              class="relative w-[120px] h-[120px] rounded-[12px] overflow-hidden dark:bg-black"
+              :class="[activeModel(item.val) ? 'model-active' : '']"
+              style="box-shadow: 0px 0px 2px 0px rgb(237, 240, 255)"
               type="button"
             >
               <div
-                class="absolute w-full h-full flex justify-center items-center"
+                class="absolute bottom-0 left-0 bg-[rgba(0,0,0,0.6)] w-full h-[30px] flex justify-center items-center"
               >
-                <div
-                  class="text-2xl text-white font-bold absolute left-5 top-1"
-                >
+                <div class="text-[12px] text-white">
                   {{ item.name }}
                 </div>
               </div>
-              <img
-                :src="item.img"
-                class="rounded aspect-[3/1] w-full object-cover"
-              />
+              <img :src="item.img" class="rounded w-full object-cover" />
             </button>
+            <div class="text-white text-[12px] mt-[9px]">{{ item.desc }}</div>
           </li>
         </ul>
         <div class="mt-4">
-          <div class="mt-2 flex justify-between items-center space-x-2 text-xs">
-            <span class="w-[65px] block text-sm">版本</span>
-            <span class="flex-1">
-              <NSelect
+          <div class="mt-2 flex justify-between items-center text-xs">
+            <span class="w-[65px] item-name block">版本</span>
+            <div class="flex-1 flex items-center">
+              <!-- <NSelect
                 v-model:value="version"
                 size="small"
                 :options="versionOptions"
-              />
-            </span>
+              /> -->
+              <div v-if="!versionOptions.length">暂无数据</div>
+              <n-radio-group v-model:value="version" size="small">
+                <n-radio-button
+                  v-for="song in versionOptions"
+                  :key="song.value"
+                  :value="song.value"
+                >
+                  V{{ song.label }}
+                </n-radio-button>
+              </n-radio-group>
+            </div>
+          </div>
+          <div class="mt-4 text-sm flex items-center">
+            <div class="item-name mr-1">图片比例</div>
+
+            <div data-tool-target="tooltip-default">
+              <NTooltip placement="right-end" trigger="hover">
+                <template #trigger>
+                  <SvgIcon icon="ri:error-warning-line" class="text-base" />
+                </template>
+                参数释义：生成图片尺寸比例
+              </NTooltip>
+            </div>
+          </div>
+          <div
+            class="flex flex-wrap gap-x-1 gap-y-1 mt-2 py-1 pb-2 overflow-x-auto justify-between scrollbar-none"
+          >
+            <button
+              v-for="(item, index) in sizeList"
+              :key="index"
+              class="w-[60px] h-[60px] flex-shrink-0 p-[2px] rounded-md"
+              @click="aspect = item.aspect"
+            >
+              <div
+                class="border-[1px] gap-[4px] w-full h-full border-[rgba(255,255,255,0.1)] box-border rounded-md flex flex-col justify-center items-center"
+                :class="[
+                  activeAspect(item.aspect) ? '' : '',
+                  isMobile ? 'py-3' : 'py-2',
+                ]"
+              >
+                <div
+                  class="flex-shrink-0 rounded-sm"
+                  :class="[
+                    activeAspect(item.aspect)
+                      ? ' bg-[rgb(0,47,167)]'
+                      : 'bg-gray-300',
+                  ]"
+                  :style="{ width: item.width, height: item.height }"
+                />
+                <div class="text-center text-[10px] leading-none text-current">
+                  {{ item.aspect }}
+                </div>
+                <div class="text-center text-[10px] leading-none text-current">
+                  {{ item.name }}
+                </div>
+              </div>
+            </button>
           </div>
           <div
             v-if="model === 'NIJI'"
             class="mt-2 flex justify-between items-center space-x-2 text-xs"
           >
-            <span class="w-[65px] block text-sm">风格</span>
+            <span class="block text-sm item-name">风格</span>
             <span class="flex-1">
-              <NSelect
+              <!-- <NSelect
                 v-model:value="style"
                 size="small"
                 :options="styleOptions"
-              />
+              /> -->
+              <n-radio-group v-model:value="style" size="small">
+                <n-radio-button
+                  v-for="song in styleOptions"
+                  :key="song.value"
+                  :value="song.value"
+                >
+                  {{ song.label }}
+                </n-radio-button>
+              </n-radio-group>
             </span>
           </div>
-          <div class="block text-sm mt-2 flex items-center">
+          <!-- <div class="block text-sm mt-2 flex items-center">
             参数
             <NTooltip placement="right-end" trigger="hover">
               <template #trigger>
@@ -575,74 +628,96 @@ onMounted(() => {
                 <p>合理使用参数绘制更为理想的结果！</p>
               </div>
             </NTooltip>
-          </div>
-          <div class="mt-3 flex justify-between items-center space-x-2 text-xs">
-            <span class="w-[65px] block text-sm">品质</span>
+          </div> -->
+          <div class="mt-5 flex justify-between items-center space-x-2 text-xs">
+            <span class="w-[65px] item-name block text-sm">品质</span>
             <span class="flex-1">
-              <NSelect
+              <!-- <NSelect
                 v-model:value="quality"
                 size="small"
                 :options="qualityOptions"
-              />
+              /> -->
+              <n-radio-group v-model:value="quality" size="small">
+                <n-radio-button
+                  v-for="song in qualityOptions"
+                  :key="song.value"
+                  :value="song.value"
+                >
+                  {{ song.label }}
+                </n-radio-button>
+              </n-radio-group>
             </span>
           </div>
-          <div class="mt-3 flex justify-between items-center space-x-2 text-xs">
-            <span class="w-[65px] block text-sm">混乱</span>
-            <span class="flex-1">
+          <div class="mt-5 flex justify-between items-center text-xs">
+            <span class="text-sm flex item-name">
+              <span class="flex-shrink-0">混乱程度</span>
+              <NTooltip placement="right-end" trigger="hover">
+                <template #trigger>
+                  <SvgIcon
+                    icon="ri:error-warning-line"
+                    class="text-base ml-2"
+                  />
+                </template>
+                <div style="width: 270px">
+                  <p>取值范围：0-100、 --chaos 或 --c</p>
+                  <p>混乱级别，可以理解为让AI天马行空的空间</p>
+                  <p>值越小越可靠、默认0最为精准</p>
+                </div>
+              </NTooltip>
+            </span>
+            <span class="flex-1 flex items-center justify-end">
+              <span class="mr-1 text-sm">当前程度:</span>
               <NInputNumber
                 v-model:value="chaos"
+                class="w-[100px]"
                 :min="0"
                 :max="100"
                 size="small"
               />
             </span>
-            <NTooltip placement="right-end" trigger="hover">
-              <template #trigger>
-                <SvgIcon icon="ri:error-warning-line" class="text-base ml-2" />
-              </template>
-              <div style="width: 270px">
-                <p>取值范围：0-100、 --chaos 或 --c</p>
-                <p>混乱级别，可以理解为让AI天马行空的空间</p>
-                <p>值越小越可靠、默认0最为精准</p>
-              </div>
-            </NTooltip>
           </div>
+          <CustomProgress
+            v-model:value="chaos"
+            class="mt-[15px] mb-[23px]"
+          ></CustomProgress>
+          <template v-if="model === 'MJ'">
+            <div class="mt-5 flex justify-between items-center w-fulltext-xs">
+              <span class="item-name text-sm flex"
+                >风格化程度
 
-          <div
-            v-if="model === 'MJ'"
-            class="mt-3 flex justify-between items-center space-x-2 text-xs"
-          >
-            <span class="w-[65px] block text-sm">风格化</span>
-            <span class="flex-1">
-              <NInputNumber
-                v-model:value="stylize"
-                :min="0"
-                :max="1000"
-                size="small"
-              />
-            </span>
-            <NTooltip placement="right-end" trigger="hover">
-              <template #trigger>
-                <SvgIcon icon="ri:error-warning-line" class="text-base ml-2" />
-              </template>
-              <div style="width: 270px">
-                <p>风格化：--stylize 或 --s，范围 1-1000</p>
-                <p>参数释义：数值越高，画面表现也会更具丰富性和艺术性</p>
-              </div>
-            </NTooltip>
-          </div>
-
-          <div class="block text-sm mt-2 flex items-center">设定</div>
+                <NTooltip placement="right-end" trigger="hover">
+                  <template #trigger>
+                    <SvgIcon
+                      icon="ri:error-warning-line"
+                      class="text-base ml-2"
+                    />
+                  </template>
+                  <div style="width: 270px">
+                    <p>风格化：--stylize 或 --s，范围 1-1000</p>
+                    <p>参数释义：数值越高，画面表现也会更具丰富性和艺术性</p>
+                  </div>
+                </NTooltip>
+              </span>
+              <span class="flex items-center">
+                <span class="mr-1">当前程度:</span>
+                <NInputNumber
+                  v-model:value="stylize"
+                  :min="0"
+                  :max="1000"
+                  class="w-[100px]"
+                  size="small"
+                />
+              </span>
+            </div>
+            <CustomProgress
+              v-model:value="stylize"
+              :max="1000"
+              class="mt-[15px] mb-[23px]"
+            ></CustomProgress>
+          </template>
+          <!-- <div class="block text-sm mt-2 flex items-center">设定</div> -->
           <div class="mt-3 flex justify-between items-center space-x-2 text-xs">
-            <span class="w-[65px] block text-sm">携带参数</span>
-            <span class="flex-1">
-              <NSwitch
-                v-model:value="carryOptions"
-                size="small"
-                :checked-value="1"
-                :unchecked-value="0"
-              />
-            </span>
+            <span class="item-name block text-sm">携带参数</span>
             <NTooltip placement="right-end" trigger="hover">
               <template #trigger>
                 <SvgIcon icon="ri:error-warning-line" class="text-base ml-2" />
@@ -653,11 +728,18 @@ onMounted(() => {
                 <p>关闭：使用指令中的我们自定义的参数</p>
               </div>
             </NTooltip>
+            <div class="flex-1 flex justify-end">
+              <CustomSwicth
+                v-model:value="carryOptions"
+                :checked-value="1"
+                :unchecked-value="0"
+              ></CustomSwicth>
+            </div>
           </div>
         </div>
 
         <div class="mt-5">
-          <div class="block text-base">以图生图</div>
+          <div class="block text-base item-name">以图生图</div>
           <div class="ant-spin-nested-loading css-4fssqp mt-5">
             <div class="ant-spin-container">
               <div
@@ -702,7 +784,7 @@ onMounted(() => {
             </div>
           </div>
         </div>
-        <div class="mt-5">
+        <!-- <div class="mt-5">
           <div class="block flex justify-between">
             <span class="text-base py-1"
               >钱包余额(<b class="text-[#3076fd]">{{ sumDrawMjCount || 0 }}</b>
@@ -742,7 +824,7 @@ onMounted(() => {
               <span class="text-sm pr-2"> 1积分 </span>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
 
       <!-- 右 -->
@@ -950,8 +1032,14 @@ onMounted(() => {
   color: #3074f8ff;
 }
 
+.item-name {
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+}
+
 .model-active {
-  border: 3px solid #3074f8ff;
+  box-shadow: 0px 0px 2px 2px #3074f8ff !important;
 }
 
 .upload {
@@ -962,5 +1050,10 @@ onMounted(() => {
   &:hover {
     border: 1px dashed #3074f8ff;
   }
+}
+
+.wrapper-box .n-radio-button {
+  padding-left: 10px;
+  padding-right: 10px;
 }
 </style>

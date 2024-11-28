@@ -44,6 +44,11 @@ export function useTheme() {
 			// color: '#101014FF',
 			// siderColor: '#2F2E34',
 		},
+		Radio: {
+			buttonBorderColorActive: 'rgb(0,47,167)',
+			colorActive: 'rgb(0,47,167)',
+			buttonColorActive: 'rgb(0,47,167)',
+		}
 	};
 
 	const lightThemeOverrides: GlobalThemeOverrides = {
