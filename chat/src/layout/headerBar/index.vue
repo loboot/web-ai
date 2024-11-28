@@ -24,9 +24,6 @@ const menuList = computed(() => {
       onClick: () => useGlobalStore.updateNoticeDialog(true),
     },
     {
-      name: '客服',
-    },
-    {
       name: '充值',
       routeName: 'Pay',
     },
@@ -56,14 +53,7 @@ const menuList = computed(() => {
       },
     ];
 
-    targetArr.push(
-      ...[
-        ...menusOptions.filter((v) => menus.includes(v.name)),
-        {
-          name: '客服',
-        },
-      ]
-    );
+    targetArr.push(...[...menusOptions.filter((v) => menus.includes(v.name))]);
   } else {
     targetArr.push(...defaultArr);
   }

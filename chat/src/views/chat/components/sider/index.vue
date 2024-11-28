@@ -261,9 +261,9 @@ watch(
           </div> -->
           <div
             v-if="isSetBeian"
-            class="w-full flex justify-center items-center py-2 text-xs text-gray-500"
+            class="w-full flex flex-col items-center py-2 text-xs text-gray-500"
           >
-            版权所有 © {{ globaelConfig?.companyName }}
+            <div>版权所有 © {{ globaelConfig?.companyName }}</div>
             <a
               class="ml-2 transition-all text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
               href="https://beian.miit.gov.cn"

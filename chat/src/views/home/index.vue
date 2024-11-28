@@ -2,7 +2,7 @@
 import TopBannerBg from '@/assets/home/top-banner-bg.png';
 import { useAuthStore } from '@/store';
 import { storeToRefs } from 'pinia';
-import { computed, reactive, ref } from 'vue';
+import { computed, reactive, ref, VNode } from 'vue';
 import DrawPng from '@/assets/home/draw.png';
 import MessagePng from '@/assets/home/message.png';
 import MusicPng from '@/assets/home/music.png';
@@ -19,12 +19,16 @@ import VideoImage from '@/assets/home/video-image.png';
 import BannerLeft from '@/assets/home/banner-left.png';
 import BannerRight from '@/assets/home/banner-right.png';
 import { useRouter } from 'vue-router';
+import { h } from 'vue';
 
 const $router = useRouter();
 const authStore = useAuthStore();
 const { globalConfig } = storeToRefs(useAuthStore());
 
 const topTitle = computed(() => globalConfig.value.homeTitle?.split(';') ?? []);
+
+const vxNumber = computed(() => globalConfig.value.vxNumber);
+const qqNumber = computed(() => globalConfig.value.qqNumber);
 
 type MenuItem = {
   name: string;
@@ -105,18 +109,18 @@ const musicList: {
   },
 ];
 
-const footerMenus = reactive<
+const footerMenus = computed<
   {
     moduleName: string;
     data: (MenuItem & { isHidden?: any })[];
   }[]
->([
+>(() => [
   {
     moduleName: '快速链接',
     data: [
       {
         name: '注册/登录',
-        isHidden: computed(() => authStore.isLogin),
+        isHidden: authStore.isLogin,
       },
       {
         name: '观看作品集',
@@ -131,11 +135,13 @@ const footerMenus = reactive<
     moduleName: '联系我们',
     data: [
       {
-        name: '客服',
+        name: `微信：${vxNumber.value}`,
+        isHidden: !vxNumber.value,
         notNeedLogin: true,
       },
       {
-        name: 'xxx@BingAI.com',
+        name: `qq：${qqNumber.value}`,
+        isHidden: !qqNumber.value,
         notNeedLogin: true,
       },
     ],

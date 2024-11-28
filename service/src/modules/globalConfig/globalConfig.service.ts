@@ -180,6 +180,7 @@ export class GlobalConfigService implements OnModuleInit {
   async queryFrontConfig(query, req) {
     /* 指定前端可以访问范围 */
     const allowKeys = [
+      'qqNumber',
       'vxNumber',
       'registerSendStatus',
       'registerSendModel3Count',
