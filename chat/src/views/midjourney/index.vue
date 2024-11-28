@@ -44,6 +44,7 @@ import { useAppStore, useAuthStore } from '@/store';
 import marketImg from '@/assets/market.png';
 import CustomProgress from './components/custom-progress.vue';
 import CustomSwicth from './components/custom-swicth.vue';
+import Logo from '@/layout/siderBar/Logo.vue';
 
 interface PromptItem {
   status: boolean;
@@ -465,26 +466,26 @@ onMounted(() => {
   queryDrawResult();
   drawLike();
   hanleQueryPrompts();
-  const container: any = document.getElementById('footer');
-  const observer = new IntersectionObserver((entries, observer) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        if (isMore.value) {
-          size.value = size.value + 12;
-          queryAllDrawList();
-        }
-      }
-    });
-  });
-  observer.observe(container);
+  // const container: any = document.getElementById('footer');
+  // const observer = new IntersectionObserver((entries, observer) => {
+  //   entries.forEach((entry) => {
+  //     if (entry.isIntersecting) {
+  //       if (isMore.value) {
+  //         size.value = size.value + 12;
+  //         queryAllDrawList();
+  //       }
+  //     }
+  //   });
+  // });
+  // observer.observe(container);
 });
 </script>
 
 <template>
   <div class="grow flex h-full flex-col lg:pt-0 wrapper-box">
-    <div class="flex grow flex-col sm:flex-row h-full">
+    <div class="flex grow flex-col pr-6 gap-x-4 items-start sm:flex-row h-full">
       <div
-        class="p-4 sm:pt-6 bg-[#f8f8f8] dark:bg-[#18181c] overflow-y-auto w-full sm:w-[20rem] shrink-0 border-r-2 border-[#ffffff17]"
+        class="p-4 sm:pt-6 h-full bg-[#f8f8f8] dark:bg-[#18181c] overflow-y-auto w-full sm:w-[20rem] shrink-0 border-r-2 border-[#ffffff17]"
       >
         <h3 class="text-lg sm:text-2xl font-bold leading-6" v-if="isMobile">
           专业绘图
@@ -829,20 +830,22 @@ onMounted(() => {
 
       <!-- 右 -->
       <div
-        class="h-full flex-1"
-        :class="[isMobile ? '' : 'overflow-y-auto overflow-hidden']"
+        class="h-full flex-1 rounded-[7px] bg-[rgb(35,38,39)]"
+        :class="[isMobile ? '' : 'overflow-hidden']"
       >
-        <div class="m-auto max-w-screen-4xl">
-          <div class="space-y-4 p-4">
-            <h3
+        <div class="m-auto max-w-screen-4xl h-full">
+          <div class="space-y-4 px-6 py-8 h-full">
+            <!-- <h3
               class="text-lg sm:text-2xl font-bold leading-6"
               v-if="!isMobile"
             >
               专业绘图
-            </h3>
-            <!-- <p>图生图：生成类似风格或类型图像；图生文：上传一张图片生成对应的提示词；融图：融合图片风格</p> -->
-            <div>
-              <div class="flex justify-between items-end">
+            </h3> -->
+            <!-- <p>
+              图生图：生成类似风格或类型图像；图生文：上传一张图片生成对应的提示词；融图：融合图片风格
+            </p> -->
+            <div class="h-full flex flex-col">
+              <!-- <div class="flex justify-between items-end">
                 <b>输入关键词，提交绘制任务</b>
                 <div v-if="Number(authStore.globalConfig.mjHideNotBlock) !== 1">
                   <NSpace>
@@ -871,20 +874,50 @@ onMounted(() => {
                     </NButton>
                   </NSpace>
                 </div>
+              </div> -->
+              <div
+                class="w-full dark:bg-transparent flex-1"
+                :class="isMobile ? 'py-3' : 'py-6'"
+              >
+                <NScrollbar x-scrollable>
+                  <div
+                    class="flex items-center space-x-3 whitespace-nowrap pb-[15px]"
+                  >
+                    <NButton
+                      v-for="(item, index) in promptList"
+                      :key="index"
+                      size="small"
+                      @click="handleSelectPrompt(item)"
+                    >
+                      {{ item.title }}
+                    </NButton>
+                  </div>
+                </NScrollbar>
               </div>
-              <div class="mt-4">
+              <div class="mt-4 relative">
                 <NInput
                   v-model:value="prompt"
                   clearable
                   type="textarea"
                   :disabled="associateLoading || translateLoading"
                   :autosize="{
-                    minRows: 3,
-                    maxRows: 6,
+                    minRows: 5,
+                    maxRows: 8,
                   }"
                   placeholder="输入绘图关键词。例如：一只五颜六色的猫，可爱，卡通"
                 />
-                <div
+                <div class="absolute right-3 bottom-3">
+                  <NButton
+                    type="primary"
+                    :loading="false"
+                    color="rgb(17, 24, 39)"
+                    :disabled="submitDisabled"
+                    @click="handleSubmit()"
+                  >
+                    生成
+                  </NButton>
+                </div>
+                <!-- <div
                   v-if="Number(authStore.globalConfig.mjHideNotBlock) !== 1"
                   class="mt-4"
                 >
@@ -907,45 +940,23 @@ onMounted(() => {
                     :rows="1"
                     placeholder="例：生成房间图片、但是不要床、你可以填bed！"
                   />
-                </div>
+                </div> -->
               </div>
-              <div
-                v-if="promptList.length"
-                class="w-full dark:bg-transparent"
-                :class="isMobile ? 'py-3' : 'py-6'"
-              >
-                <NScrollbar x-scrollable>
-                  <div
-                    class="flex items-center space-x-3 whitespace-nowrap pb-[15px]"
-                  >
-                    <NButton
-                      v-for="(item, index) in promptList"
-                      :key="index"
-                      size="small"
-                      @click="handleSelectPrompt(item)"
-                    >
-                      {{ item.title }}
-                    </NButton>
-                  </div>
-                </NScrollbar>
-              </div>
-              <div class="mt-3">
+              <!-- <div class="mt-3">
                 <NButton
                   type="primary"
                   :loading="false"
+                  color="rgb(17, 24, 39)"
                   :disabled="submitDisabled"
                   @click="handleSubmit()"
                 >
-                  <template #icon>
-                    <SvgIcon icon="ri:ai-generate" class="text-base" />
-                  </template>
-                  提交任务
+                  生成
                 </NButton>
-              </div>
+              </div> -->
             </div>
           </div>
 
-          <div class="space-y-2 p-4">
+          <!-- <div class="space-y-2 p-4">
             <div v-if="Number(authStore.globalConfig.mjHideNotBlock) !== 1">
               <div class="mt-6 mb-4 flex flex-col">
                 <span class="text-xl font-bold flex items-end">
@@ -981,7 +992,6 @@ onMounted(() => {
                 </p>
               </div>
             </div>
-            <!-- working -->
             <div class="min-h-[500px] mt-5">
               <div class="mt-6 mb-10 flex flex-col">
                 <span class="text-xl font-bold"
@@ -990,11 +1000,6 @@ onMounted(() => {
                     >[{{ drawList.length }}]</span
                   ></span
                 >
-                <!-- <span class="mt-2 text-xs font-bold text-[#444]"
-                  >点击下面的编号按钮以获取升级版（U:
-                  放大图片更细节）或变化版（V:
-                  在此基础上变体）。绘画失败不扣除积分，请重试直到绘画成功为止。</span
-                > -->
               </div>
               <div v-if="!drawList || !drawList.length" class="w-full py-28">
                 <img
@@ -1019,8 +1024,27 @@ onMounted(() => {
             </div>
 
             <div id="footer" ref="containerRef" />
-          </div>
+          </div> -->
         </div>
+      </div>
+      <div
+        class="flex-shrink-0 overflow-hidden text-center text-xs bg-[rgb(16,23,37)] px-2 py-3 rounded-[12px] text-white space-y-2"
+      >
+        <div class="w-[30px] h-[30px] rounded-full mx-auto">logo占位</div>
+        <div class="text-base font-[500]">欢迎体验</div>
+        <div class="text-base font-[500]">Midjourney中文版</div>
+        <div>bingaiart.com</div>
+        <div>普通模式1积分，快速模式4积 「</div>
+        <div>严禁生产不良内容，违规将封号</div>
+        <div>- - -</div>
+        <div>描述画面内容，而非发布指令</div>
+        <div>- - -</div>
+        <div>正确示范：</div>
+        <div>皮克斯风格，年轻的女孩，商业摄</div>
+        <div>影，纯黑背景。</div>
+        <div>错误示范：</div>
+        <div>把这个汽车变成宇宙飞船。</div>
+        <div>Mid journey｜ BingoAI ｜ Aimple to use。</div>
       </div>
     </div>
   </div>
