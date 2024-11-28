@@ -135,6 +135,7 @@ const qualityOptions = [
 const versionOptions = computed(() => {
   if (model.value === 'MJ') {
     return [
+      { label: '6.1', value: '6.1' },
       { label: '6.0', value: '6.0' },
       { label: '5.2', value: '5.2' },
       { label: '5.1', value: '5.1' },
