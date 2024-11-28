@@ -21,23 +21,23 @@ export class MenuService {
     const menuCount = await this.menuEntity.count()
     if(menuCount > 0) return;
     const pcMenuData = [
-      { menuTipText: '对话聊天', menuIcon: 'ri:message-3-line', menuName: 'Chat',menuPath: '/chat', menuType: 0, menuPlatform: 1 , order: 100 },
+      { menuTipText: '对话', menuIcon: 'ri:message-3-line', menuName: 'Chat',menuPath: '/chat', menuType: 0, menuPlatform: 1 , order: 100 },
       { menuTipText: '应用广场', menuIcon: 'ant-design:appstore-outlined', menuName: 'AppStore',menuPath: '/app-store', menuType: 0, menuPlatform: 1 , order: 200 },
-      { menuTipText: '专业绘画', menuIcon: 'ri:landscape-line', menuName: 'Midjourney',menuPath: '/midjourney', menuType: 0, menuPlatform: 1 , order: 300 },
-      { menuTipText: '绘画广场', menuIcon: 'solar:album-line-duotone', menuName: 'Market',menuPath: '/market', menuType: 0, menuPlatform: 1 , order: 400 },
+      { menuTipText: '绘图', menuIcon: 'ri:landscape-line', menuName: 'Midjourney',menuPath: '/midjourney', menuType: 0, menuPlatform: 1 , order: 300 },
+      { menuTipText: '画廊', menuIcon: 'solar:album-line-duotone', menuName: 'Market',menuPath: '/market', menuType: 0, menuPlatform: 1 , order: 400 },
       { menuTipText: '基础绘画', menuIcon: 'fluent:draw-image-24-regular', menuName: 'Draw',menuPath: '/draw', menuType: 0, menuPlatform: 1 , order: 500 },
       { menuTipText: '思维导图', menuIcon: 'icon-park-outline:mindmap-map', menuName: 'Mind',menuPath: '/mind', menuType: 0, menuPlatform: 1 , order: 600 },
       { menuTipText: '会员中心', menuIcon: 'icon-park-outline:shopping', menuName: 'Pay',menuPath: '/pay', menuType: 0, menuPlatform: 1 , order: 700 },
       { menuTipText: '推广计划', menuIcon: 'uiw:share', menuName: 'Share',menuPath: '/share', menuType: 0, menuPlatform: 1 , order: 800 },
     ]
     const mobileMenuData = [
-      { menuTipText: '对话聊天', menuIcon: 'ri:message-3-line', menuName: 'Chat',menuPath: '/chat', menuType: 0, menuPlatform: 0 , order: 100 },
+      { menuTipText: '对话', menuIcon: 'ri:message-3-line', menuName: 'Chat',menuPath: '/chat', menuType: 0, menuPlatform: 0 , order: 100 },
       { menuTipText: '应用广场', menuIcon: 'ant-design:appstore-outlined', menuName: 'AppStore',menuPath: '/app-store', menuType: 0, menuPlatform: 0 , order: 200 },
-      { menuTipText: '专业绘画', menuIcon: 'ri:landscape-line', menuName: 'Midjourney',menuPath: '/midjourney', menuType: 0, menuPlatform: 0 , order: 300 },
+      { menuTipText: '绘图', menuIcon: 'ri:landscape-line', menuName: 'Midjourney',menuPath: '/midjourney', menuType: 0, menuPlatform: 0 , order: 300 },
       { menuTipText: '思维导图', menuIcon: 'icon-park-outline:mindmap-map', menuName: 'Mind',menuPath: '/mind', menuType: 0, menuPlatform: 0 , order: 400 },
       { menuTipText: '个人中心', menuIcon: 'ri:account-pin-box-line', menuName: 'UserCenter',menuPath: '/user-center', menuType: 0, menuPlatform: 0 , order: 500 },
     ]
-    
+
     const initMenuData = [...pcMenuData, ...mobileMenuData]
 
     await this.menuEntity.save(initMenuData)
@@ -82,7 +82,7 @@ export class MenuService {
         const res = await this.menuEntity.update({id}, params)
         return res.affected > 0
       }else{
-        const res = await this.menuEntity.save(params) 
+        const res = await this.menuEntity.save(params)
         return res
       }
     } catch (error) {
@@ -105,6 +105,6 @@ export class MenuService {
       throw new HttpException('缺失必要参数!', HttpStatus.BAD_REQUEST)
     }
     const res = await this.menuEntity.update({id}, { menuIcon, menuTipText, order })
-    return res.affected > 0 
+    return res.affected > 0
   }
 }
