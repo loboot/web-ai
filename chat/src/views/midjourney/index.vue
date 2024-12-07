@@ -804,7 +804,7 @@ onMounted(() => {
               <div
                 class="mt-2 flex justify-center items-center dark:bg-black p-5 rounded-md"
               >
-                <label v-if="!dataBase64.def" for="upload-file">
+                <label v-if="!dataBase64.def" for="upload-file-def">
                   <div
                     class="upload cursor-pointer"
                     @dragover.prevent
@@ -813,7 +813,7 @@ onMounted(() => {
                     @drop="handleDrop($event, 'def')"
                   >
                     <input
-                      id="upload-file"
+                      id="upload-file-def"
                       type="file"
                       accept=".png, .jpg, .jpeg"
                       style="display: none"
@@ -873,7 +873,7 @@ onMounted(() => {
               <div
                 class="mt-2 flex justify-center items-center dark:bg-black p-5 rounded-md"
               >
-                <label v-if="!dataBase64.role" for="upload-file">
+                <label v-if="!dataBase64.role" for="upload-file-role">
                   <div
                     class="upload cursor-pointer"
                     @dragover.prevent
@@ -882,7 +882,7 @@ onMounted(() => {
                     @drop="handleDrop($event, 'role')"
                   >
                     <input
-                      id="upload-file"
+                      id="upload-file-role"
                       type="file"
                       accept=".png, .jpg, .jpeg"
                       style="display: none"
@@ -940,7 +940,7 @@ onMounted(() => {
               <div
                 class="mt-2 flex justify-center items-center dark:bg-black p-5 rounded-md"
               >
-                <label v-if="!dataBase64.style" for="upload-file">
+                <label v-if="!dataBase64.style" for="upload-file-style">
                   <div
                     class="upload cursor-pointer"
                     @dragover.prevent
@@ -949,7 +949,7 @@ onMounted(() => {
                     @drop="handleDrop($event, 'style')"
                   >
                     <input
-                      id="upload-file"
+                      id="upload-file-style"
                       type="file"
                       accept=".png, .jpg, .jpeg"
                       style="display: none"

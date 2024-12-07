@@ -110,7 +110,7 @@ function handleRegenerate() {
   <div>
     <div
       ref="messageRef"
-      class="flex w-full mb-5 overflow-hidden items-start bg-white dark:bg-gray-900"
+      class="flex w-full mb-5 overflow-hidden items-start bg-white dark:bg-transparent"
       :class="[inversion ? 'flex-row-reverse pl-2' : 'flex-row pr-2']"
     >
       <div

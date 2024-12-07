@@ -283,7 +283,7 @@ init();
             :list="imageList"
             :width="376"
             :gutter="26"
-            backgroundColor="transition"
+            backgroundColor="transparent"
           >
             <!-- v2.6.0之前版本插槽数据获取 -->
             <!-- <template #item="{ item, url, index }"> -->
