@@ -37,6 +37,7 @@ import { SalesModule } from './modules/sales/sales.module';
 import { SigninModule } from './modules/signin/signin.module';
 import { MenuModule } from './modules/menu/menu.module';
 import { ModelsModule } from './modules/models/models.module';
+import { ActiveCodeModule } from './modules/active-code/active-code.module';
 
 @Global()
 @Module({
@@ -75,6 +76,7 @@ import { ModelsModule } from './modules/models/models.module';
     SigninModule,
     MenuModule,
     ModelsModule,
+    ActiveCodeModule,
   ],
   providers: [
     {
@@ -83,4 +85,4 @@ import { ModelsModule } from './modules/models/models.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}
