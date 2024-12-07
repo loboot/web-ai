@@ -3,7 +3,7 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom, Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import getMAC, { isMAC } from 'getmac';
+import * as os from 'node:os';
 
 @Injectable()
 export class ActiveCodeService {
@@ -12,12 +12,33 @@ export class ActiveCodeService {
     private readonly configService: ConfigService
   ) {}
 
-  // 查询激活状态，传入 MAC 地址
+  getIp() {
+    try {
+      const networkInterfaces = os.networkInterfaces();
+
+      let ipAddress;
+      for (const iface in networkInterfaces) {
+        for (const details of networkInterfaces[iface]) {
+          if (details.family === 'IPv4' && !details.internal) {
+            ipAddress = details.address;
+            break;
+          }
+        }
+        if (ipAddress) break;
+      }
+      return ipAddress;
+    } catch (e) {
+      Logger.error('获取网络接口信息失败:', e);
+    }
+  }
+
+  // 查询激活状态，传入 ip 地址
   async checkActivationStatus() {
     try {
       const url = this.configService.get('active-code').baseUrl;
-      const macAddress = getMAC();
-      const params = { macAddress };
+      const ip = this.getIp();
+
+      const params = { ip };
 
       const response = await firstValueFrom(
         this.httpService.get(`${url}/active-code/checkActiveCode`, { params })
@@ -48,13 +69,14 @@ export class ActiveCodeService {
 
     try {
       const url = this.configService.get('active-code').baseUrl;
-      const macAddress = getMAC();
-      Logger.debug(macAddress, '获取macAddress成功');
+      const ip = this.getIp();
+
+      Logger.debug(ip, '获取ip成功');
       const response = await firstValueFrom(
         this.httpService
           .post(`${url}/active-code/activate`, {
             activeCode,
-            macAddress,
+            ip,
           })
           .pipe(
             map((res) => res.data),
