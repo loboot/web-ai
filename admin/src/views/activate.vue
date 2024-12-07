@@ -23,15 +23,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Key } from '@element-plus/icons-vue';
 import activeCodeApi from '@/api/modules/active-code';
+import { useRouter } from 'vue-router';
 
 const activeCode = ref('');
 const loading = ref(false);
 
 const router = useRouter();
+
+onMounted(async () => {
+  const res = await activeCodeApi.queryActiveCodeCheck();
+  if (res.data) {
+    router.replace('/');
+  }
+});
 
 const handleActivate = async () => {
   if (!activeCode.value) {
@@ -45,7 +53,7 @@ const handleActivate = async () => {
     console.log(res);
     ElMessage.success('激活成功');
     activeCode.value = '';
-    router.push('/login');
+    router.replace('/login');
   } catch (error: any) {
     ElMessage.error(error.message || '激活失败');
   } finally {
