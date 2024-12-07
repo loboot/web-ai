@@ -20,6 +20,10 @@ import BannerLeft from '@/assets/home/banner-left.png';
 import BannerRight from '@/assets/home/banner-right.png';
 import { useRouter } from 'vue-router';
 import { h } from 'vue';
+import { LazyImg, Waterfall } from 'vue-waterfall-plugin-next';
+import 'vue-waterfall-plugin-next/dist/style.css';
+import { ResData } from '@/api/types';
+import { fetchMidjourneyGetList } from '@/api';
 
 const $router = useRouter();
 const authStore = useAuthStore();
@@ -151,6 +155,28 @@ const footerMenus = computed<
 function checkShow(name: string) {
   return ~menuList.value.findIndex((v) => v.name === name);
 }
+
+const imageList = ref<
+  {
+    src: string;
+  }[]
+>([]);
+async function init() {
+  try {
+    const res: ResData = await fetchMidjourneyGetList({
+      page: 1,
+      size: 6,
+      rec: 1,
+    });
+    const target: any[] = res.data?.rows ?? [];
+
+    imageList.value = target.map((v) => ({ src: v.drawUrl }));
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+init();
 </script>
 <template>
   <div>
@@ -246,10 +272,25 @@ function checkShow(name: string) {
         <div>我们正在构建初学者</div>
         <div>最容易上手的 AI 绘画</div>
       </div>
-      <div class="relative h-[1310px] mb-[223px]">
+      <div class="relative mb-[223px]">
         <img class="absolute w-full left-0 top-[237px]" :src="Group" alt="" />
         <div class="relative z-10">
-          <img class="mx-auto" :src="Row" alt="" />
+          <Waterfall
+            :list="imageList"
+            :width="376"
+            :gutter="26"
+            backgroundColor="transition"
+          >
+            <!-- v2.6.0之前版本插槽数据获取 -->
+            <!-- <template #item="{ item, url, index }"> -->
+            <!-- 新版插槽数据获取 -->
+            <template #default="{ item, url, index }">
+              <div class="rounded-[24px] overflow-hidden">
+                <!-- <LazyImg :url="url" Access-Control-Allow-Origin /> -->
+                <img :src="url" alt="" />
+              </div>
+            </template>
+          </Waterfall>
           <div
             class="absolute w-full h-[348px] left-0 bottom-0 bg-gradient-to-b from-[rgba(20,23,24,0.01)] to-[rgb(20,23,24)]"
           ></div>
