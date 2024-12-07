@@ -421,6 +421,9 @@ importers:
       vue-router:
         specifier: ^4.1.6
         version: 4.4.5(vue@3.5.12(typescript@4.9.5))
+      vue-waterfall-plugin-next:
+        specifier: ^2.6.4
+        version: 2.6.4
     devDependencies:
       '@commitlint/cli':
         specifier: ^17.4.4
@@ -3456,6 +3459,7 @@ packages:
 
   acorn-import-assertions@1.9.0:
     resolution: {integrity: sha512-cmMwop9x+8KFhxvKrKfPYmN6/pKTYYHBqLa0DfvVZcKMJWNyWLnaqND7dx/qn66R7ewM1UX5XMaDVP5wlVTaVA==}
+    deprecated: package has been renamed to acorn-import-attributes
     peerDependencies:
       acorn: ^8
 
@@ -11006,6 +11010,9 @@ packages:
     peerDependencies:
       typescript: '*'
 
+  vue-waterfall-plugin-next@2.6.4:
+    resolution: {integrity: sha512-pQVecCaN4nnk48p5OlMTaMwk7ECtRbEFfMDPNIzARFXEYaIiEVc9ODQZNgGaGzFCML3AClIwEGSKu/uYOvP8sQ==}
+
   vue@3.5.12:
     resolution: {integrity: sha512-CLVZtXtn2ItBIi/zHZ0Sg1Xkb7+PU32bJJ8Bmy7ts3jxXTcbfsEfBivFYYWz1Hur+lalqGAh65Coin0r+HRUfg==}
     peerDependencies:
@@ -12462,7 +12469,7 @@ snapshots:
       '@types/node': 20.5.1
       chalk: 4.1.2
       cosmiconfig: 8.3.6(typescript@4.9.5)
-      cosmiconfig-typescript-loader: 4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@4.9.5))(ts-node@10.9.2(@types/node@18.19.64)(typescript@4.9.5))(typescript@4.9.5)
+      cosmiconfig-typescript-loader: 4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@4.9.5))(ts-node@10.9.2(@types/node@20.5.1)(typescript@4.9.5))(typescript@4.9.5)
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       lodash.uniq: 4.5.0
@@ -16166,7 +16173,7 @@ snapshots:
       mime-types: 2.1.35
       request: 2.88.2
 
-  cosmiconfig-typescript-loader@4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@4.9.5))(ts-node@10.9.2(@types/node@18.19.64)(typescript@4.9.5))(typescript@4.9.5):
+  cosmiconfig-typescript-loader@4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@4.9.5))(ts-node@10.9.2(@types/node@20.5.1)(typescript@4.9.5))(typescript@4.9.5):
     dependencies:
       '@types/node': 20.5.1
       cosmiconfig: 8.3.6(typescript@4.9.5)
@@ -24055,6 +24062,8 @@ snapshots:
       '@vue/language-core': 1.8.27(typescript@5.6.3)
       semver: 7.6.3
       typescript: 5.6.3
+
+  vue-waterfall-plugin-next@2.6.4: {}
 
   vue@3.5.12(typescript@4.9.5):
     dependencies:
