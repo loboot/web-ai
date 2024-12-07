@@ -45,27 +45,37 @@ export class ActiveCodeService {
     if (!activeCode) {
       throw new HttpException('激活码为空', HttpStatus.BAD_REQUEST);
     }
+
     try {
       const url = this.configService.get('active-code').baseUrl;
       const macAddress = getMAC();
+
       const response = await firstValueFrom(
-        this.httpService.post(`${url}/active-code/activate`, {
-          activeCode,
-          macAddress,
-        })
+        this.httpService
+          .post(`${url}/active-code/activate`, {
+            activeCode,
+            macAddress,
+          })
+          .pipe(
+            map((res) => res.data),
+            catchError((error) => {
+              throw new HttpException(
+                error.response?.data?.message || '激活失败',
+                error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
+              );
+            })
+          )
       );
 
-      const { data, code, message } = response.data;
+      const { data, code, message } = response;
       if (code === 200) {
         return data;
       }
+
       throw new HttpException(message || '激活失败', HttpStatus.BAD_REQUEST);
     } catch (error: any) {
       Logger.error('激活服务失败:', error);
-      throw new HttpException(
-        error.response?.data?.message || error.response?.message || '激活失败',
-        error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw error;
     }
   }
 }
