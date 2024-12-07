@@ -272,14 +272,18 @@ init();
         <div>我们正在构建初学者</div>
         <div>最容易上手的 AI 绘画</div>
       </div>
-      <div class="relative mb-[223px]">
+      <div
+        class="relative mb-[223px]"
+        :class="{ 'h-[1310px]': !imageList.length }"
+      >
         <img class="absolute w-full left-0 top-[237px]" :src="Group" alt="" />
         <div class="relative z-10">
           <Waterfall
+            v-if="imageList.length"
             :list="imageList"
             :width="376"
             :gutter="26"
-            backgroundColor="transition"
+            backgroundColor="transparent"
           >
             <!-- v2.6.0之前版本插槽数据获取 -->
             <!-- <template #item="{ item, url, index }"> -->
@@ -291,6 +295,7 @@ init();
               </div>
             </template>
           </Waterfall>
+          <img class="mx-auto" :src="Row" alt="" v-else />
           <div
             class="absolute w-full h-[348px] left-0 bottom-0 bg-gradient-to-b from-[rgba(20,23,24,0.01)] to-[rgb(20,23,24)]"
           ></div>
