@@ -78,8 +78,8 @@ async function handleDownloadImg(item: any) {
     onPositiveClick: async () => {
       d.loading = true;
       return new Promise(async (resolve) => {
-        const { fileInfo } = item;
-        const { filename, cosUrl } = fileInfo;
+        const { fileInfo = {}, drawUrl, drawId } = item;
+        const { filename = drawId, cosUrl = drawUrl } = fileInfo;
         const response = await axios.post(
           downloadUrl,
           { url: cosUrl },
@@ -203,7 +203,7 @@ function handleRegion(file) {}
       </span>
 
       <NSpace>
-        <NTooltip
+        <!-- <NTooltip
           v-if="drawItemInfo.action === 'IMAGINE'"
           placement="top"
           trigger="hover"
@@ -219,9 +219,31 @@ function handleRegion(file) {}
           <div style="width: 240px">
             <p>{{ drawItemInfo.fullPrompt }}</p>
           </div>
+        </NTooltip> -->
+        <NTooltip
+          v-if="drawItemInfo.action === 'IMAGINE'"
+          placement="top"
+          trigger="hover"
+        >
+          <template #trigger>
+            <NButton size="tiny" ghost @click="usePrompt">
+              <template #icon>
+                <SvgIcon icon="ri:brush-line" class="text-base" />
+              </template>
+              参数
+            </NButton>
+          </template>
+          <div style="width: 240px">
+            <p>{{ drawItemInfo.fullPrompt }}</p>
+          </div>
         </NTooltip>
 
-        <NButton size="tiny" ghost @click="handleDownloadImg(drawItemInfo)">
+        <NButton
+          v-if="![4, 5, 6].includes(drawItemInfo.status)"
+          size="tiny"
+          ghost
+          @click="handleDownloadImg(drawItemInfo)"
+        >
           <template #icon>
             <SvgIcon icon="mingcute:file-download-line" class="text-base" />
           </template>
