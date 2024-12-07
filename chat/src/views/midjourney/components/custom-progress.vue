@@ -22,10 +22,12 @@ const props = withDefaults(
   defineProps<{
     max?: number;
     min?: number;
+    step?: number;
   }>(),
   {
     max: 100,
     min: 0,
+    step: 1,
   }
 );
 
@@ -52,7 +54,11 @@ const handleChange = (e: any) => {
   const maxL = w - 10;
   x = x < maxL && x > 0 ? x : x >= maxL ? maxL : 0;
 
-  const target = Math.round((x / maxL) * (props.max - props.min) + props.min);
+  const target = +(
+    Math.round(
+      ((x / maxL) * (props.max - props.min) + props.min) / props.step
+    ) * props.step
+  ).toFixed(2);
 
   value.value =
     target < props.max && target > props.min
@@ -76,9 +82,10 @@ function setSlideLeft() {
   const maxL = w - 10;
 
   const targetVal = value.value ?? 0;
-  const target = Math.round(
-    ((targetVal - props.min) / (props.max - props.min)) * maxL
-  );
+  const target =
+    Math.round(
+      (((targetVal - props.min) / (props.max - props.min)) * maxL) / props.step
+    ) * props.step;
 
   sliderLeft.value =
     target < maxL && target > 0 ? target : target >= maxL ? maxL : 0;
