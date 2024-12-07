@@ -49,7 +49,7 @@ export class ActiveCodeService {
     try {
       const url = this.configService.get('active-code').baseUrl;
       const macAddress = getMAC();
-      Logger.log(macAddress, '获取macAddress成功');
+      Logger.debug(macAddress, '获取macAddress成功');
       const response = await firstValueFrom(
         this.httpService
           .post(`${url}/active-code/activate`, {
