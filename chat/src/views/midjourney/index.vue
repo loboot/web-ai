@@ -75,7 +75,7 @@ let isLoopIn = false;
 let timer: any = null;
 const aspect = ref('9:16');
 const model = ref('MJ');
-const version = ref('6.0');
+const version = ref('6.1');
 const style = ref(0);
 const quality = ref('1');
 const stylize = ref(100);
@@ -483,7 +483,7 @@ function readMore() {
 
 function setModel(name: string) {
   model.value = name;
-  if (name === 'MJ') version.value = '6.0';
+  if (name === 'MJ') version.value = '6.1';
 
   if (name === 'NIJI') version.value = '6';
 }
