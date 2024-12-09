@@ -583,7 +583,10 @@ onMounted(() => {
                   {{ item.name }}
                 </div>
               </div>
-              <img :src="item.img" class="rounded w-full object-cover" />
+              <img
+                :src="item.img"
+                class="rounded w-full h-full object-cover object-center"
+              />
             </button>
             <div class="text-white text-[12px] mt-[9px]">{{ item.desc }}</div>
           </li>
