@@ -696,14 +696,14 @@ onUnmounted(() => {
 
 <template>
   <div class="h-full flex flex-col bg-white dark:bg-[rgb(35,38,39)] pb-2">
-    <!-- <HeaderComponent
+    <HeaderComponent
       :using-context="usingContext"
       :dark-mode="darkMode"
       @export="handleExport"
       @toggle-using-context="toggleUsingContext"
       @clear="handleClear"
       @scroll-btn="handleScrollBtm"
-    /> -->
+    />
     <main class="flex-1 overflow-hidden">
       <div
         id="scrollRef"

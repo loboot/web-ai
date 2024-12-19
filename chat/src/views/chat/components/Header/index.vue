@@ -221,7 +221,7 @@ onMounted(() => {
             </transition>
           </Menu>
 
-          <Menu as="div" class="relative inline-block text-left">
+          <!-- <Menu as="div" class="relative inline-block text-left">
             <div>
               <MenuButton
                 class="inline-flex w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-400 text-gray-700"
@@ -293,7 +293,7 @@ onMounted(() => {
                 </div>
               </MenuItems>
             </transition>
-          </Menu>
+          </Menu> -->
         </div>
       </div>
     </div>
