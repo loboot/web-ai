@@ -1061,7 +1061,7 @@ onMounted(() => {
               图生图：生成类似风格或类型图像；图生文：上传一张图片生成对应的提示词；融图：融合图片风格
             </p> -->
             <div class="h-full flex flex-col">
-              <!-- <div class="flex justify-between items-end">
+              <div class="flex justify-between items-end">
                 <b>输入关键词，提交绘制任务</b>
                 <div v-if="Number(authStore.globalConfig.mjHideNotBlock) !== 1">
                   <NSpace>
@@ -1090,12 +1090,12 @@ onMounted(() => {
                     </NButton>
                   </NSpace>
                 </div>
-              </div> -->
+              </div>
               <div
                 class="w-full dark:bg-transparent flex-1 overflow-y-auto"
                 :class="isMobile ? 'py-3' : 'py-6'"
               >
-                <!-- <NScrollbar x-scrollable>
+                <NScrollbar x-scrollable>
                   <div
                     class="flex items-center space-x-3 whitespace-nowrap pb-[15px]"
                   >
@@ -1108,7 +1108,7 @@ onMounted(() => {
                       {{ item.title }}
                     </NButton>
                   </div>
-                </NScrollbar> -->
+                </NScrollbar>
 
                 <div class="space-y-2 p-4">
                   <div
