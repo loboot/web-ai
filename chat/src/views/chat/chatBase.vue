@@ -36,7 +36,6 @@ import { fetchChatAPIProcess } from '@/api';
 import { t } from '@/locales';
 import { router } from '@/router';
 import { url } from 'inspector';
-import ModelDialog from '@/layout/components/modelDialog.vue';
 const useGlobalStore = useGlobalStoreWithOut();
 const authStore = useAuthStore();
 const route = useRoute();

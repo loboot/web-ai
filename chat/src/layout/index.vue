@@ -11,7 +11,7 @@ import GoodsDialog from './components/GoodsDialog.vue';
 import NoticeDialog from './components/NoticeDialog.vue';
 import BindWxDialog from './components/BindWx.vue';
 import SignInDialog from './components/SignInDialog.vue';
-import ModelDialog from './components/modelDialog.vue';
+// import ModelDialog from './components/modelDialog.vue';
 import { useBasicLayout } from '@/hooks/useBasicLayout';
 import { useAppStore, useAuthStore, useGlobalStoreWithOut } from '@/store';
 import { fetchLoginByCodeAPI, fetchWxLoginRedirectAPI } from '@/api/user';
@@ -29,7 +29,7 @@ const goodsDialog = computed(() => useGlobalStore.goodsDialog);
 const noticeDialog = computed(() => useGlobalStore.noticeDialog);
 const bindWxDialog = computed(() => useGlobalStore.bindWxDialog);
 const signInDialog = computed(() => useGlobalStore.signInDialog);
-const modelDialog = computed(() => useGlobalStore.modelDialog);
+// const modelDialog = computed(() => useGlobalStore.modelDialog);
 const { isMobile } = useBasicLayout();
 const loginDialog = computed(() => authStore.loginDialog);
 const globalConfigLoading = computed(() => authStore.globalConfigLoading);
@@ -127,7 +127,7 @@ const getMobileLayoutClass = computed(() => {
       <GoodsDialog :visible="goodsDialog" />
       <BindWxDialog :visible="bindWxDialog" />
       <SignInDialog :visible="signInDialog" />
-      <ModelDialog :visible="modelDialog" />
+      <!-- <ModelDialog :visible="modelDialog" /> -->
     </div>
   </div>
 </template>

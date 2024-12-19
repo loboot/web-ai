@@ -109,7 +109,7 @@ async function switchModel(option: any) {
 
   await fetchUpdateGroupAPI(params);
   await chatStore.queryMyGroup();
-  useGlobalStore.updateModelDialog(false);
+  // useGlobalStore.updateModelDialog(false);
 }
 
 async function queryModelsList() {
