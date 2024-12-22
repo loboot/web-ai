@@ -144,9 +144,11 @@ function imgLoadSuccess(e: any, item: FileItem) {
   loadComplete.value.push(item.id);
 }
 
+const errorArr = ref<number[]>([]);
 function imgLoadError(e: any, item: FileItem) {
   console.error('Image failed to load:', item);
   loadComplete.value.push(item.id);
+  errorArr.value.push(item.id);
 }
 
 function handleCopy(item: any) {
@@ -201,6 +203,10 @@ onMounted(async () => {
 onUnmounted(() => {
   window.removeEventListener('resize', handleResizeThrottled);
 });
+
+const successDataList = computed(() =>
+  props.dataList.filter((item) => !errorArr.value.includes(item.id))
+);
 </script>
 
 <template>
@@ -213,7 +219,7 @@ onUnmounted(() => {
         :style="{ height: `${wapperHeigth}px` }"
       >
         <div
-          v-for="(item, index) in dataList"
+          v-for="(item, index) in successDataList"
           :id="item.id.toString()"
           :key="index"
           :ref="(el) => setItemRefs(el, item)"
