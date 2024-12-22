@@ -1095,7 +1095,7 @@ onMounted(() => {
                 class="w-full dark:bg-transparent flex-1 overflow-y-auto"
                 :class="isMobile ? 'py-3' : 'py-6'"
               >
-                <NScrollbar x-scrollable>
+                <NScrollbar x-scrollable class="!h-max">
                   <div
                     class="flex items-center space-x-3 whitespace-nowrap pb-[15px]"
                   >
