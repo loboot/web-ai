@@ -147,7 +147,7 @@ defineExpose({ textRef });
     >
       <div v-if="!inversion">
         <div class="mt-1 flex">
-          <Button
+          <n-button
             class="flex ml-0 items-center text-gray-400 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-400 mx-1"
             text
             type="primary"
@@ -155,9 +155,9 @@ defineExpose({ textRef });
           >
             <ClipboardIcon class="flex h-3 w-3 mx-1" />
             <span class="flex text-xs">复制</span>
-          </Button>
+          </n-button>
 
-          <Button
+          <n-button
             class="flex ml-0 items-center text-gray-400 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-400 mx-1"
             text
             type="primary"
@@ -165,13 +165,13 @@ defineExpose({ textRef });
           >
             <ArrowPathIcon class="flex h-3 w-3 mx-1" />
             <span class="flex text-xs">重新生成</span>
-          </Button>
+          </n-button>
         </div>
       </div>
 
       <div v-else>
         <div class="pt-1">
-          <Button
+          <n-button
             class="flex ml-0 items-center text-gray-400 hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-400"
             text
             type="primary"
@@ -179,7 +179,7 @@ defineExpose({ textRef });
           >
             <ClipboardIcon class="flex h-3 w-3 mx-1" />
             <span class="flex text-xs">复制</span>
-          </Button>
+          </n-button>
         </div>
       </div>
     </div>

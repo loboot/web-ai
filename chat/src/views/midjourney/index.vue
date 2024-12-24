@@ -1066,6 +1066,7 @@ onMounted(() => {
                 <div v-if="Number(authStore.globalConfig.mjHideNotBlock) !== 1">
                   <NSpace>
                     <NButton
+                      class="!bg-[rgb(0,47,167)]"
                       type="primary"
                       :loading="translateLoading"
                       @click="handleFanyiPrompt"
@@ -1076,6 +1077,7 @@ onMounted(() => {
                       翻译
                     </NButton>
                     <NButton
+                      class="!bg-[rgb(0,47,167)]"
                       type="primary"
                       :loading="associateLoading"
                       @click="handleAssociatePrompt"

@@ -1,4 +1,4 @@
-<script setup lang='ts'>
+<script setup lang="ts">
 import { computed, ref, onMounted, watch } from 'vue';
 import { NLayout, NLayoutContent } from 'naive-ui';
 import Sider from './components/siderbar/index.vue';
@@ -64,7 +64,7 @@ const getMobileClass = computed(() => {
   return ['rounded-md', 'shadow-md', 'dark:border-neutral-800'];
 });
 
-onMounted(() => draw());
+// onMounted(() => draw());
 </script>
 
 <template>
@@ -73,11 +73,15 @@ onMounted(() => draw());
       <!-- <div class="h-12  header border-[#e1e1e1] dark:border-[#ffffff17] border-b-2">
         <Header />
       </div> -->
-      <NLayout class="transition flex-1 h-full w-full" has-sider>
-        <canvas
+      <NLayout
+        class="transition flex-1 h-full w-full"
+        content-class="dark:bg-[#18181c]"
+        has-sider
+      >
+        <!-- <canvas
           ref="grid"
           class="absolute left-0 right-0 bottom-0 top-0 z-0 bg-white dark:bg-gray-900"
-        ></canvas>
+        ></canvas> -->
         <div v-if="!isMobile" class="h-full">
           <!-- <Sider /> -->
         </div>
