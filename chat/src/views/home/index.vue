@@ -156,21 +156,46 @@ function checkShow(name: string) {
   return ~menuList.value.findIndex((v) => v.name === name);
 }
 
+interface FileItem {
+  id: number;
+  drawUrl: string;
+  fullPrompt?: string;
+  drawRatio: string;
+}
+
+function imgLoadError(e: any, item: FileItem) {
+  console.error('Image failed to load:', item);
+  errorArr.value.push(item.id);
+}
+
 const imageList = ref<
   {
-    src: string;
+    id: number;
+    createdAt: string;
+    prompt: string;
+    fullPrompt: string;
+    status: number;
+    action: string;
+    rec: number;
+    drawId: string;
+    drawUrl: string;
+    drawRatio: string;
   }[]
 >([]);
+const errorArr = ref<number[]>([]);
+const successDataList = computed(() =>
+  imageList.value.filter((item) => !errorArr.value.includes(item.id))
+);
 async function init() {
   try {
     const res: ResData = await fetchMidjourneyGetList({
       page: 1,
-      size: 6,
+      size: 10,
       rec: 1,
     });
     const target: any[] = res.data?.rows ?? [];
 
-    imageList.value = target.map((v) => ({ src: v.drawUrl }));
+    imageList.value = target;
   } catch (error) {
     console.log(error);
   }
@@ -274,13 +299,13 @@ init();
       </div>
       <div
         class="relative mb-[223px]"
-        :class="{ 'h-[1310px]': !imageList.length }"
+        :class="{ 'h-[1310px]': !successDataList.length }"
       >
         <img class="absolute w-full left-0 top-[237px]" :src="Group" alt="" />
         <div class="relative z-10">
           <Waterfall
-            v-if="imageList.length"
-            :list="imageList"
+            v-if="successDataList.length"
+            :list="successDataList"
             :width="376"
             :gutter="26"
             backgroundColor="transparent"
@@ -288,10 +313,14 @@ init();
             <!-- v2.6.0之前版本插槽数据获取 -->
             <!-- <template #item="{ item, url, index }"> -->
             <!-- 新版插槽数据获取 -->
-            <template #default="{ item, url, index }">
+            <template #default="{ item }">
               <div class="rounded-[24px] overflow-hidden">
                 <!-- <LazyImg :url="url" Access-Control-Allow-Origin /> -->
-                <img :src="url" alt="" />
+                <img
+                  :src="item.drawUrl"
+                  :alt="item.prompt"
+                  @error="imgLoadError($event, item)"
+                />
               </div>
             </template>
           </Waterfall>

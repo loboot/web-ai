@@ -63,8 +63,8 @@ function compilerContainer() {
   compilerColumn();
   const columns = realColumn.value;
   const itemWidth = realWidth.value;
-  const cacheHeight = <any>[];
-  props.dataList.forEach((item, index) => {
+  const cacheHeight: number[] = [];
+  successDataList.value.forEach((item, index) => {
     const drawRatio = item.drawRatio; // 假设 drawRatio 是 "1632x2912"
     const dimensions = drawRatio.split('x'); // 使用 'x' 分割字符串
     const width = parseInt(dimensions[0], 10); // 宽度，转换为数字
@@ -72,14 +72,17 @@ function compilerContainer() {
     const bi = itemWidth / width;
     const boxheight = height * bi + props.gap + otherInfoContainerHeight.value;
     const currentBox = boxRefs.value[item.id];
+
     if (cacheHeight.length < columns) {
       currentBox.style.top = '0px';
       currentBox.style.left = `${(itemWidth + props.gap) * index}px`;
+
       cacheHeight.push(boxheight);
     } else {
-      const minHeight = Math.min.apply(null, cacheHeight);
+      const minHeight = Math.min(...cacheHeight);
       const minIndex = cacheHeight.findIndex((t: number) => t === minHeight);
-      currentBox.style.top = `${minHeight + 0}px`;
+
+      currentBox.style.top = `${minHeight}px`;
       currentBox.style.left = `${minIndex * (realWidth.value + props.gap)}px`;
       cacheHeight[minIndex] += boxheight;
     }
