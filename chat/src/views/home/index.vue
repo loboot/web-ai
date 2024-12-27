@@ -190,7 +190,7 @@ async function init() {
   try {
     const res: ResData = await fetchMidjourneyGetList({
       page: 1,
-      size: 10,
+      size: 20,
       rec: 1,
     });
     const target: any[] = res.data?.rows ?? [];
@@ -299,7 +299,7 @@ init();
       </div>
       <div
         class="relative mb-[223px]"
-        :class="{ 'h-[1310px]': !successDataList.length }"
+        :class="{ 'h-[1310px] overflow-hidden': successDataList.length }"
       >
         <img class="absolute w-full left-0 top-[237px]" :src="Group" alt="" />
         <div class="relative z-10">
@@ -308,6 +308,7 @@ init();
             :list="successDataList"
             :width="376"
             :gutter="26"
+            class="!h-[1310px]"
             backgroundColor="transparent"
           >
             <!-- v2.6.0之前版本插槽数据获取 -->
