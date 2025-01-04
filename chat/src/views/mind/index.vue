@@ -62,7 +62,7 @@ const demoData = `
 `;
 
 const prompt = ref('');
-const initValue = `# NineAi
+const initValue = `# BINGOAI
 ## 基础功能
 - 支持AI聊天
 - 支持GPT4
@@ -92,7 +92,7 @@ let mm: Markmap;
 function exportSVG() {
   const svgData = new XMLSerializer().serializeToString(svgRef.value);
   const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-  saveAs(blob, 'nineai-mind.svg');
+  saveAs(blob, 'BINGOAI-mind.svg');
 }
 async function exportHTML() {
   const dataUrl = await domtoimage.toSvg(svgRef.value);
@@ -108,7 +108,7 @@ async function exportHTML() {
 </body>
 </html>`;
   const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-  saveAs(blob, 'nineai-mind.html');
+  saveAs(blob, 'BINGOAI-mind.html');
 }
 
 async function chatmind() {

@@ -1,39 +1,39 @@
 <script lang="ts" setup name="Tools">
-import { useFullscreen } from '@vueuse/core'
-import eventBus from '@/utils/eventBus'
-import useSettingsStore from '@/store/modules/settings'
-import useUserStore from '@/store/modules/user'
+import { useFullscreen } from '@vueuse/core';
+import eventBus from '@/utils/eventBus';
+import useSettingsStore from '@/store/modules/settings';
+import useUserStore from '@/store/modules/user';
 
-const router = useRouter()
+const router = useRouter();
 
-const settingsStore = useSettingsStore()
-const userStore = useUserStore()
+const settingsStore = useSettingsStore();
+const userStore = useUserStore();
 
-const mainPage = useMainPage()
-const { isFullscreen, toggle } = useFullscreen()
+const mainPage = useMainPage();
+const { isFullscreen, toggle } = useFullscreen();
 
 function userCommand(command: 'home' | 'setting' | 'hotkeys' | 'logout') {
   switch (command) {
     case 'home':
       router.push({
         name: 'home',
-      })
-      break
+      });
+      break;
     case 'setting':
       router.push({
         name: 'personalSetting',
-      })
-      break
+      });
+      break;
     case 'hotkeys':
-      eventBus.emit('global-hotkeys-intro-toggle')
-      break
+      eventBus.emit('global-hotkeys-intro-toggle');
+      break;
     case 'logout':
       userStore.logout().then(() => {
         router.push({
           name: 'login',
-        })
-      })
-      break
+        });
+      });
+      break;
   }
 }
 </script>
@@ -41,25 +41,54 @@ function userCommand(command: 'home' | 'setting' | 'hotkeys' | 'logout') {
 <template>
   <div class="tools">
     <div class="buttons">
-      <span v-if="settingsStore.settings.navSearch.enable" class="item" @click="eventBus.emit('global-search-toggle')">
+      <span
+        v-if="settingsStore.settings.navSearch.enable"
+        class="item"
+        @click="eventBus.emit('global-search-toggle')"
+      >
         <el-icon>
           <svg-icon name="ep:search" />
         </el-icon>
       </span>
-      <span v-if="settingsStore.mode === 'pc' && settingsStore.settings.toolbar.enableFullscreen" class="item" @click="toggle">
+      <span
+        v-if="
+          settingsStore.mode === 'pc' &&
+          settingsStore.settings.toolbar.enableFullscreen
+        "
+        class="item"
+        @click="toggle"
+      >
         <el-icon>
           <svg-icon :name="isFullscreen ? 'fullscreen-exit' : 'fullscreen'" />
         </el-icon>
       </span>
-      <span v-if="settingsStore.settings.toolbar.enablePageReload" class="item" @click="mainPage.reload()">
+      <span
+        v-if="settingsStore.settings.toolbar.enablePageReload"
+        class="item"
+        @click="mainPage.reload()"
+      >
         <el-icon>
           <svg-icon name="ep:refresh-right" />
         </el-icon>
       </span>
-      <span v-if="settingsStore.settings.toolbar.enableColorScheme" class="item" @click="settingsStore.setColorScheme(settingsStore.settings.app.colorScheme === 'dark' ? 'light' : 'dark')">
+      <span
+        v-if="settingsStore.settings.toolbar.enableColorScheme"
+        class="item"
+        @click="
+          settingsStore.setColorScheme(
+            settingsStore.settings.app.colorScheme === 'dark' ? 'light' : 'dark'
+          )
+        "
+      >
         <el-icon>
-          <svg-icon v-show="settingsStore.settings.app.colorScheme === 'light'" name="ep:sunny" />
-          <svg-icon v-show="settingsStore.settings.app.colorScheme === 'dark'" name="ep:moon" />
+          <svg-icon
+            v-show="settingsStore.settings.app.colorScheme === 'light'"
+            name="ep:sunny"
+          />
+          <svg-icon
+            v-show="settingsStore.settings.app.colorScheme === 'dark'"
+            name="ep:moon"
+          />
         </el-icon>
       </span>
     </div>
@@ -70,20 +99,25 @@ function userCommand(command: 'home' | 'setting' | 'hotkeys' | 'logout') {
             <svg-icon name="ep:user-filled" />
           </el-icon>
         </el-avatar>
-        {{ `${userStore.username || 'Nine Ai'} ` }}
+        {{ `${userStore.username || 'BINGO AI'} ` }}
         <el-icon>
           <svg-icon name="ep:caret-bottom" />
         </el-icon>
       </div>
       <template #dropdown>
         <el-dropdown-menu class="user-dropdown">
-          <el-dropdown-item v-if="settingsStore.settings.home.enable" command="home">
+          <el-dropdown-item
+            v-if="settingsStore.settings.home.enable"
+            command="home"
+          >
             {{ settingsStore.settings.home.title }}
           </el-dropdown-item>
-          <el-dropdown-item command="setting">
-            个人设置
-          </el-dropdown-item>
-          <el-dropdown-item v-if="settingsStore.mode === 'pc'" divided command="hotkeys">
+          <el-dropdown-item command="setting"> 个人设置 </el-dropdown-item>
+          <el-dropdown-item
+            v-if="settingsStore.mode === 'pc'"
+            divided
+            command="hotkeys"
+          >
             快捷键介绍
           </el-dropdown-item>
           <el-dropdown-item divided command="logout">

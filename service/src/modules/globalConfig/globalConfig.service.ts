@@ -35,7 +35,7 @@ export class GlobalConfigService implements OnModuleInit {
   private globalConfigs: any = {};
   private wechatAccessToken: string;
   private wechatJsapiTicket: string;
-  private nineAiToken = true;
+  private BINGOAIToken = true;
 
   async onModuleInit() {
     await this.initGetAllConfig();
@@ -368,9 +368,9 @@ export class GlobalConfigService implements OnModuleInit {
   }
 
   /* 获取token success = 0 error = 1 */
-  getNineAiToken() {
+  getBINGOAIToken() {
     const MjdrawCount = this.globalConfigs['MjdrawCount'];
-    const auth = this.nineAiToken;
+    const auth = this.BINGOAIToken;
     return !auth || Number(MjdrawCount) === 1;
   }
 
@@ -516,7 +516,7 @@ export class GlobalConfigService implements OnModuleInit {
 
   /* get namespace */
   getNamespace() {
-    return process.env.NAMESPACE || 'NINEAI';
+    return process.env.NAMESPACE || 'BINGOAI';
   }
 
   /* 获取签名赠送额度 */
@@ -551,7 +551,7 @@ export class GlobalConfigService implements OnModuleInit {
     Logger.error('请填写您的授权码');
     Logger.error('缺失ip信息');
     Logger.error('缺失ip信息');
-    Logger.debug('感谢您使用NineAi、祝您使用愉快~');
+    Logger.debug('感谢您使用BINGOAI、祝您使用愉快~');
   }
 
   /* 拿到敏感次配置 都开启优先使用百度云 */
@@ -559,15 +559,15 @@ export class GlobalConfigService implements OnModuleInit {
     const {
       baiduTextStatus = 0,
       baiduTextAccessToken,
-      nineaiBuiltInSensitiveStatus = 0,
-      nineaiBuiltInSensitiveApiBase,
-      nineaiBuiltInSensitiveAuthKey,
+      BINGOAIBuiltInSensitiveStatus = 0,
+      BINGOAIBuiltInSensitiveApiBase,
+      BINGOAIBuiltInSensitiveAuthKey,
     } = await this.getConfigs([
       'baiduTextStatus',
       'baiduTextAccessToken',
-      'nineaiBuiltInSensitiveStatus',
-      'nineaiBuiltInSensitiveApiBase',
-      'nineaiBuiltInSensitiveAuthKey',
+      'BINGOAIBuiltInSensitiveStatus',
+      'BINGOAIBuiltInSensitiveApiBase',
+      'BINGOAIBuiltInSensitiveAuthKey',
     ]);
     if (Number(baiduTextStatus) === 1) {
       return {
@@ -576,11 +576,11 @@ export class GlobalConfigService implements OnModuleInit {
       };
     }
     /* 官方提供的检测Api */
-    if (Number(nineaiBuiltInSensitiveStatus) === 1) {
+    if (Number(BINGOAIBuiltInSensitiveStatus) === 1) {
       return {
-        useType: 'nineai',
-        nineaiBuiltInSensitiveApiBase,
-        nineaiBuiltInSensitiveAuthKey,
+        useType: 'BINGOAI',
+        BINGOAIBuiltInSensitiveApiBase,
+        BINGOAIBuiltInSensitiveAuthKey,
       };
     }
     return null;

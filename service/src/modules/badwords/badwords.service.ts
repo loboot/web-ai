@@ -1,5 +1,10 @@
 import { GlobalConfigService } from './../globalConfig/globalConfig.service';
-import { HttpException, HttpStatus, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  OnModuleInit,
+} from '@nestjs/common';
 import { BadWordsEntity } from './badwords.entity';
 import { In, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,7 +27,7 @@ export class BadwordsService implements OnModuleInit {
     private readonly violationLogEntity: Repository<ViolationLogEntity>,
     @InjectRepository(UserEntity)
     private readonly userEntity: Repository<UserEntity>,
-    private readonly globalConfigService: GlobalConfigService,
+    private readonly globalConfigService: GlobalConfigService
   ) {
     this.badWords = [];
   }
@@ -41,7 +46,13 @@ export class BadwordsService implements OnModuleInit {
       }
     }
     if (triggeredWords.length) {
-      await this.recordUserBadWords(userId, content, triggeredWords, ['自定义'], '自定义检测');
+      await this.recordUserBadWords(
+        userId,
+        content,
+        triggeredWords,
+        ['自定义'],
+        '自定义检测'
+      );
       const tips = `您提交的信息中包含违规的内容、我们已对您的账户进行标记、请合规使用！`;
       throw new HttpException(tips, HttpStatus.BAD_REQUEST);
     }
@@ -61,8 +72,14 @@ export class BadwordsService implements OnModuleInit {
   /* 通过配置信息去检测敏感词 */
   async checkBadWordsByConfig(content: string, config: any, userId) {
     const { useType } = config;
-    useType === 'baidu' && (await this.baiduCheckBadWords(content, config.baiduTextAccessToken, userId));
-    useType === 'nineai' && (await this.nineaiCheckBadWords(content, config, userId));
+    useType === 'baidu' &&
+      (await this.baiduCheckBadWords(
+        content,
+        config.baiduTextAccessToken,
+        userId
+      ));
+    useType === 'BINGOAI' &&
+      (await this.BINGOAICheckBadWords(content, config, userId));
   }
 
   /* 提取百度云敏感词违规类型 */
@@ -73,7 +90,11 @@ export class BadwordsService implements OnModuleInit {
   }
 
   /* 通过百度云敏感词检测 */
-  async baiduCheckBadWords(content: string, accessToken: string, userId: number) {
+  async baiduCheckBadWords(
+    content: string,
+    accessToken: string,
+    userId: number
+  ) {
     if (!accessToken) return;
     const url = `https://aip.baidubce.com/rest/2.0/solution/v1/text_censor/v2/user_defined?access_token=${accessToken}}`;
     const headers = {
@@ -81,28 +102,46 @@ export class BadwordsService implements OnModuleInit {
       Accept: 'application/json',
     };
     const response = await axios.post(url, { text: content }, { headers });
-    const { conclusion, error_code, error_msg, conclusionType, data } = response.data;
+    const { conclusion, error_code, error_msg, conclusionType, data } =
+      response.data;
     if (error_code) {
       console.log('百度文本检测出现错误、请查看配置信息: ', error_msg);
     }
     // conclusion 审核结果，可取值：合规、不合规、疑似、审核失败
     // conclusionType 1.合规，2.不合规，3.疑似，4.审核失败
     if (conclusionType !== 1) {
-      const types = [...new Set(data.map((item) => this.extractContent(item.msg)))];
-      await this.recordUserBadWords(userId, content, ['***'], types, '百度云检测');
-      const tips = `您提交的信息中包含${types.join(',')}的内容、我们已对您的账户进行标记、请合规使用！`;
+      const types = [
+        ...new Set(data.map((item) => this.extractContent(item.msg))),
+      ];
+      await this.recordUserBadWords(
+        userId,
+        content,
+        ['***'],
+        types,
+        '百度云检测'
+      );
+      const tips = `您提交的信息中包含${types.join(
+        ','
+      )}的内容、我们已对您的账户进行标记、请合规使用！`;
       throw new HttpException(tips, HttpStatus.BAD_REQUEST);
     }
   }
 
-  /* 通过nineai提供的敏感词检测 */
-  async nineaiCheckBadWords(content: string, config: any, userId) {
-    const { nineaiBuiltInSensitiveApiBase, nineaiBuiltInSensitiveAuthKey } = config;
-    if (!nineaiBuiltInSensitiveApiBase || !nineaiBuiltInSensitiveAuthKey) return;
+  /* 通过BINGOAI提供的敏感词检测 */
+  async BINGOAICheckBadWords(content: string, config: any, userId) {
+    const { BINGOAIBuiltInSensitiveApiBase, BINGOAIBuiltInSensitiveAuthKey } =
+      config;
+    if (!BINGOAIBuiltInSensitiveApiBase || !BINGOAIBuiltInSensitiveAuthKey)
+      return;
     const res = await axios.post(
-      nineaiBuiltInSensitiveApiBase,
+      BINGOAIBuiltInSensitiveApiBase,
       { content },
-      { headers: { 'Content-Type': 'application/json', Authorization: nineaiBuiltInSensitiveAuthKey } },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: BINGOAIBuiltInSensitiveAuthKey,
+        },
+      }
     );
     if (!res.data) return;
     if (res.data.code !== '0') {
@@ -112,7 +151,13 @@ export class BadwordsService implements OnModuleInit {
     if (res.data.word_list && res.data.word_list?.length) {
       const words = [...new Set(res.data.word_list.map((t) => t.keyword))];
       const types = [...new Set(res.data.word_list.map((t) => t.category))];
-      await this.recordUserBadWords(userId, content, words, types, 'NineAi检测');
+      await this.recordUserBadWords(
+        userId,
+        content,
+        words,
+        types,
+        'BINGOAI检测'
+      );
       const tips = this.formarTips(res.data.word_list);
       throw new HttpException(tips, HttpStatus.BAD_REQUEST);
     }
@@ -122,12 +167,17 @@ export class BadwordsService implements OnModuleInit {
   formarTips(wordList) {
     const categorys = wordList.map((t) => t.category);
     const unSet = [...new Set(categorys)];
-    return `您提交的内容中包含${unSet.join(',')}的信息、我们已对您账号进行标记、请合规使用！`;
+    return `您提交的内容中包含${unSet.join(
+      ','
+    )}的信息、我们已对您账号进行标记、请合规使用！`;
   }
 
   /* 加载自定义的敏感词 */
   async loadBadWords() {
-    const data = await this.badWordsEntity.find({ where: { status: 1 }, select: ['word'] });
+    const data = await this.badWordsEntity.find({
+      where: { status: 1 },
+      select: ['word'],
+    });
     this.badWords = data.map((t) => t.word);
   }
 
@@ -150,7 +200,10 @@ export class BadwordsService implements OnModuleInit {
   async delBadWords(body: DelBadWordsDto) {
     const b = await this.badWordsEntity.findOne({ where: { id: body.id } });
     if (!b) {
-      throw new HttpException('敏感词不存在,请检查您的提交信息', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '敏感词不存在,请检查您的提交信息',
+        HttpStatus.BAD_REQUEST
+      );
     }
     const res = await this.badWordsEntity.delete({ id: body.id });
     if (res.affected > 0) {
@@ -166,7 +219,10 @@ export class BadwordsService implements OnModuleInit {
     const { id, word, status } = body;
     const b = await this.badWordsEntity.findOne({ where: { word } });
     if (b) {
-      throw new HttpException('敏感词已经存在了、请勿重复添加', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '敏感词已经存在了、请勿重复添加',
+        HttpStatus.BAD_REQUEST
+      );
     }
     const res = await this.badWordsEntity.update({ id }, { word, status });
     if (res.affected > 0) {
@@ -181,7 +237,10 @@ export class BadwordsService implements OnModuleInit {
     const { word } = body;
     const b = await this.badWordsEntity.findOne({ where: { word } });
     if (b) {
-      throw new HttpException('敏感词已存在,请检查您的提交信息', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '敏感词已存在,请检查您的提交信息',
+        HttpStatus.BAD_REQUEST
+      );
     }
     await this.badWordsEntity.save({ word });
     await this.loadBadWords();

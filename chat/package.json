@@ -101,7 +101,7 @@
     ]
   },
   "build": {
-    "productName": "NineAi",
+    "productName": "BINGOAI",
     "appId": "ai.jiangly.com",
     "icon": "icons/icon.icns",
     "directories": {

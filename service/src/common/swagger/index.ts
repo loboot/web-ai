@@ -10,5 +10,5 @@ const swaggerOptions = new DocumentBuilder()
 
 export function createSwagger(app) {
   const document = SwaggerModule.createDocument(app, swaggerOptions);
-  SwaggerModule.setup('/nineai/swagger/docs', app, document);
+  SwaggerModule.setup('/BINGOAI/swagger/docs', app, document);
 }

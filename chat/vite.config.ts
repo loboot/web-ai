@@ -11,8 +11,8 @@ function setupPlugins(env: ImportMetaEnv): PluginOption[] {
       VitePWA({
         injectRegister: 'auto',
         manifest: {
-          name: 'Nine AI',
-          short_name: 'Nine AI',
+          name: 'BINGO AI',
+          short_name: 'BINGO AI',
           icons: [
             { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
             { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },

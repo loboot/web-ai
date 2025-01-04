@@ -1,15 +1,14 @@
 // appMenu.js
 const { Menu, app, Tray } = require('electron');
-const path = require('path')
+const path = require('path');
 
 function configureAppMenu(mainWindow) {
-
-  let	tray = new Tray(path.join(__dirname, '../icons/16x16.png'));
-  // tray.setToolTip('Nine Ai');
+  let tray = new Tray(path.join(__dirname, '../icons/16x16.png'));
+  // tray.setToolTip('BINGO AI');
 
   const template = [
     {
-      label: 'NineAi',
+      label: 'BINGOAI',
       submenu: [
         {
           label: '退出应用',
@@ -17,36 +16,36 @@ function configureAppMenu(mainWindow) {
           click: () => {
             app.quit();
           },
-        }
+        },
       ],
-    }
+    },
   ];
 
-	if (process.platform === 'darwin') {
+  if (process.platform === 'darwin') {
     template.unshift({
-        label: 'Edit',
-        submenu: [
-          { role: 'undo' },
-          { role: 'redo' },
-          { type: 'separator' },
-          { role: 'cut' },
-          { role: 'copy' },
-          { role: 'paste' },
-          { role: 'pasteandmatchstyle' },
-          { role: 'delete' },
-          { role: 'selectall' }
-        ]
-      })
-}
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'pasteandmatchstyle' },
+        { role: 'delete' },
+        { role: 'selectall' },
+      ],
+    });
+  }
 
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
 
-	tray.on('click', () => {
+  tray.on('click', () => {
     mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show();
   });
 
-	tray.on('right-click', () => {
+  tray.on('right-click', () => {
     const contextMenuWindows = Menu.buildFromTemplate([
       {
         label: '退出应用',
@@ -56,8 +55,7 @@ function configureAppMenu(mainWindow) {
       },
     ]);
     tray.popUpContextMenu(contextMenuWindows);
-	})
-
+  });
 }
 
 module.exports = { configureAppMenu };

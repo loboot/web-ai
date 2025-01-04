@@ -1,8 +1,18 @@
 import { UploadService } from './../upload/upload.service';
 import { UserService } from './../user/user.service';
 import { ConfigService } from 'nestjs-config';
-import { HttpException, HttpStatus, Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import type { ChatGPTAPIOptions, ChatMessage, SendMessageOptions } from 'chatgpt-ai-web';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  OnModuleInit,
+  Logger,
+} from '@nestjs/common';
+import type {
+  ChatGPTAPIOptions,
+  ChatMessage,
+  SendMessageOptions,
+} from 'chatgpt-ai-web';
 import { Request, Response } from 'express';
 import { OpenAiErrorCodeMessage } from '@/common/constants/errorMessage.constant';
 import {
@@ -82,8 +92,8 @@ export class ChatgptService implements OnModuleInit {
     private readonly globalConfigService: GlobalConfigService,
     private readonly fanyiService: FanyiService,
     private readonly chatGroupService: ChatGroupService,
-    private readonly modelsService: ModelsService,
-  ) { }
+    private readonly modelsService: ModelsService
+  ) {}
 
   private api;
   private nineStore: NineStoreInterface = null; // redis存储
@@ -92,9 +102,9 @@ export class ChatgptService implements OnModuleInit {
     list3: Key[];
     list4: Key[];
   } = {
-      list3: [],
-      list4: [],
-    };
+    list3: [],
+    list4: [],
+  };
 
   async onModuleInit() {
     let chatgpt = await importDynamic('chatgpt-ai-web');
@@ -109,15 +119,22 @@ export class ChatgptService implements OnModuleInit {
     const host = process.env.REDIS_HOST;
     const password = process.env.REDIS_PASSWORD;
     const username = process.env.REDIS_USER;
-    const redisUrl = `redis://${username || ''}:${password || ''}@${host}:${port}`;
+    const redisUrl = `redis://${username || ''}:${
+      password || ''
+    }@${host}:${port}`;
     const store = new KeyvRedis(redisUrl);
-    /* chatgpt-nineai 使用的 可以切换给 store使用 */
-    const messageStore = new Keyv({ store, namespace: 'nineai-chatlog' });
+    /* chatgpt-BINGOAI 使用的 可以切换给 store使用 */
+    const messageStore = new Keyv({ store, namespace: 'BINGOAI-chatlog' });
     this.nineStore = new NineStore({ store: messageStore, namespace: 'chat' });
   }
 
   /* 整理请求的所有入参 */
-  async getRequestParams(inputOpt, systemMessage, currentRequestModelKey, modelInfo = null) {
+  async getRequestParams(
+    inputOpt,
+    systemMessage,
+    currentRequestModelKey,
+    modelInfo = null
+  ) {
     if (!modelInfo) {
       modelInfo = (await this.modelsService.getBaseConfig())?.modelInfo;
     }
@@ -125,7 +142,9 @@ export class ChatgptService implements OnModuleInit {
     const { topN: temperature, model } = modelInfo;
     const { parentMessageId = 0 } = inputOpt;
     /* 根据用户区分不同模型使用不同的key */
-    const globalTimeoutMs: any = await this.globalConfigService.getConfigs(['openaiTimeoutMs']);
+    const globalTimeoutMs: any = await this.globalConfigService.getConfigs([
+      'openaiTimeoutMs',
+    ]);
     const timeoutMs = timeout * 1000 || globalTimeoutMs || 100 * 1000;
     const options: any = {
       parentMessageId,
@@ -141,10 +160,21 @@ export class ChatgptService implements OnModuleInit {
 
   async chatSyncFree(prompt: string) {
     const currentRequestModelKey = await this.modelsService.getRandomDrawKey();
-    const systemMessage = await this.globalConfigService.getConfigs(['systemPreMessage']);
-    const { maxModelTokens = 8000, maxResponseTokens = 4096, key, model } = currentRequestModelKey;
+    const systemMessage = await this.globalConfigService.getConfigs([
+      'systemPreMessage',
+    ]);
+    const {
+      maxModelTokens = 8000,
+      maxResponseTokens = 4096,
+      key,
+      model,
+    } = currentRequestModelKey;
     const proxyUrl = await this.getModelProxyUrl(currentRequestModelKey);
-    const { context: messagesHistory } = await this.nineStore.buildMessageFromParentMessageId(prompt, { parentMessageId: '', systemMessage });
+    const { context: messagesHistory } =
+      await this.nineStore.buildMessageFromParentMessageId(prompt, {
+        parentMessageId: '',
+        systemMessage,
+      });
     try {
       const response: any = await sendMessageFromOpenAi(messagesHistory, {
         apiKey: removeSpecialCharacters(key),
@@ -171,25 +201,53 @@ export class ChatgptService implements OnModuleInit {
     /* 获取当前对话组的详细配置信息 */
     const groupInfo = await this.chatGroupService.getGroupInfoFromId(groupId);
     /* 当前对话组关于对话的配置信息 */
-    const groupConfig = groupInfo?.config ? JSON.parse(groupInfo.config) : await this.modelsService.getBaseConfig();
-    const { keyType, model, topN: temperature, systemMessage: customSystemMessage, rounds } = groupConfig.modelInfo;
+    const groupConfig = groupInfo?.config
+      ? JSON.parse(groupInfo.config)
+      : await this.modelsService.getBaseConfig();
+    const {
+      keyType,
+      model,
+      topN: temperature,
+      systemMessage: customSystemMessage,
+      rounds,
+    } = groupConfig.modelInfo;
     /* 获取到本次需要调用的key */
     let currentRequestModelKey = null;
     if (!cusromPrompt) {
-      currentRequestModelKey = await this.modelsService.getCurrentModelKeyInfo(model);
+      currentRequestModelKey = await this.modelsService.getCurrentModelKeyInfo(
+        model
+      );
     } else {
       currentRequestModelKey = await this.modelsService.getRandomDrawKey();
     }
     if (!currentRequestModelKey) {
-      throw new HttpException('当前流程所需要的模型已被管理员下架、请联系管理员上架专属模型！', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '当前流程所需要的模型已被管理员下架、请联系管理员上架专属模型！',
+        HttpStatus.BAD_REQUEST
+      );
     }
 
-    const { deduct, isTokenBased, tokenFeeRatio, deductType, key: modelKey, secret, modelName, id: keyId, accessToken } = currentRequestModelKey;
+    const {
+      deduct,
+      isTokenBased,
+      tokenFeeRatio,
+      deductType,
+      key: modelKey,
+      secret,
+      modelName,
+      id: keyId,
+      accessToken,
+    } = currentRequestModelKey;
     /* 用户状态检测 */
     await this.userService.checkUserStatus(req.user);
     /* 用户余额检测 */
-    await this.userBalanceService.validateBalance(req, deductType === 1 ? 'model3' : 'model4', deduct);
-    res && res.setHeader('Content-type', 'application/octet-stream; charset=utf-8');
+    await this.userBalanceService.validateBalance(
+      req,
+      deductType === 1 ? 'model3' : 'model4',
+      deduct
+    );
+    res &&
+      res.setHeader('Content-type', 'application/octet-stream; charset=utf-8');
     /* 敏感词检测 */
     await this.badwordsService.checkBadWords(prompt, req.user.id);
     /* 自动回复 */
@@ -202,9 +260,14 @@ export class ChatgptService implements OnModuleInit {
 
     /* 如果传入了appId 那么appId优先级更高 */
     if (appId) {
-      const appInfo = await this.appEntity.findOne({ where: { id: appId, status: In([1, 3, 4, 5]) } });
+      const appInfo = await this.appEntity.findOne({
+        where: { id: appId, status: In([1, 3, 4, 5]) },
+      });
       if (!appInfo) {
-        throw new HttpException('你当前使用的应用已被下架、请删除当前对话开启新的对话吧！', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          '你当前使用的应用已被下架、请删除当前对话开启新的对话吧！',
+          HttpStatus.BAD_REQUEST
+        );
       }
       appInfo.preset && (setSystemMessage = appInfo.preset);
     } else if (cusromPrompt) {
@@ -217,7 +280,9 @@ export class ChatgptService implements OnModuleInit {
     } else {
       // 走系统默认预设
       const currentDate = new Date().toISOString().split('T')[0];
-      const systemPreMessage = await this.globalConfigService.getConfigs(['systemPreMessage']);
+      const systemPreMessage = await this.globalConfigService.getConfigs([
+        'systemPreMessage',
+      ]);
       setSystemMessage = systemPreMessage + `\n Current date: ${currentDate}`;
     }
 
@@ -226,11 +291,18 @@ export class ChatgptService implements OnModuleInit {
     if (usingNetwork) {
       netWorkPrompt = await compileNetwork(prompt);
       const currentDate = new Date().toISOString().split('T')[0];
-      const systemPreMessage = await this.globalConfigService.getConfigs(['systemPreMessage']);
+      const systemPreMessage = await this.globalConfigService.getConfigs([
+        'systemPreMessage',
+      ]);
       setSystemMessage = systemPreMessage + `\n Current date: ${currentDate}`;
     }
     /* 整理本次请求全部数据 */
-    const mergedOptions: any = await this.getRequestParams(options, setSystemMessage, currentRequestModelKey, groupConfig.modelInfo);
+    const mergedOptions: any = await this.getRequestParams(
+      options,
+      setSystemMessage,
+      currentRequestModelKey,
+      groupConfig.modelInfo
+    );
     res && res.status(200);
     let response = null;
     let othersInfo = null;
@@ -304,39 +376,56 @@ export class ChatgptService implements OnModuleInit {
           if (isTokenBased === true) {
             charge = Math.ceil((deduct * total_tokens) / tokenFeeRatio);
           }
-          await this.userBalanceService.deductFromBalance(req.user.id, `model${deductType === 1 ? 3 : 4}`, charge, total_tokens);
+          await this.userBalanceService.deductFromBalance(
+            req.user.id,
+            `model${deductType === 1 ? 3 : 4}`,
+            charge,
+            total_tokens
+          );
         });
 
         /* openAi */
-        const { key, maxToken, maxTokenRes, proxyResUrl } = await this.formatModelToken(currentRequestModelKey);
-        const { parentMessageId, completionParams, systemMessage } = mergedOptions;
+        const { key, maxToken, maxTokenRes, proxyResUrl } =
+          await this.formatModelToken(currentRequestModelKey);
+        const { parentMessageId, completionParams, systemMessage } =
+          mergedOptions;
         const { model, temperature } = completionParams;
-        const { context: messagesHistory } = await this.nineStore.buildMessageFromParentMessageId(usingNetwork ? netWorkPrompt : prompt, {
-          parentMessageId,
-          systemMessage,
-          maxModelToken: maxToken,
-          maxResponseTokens: maxTokenRes,
-          maxRounds: addOneIfOdd(rounds),
-          fileInfo: fileInfo,
-          model: model
-        });
+        const { context: messagesHistory } =
+          await this.nineStore.buildMessageFromParentMessageId(
+            usingNetwork ? netWorkPrompt : prompt,
+            {
+              parentMessageId,
+              systemMessage,
+              maxModelToken: maxToken,
+              maxResponseTokens: maxTokenRes,
+              maxRounds: addOneIfOdd(rounds),
+              fileInfo: fileInfo,
+              model: model,
+            }
+          );
         let firstChunk = true;
 
-        response = await sendMessageFromOpenAi(messagesHistory, {
-          maxToken,
-          maxTokenRes,
-          apiKey: modelKey,
-          model,
-          prompt,
-          fileInfo,
-          temperature,
-          proxyUrl: proxyResUrl,
-          onProgress: (chat) => {
-            res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`);
-            lastChat = chat;
-            firstChunk = false;
-          }
-        }, this.uploadService);
+        response = await sendMessageFromOpenAi(
+          messagesHistory,
+          {
+            maxToken,
+            maxTokenRes,
+            apiKey: modelKey,
+            model,
+            prompt,
+            fileInfo,
+            temperature,
+            proxyUrl: proxyResUrl,
+            onProgress: (chat) => {
+              res.write(
+                firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`
+              );
+              lastChat = chat;
+              firstChunk = false;
+            },
+          },
+          this.uploadService
+        );
 
         isSuccess = true;
         const userMessageData: MessageInfo = {
@@ -365,20 +454,25 @@ export class ChatgptService implements OnModuleInit {
           conversationId: response?.conversationId,
         };
 
-
         await this.nineStore.setData(assistantMessageData);
 
         othersInfo = { model, parentMessageId: userMessageData.id };
         /* 回答完毕 */
       } else {
-        const { key, maxToken, maxTokenRes, proxyResUrl } = await this.formatModelToken(currentRequestModelKey);
-        const { parentMessageId, completionParams, systemMessage } = mergedOptions;
+        const { key, maxToken, maxTokenRes, proxyResUrl } =
+          await this.formatModelToken(currentRequestModelKey);
+        const { parentMessageId, completionParams, systemMessage } =
+          mergedOptions;
         const { model, temperature } = completionParams;
-        const { context: messagesHistory } = await this.nineStore.buildMessageFromParentMessageId(usingNetwork ? netWorkPrompt : prompt, {
-          parentMessageId,
-          systemMessage,
-          maxRounds: addOneIfOdd(rounds),
-        });
+        const { context: messagesHistory } =
+          await this.nineStore.buildMessageFromParentMessageId(
+            usingNetwork ? netWorkPrompt : prompt,
+            {
+              parentMessageId,
+              systemMessage,
+              maxRounds: addOneIfOdd(rounds),
+            }
+          );
         response = await sendMessageFromOpenAi(messagesHistory, {
           apiKey: modelKey,
           model,
@@ -388,13 +482,22 @@ export class ChatgptService implements OnModuleInit {
           prompt,
         });
       }
-      const usage = response.detail?.usage || { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 };
+      const usage = response.detail?.usage || {
+        prompt_tokens: 1,
+        completion_tokens: 1,
+        total_tokens: 2,
+      };
       const { prompt_tokens, completion_tokens, total_tokens } = usage;
       let charge = deduct;
       if (isTokenBased === true) {
         charge = Math.ceil((deduct * total_tokens) / tokenFeeRatio);
       }
-      await this.userBalanceService.deductFromBalance(req.user.id, `model${deductType === 1 ? 3 : 4}`, charge, total_tokens);
+      await this.userBalanceService.deductFromBalance(
+        req.user.id,
+        `model${deductType === 1 ? 3 : 4}`,
+        charge,
+        total_tokens
+      );
       /* 记录key的使用次数 和使用token */
       await this.modelsService.saveUseLog(keyId, total_tokens);
       const curIp = getClientIp(req);
@@ -451,9 +554,11 @@ export class ChatgptService implements OnModuleInit {
       });
       Logger.debug(
         `用户ID: ${req.user.id} 模型名称: ${modelName}-${model}, 消耗token: ${total_tokens}, 消耗积分： ${charge}`,
-        'ChatgptService',
+        'ChatgptService'
       );
-      const userBalance = await this.userBalanceService.queryUserBalance(req.user.id);
+      const userBalance = await this.userBalanceService.queryUserBalance(
+        req.user.id
+      );
       response.userBanance = { ...userBalance };
       response.result && (response.result = '');
       response.is_end = true; //本次才是表示真的结束
@@ -463,7 +568,11 @@ export class ChatgptService implements OnModuleInit {
         return response.text;
       }
     } catch (error) {
-      console.log('chat-error <----------------------------------------->', modelKey, error);
+      console.log(
+        'chat-error <----------------------------------------->',
+        modelKey,
+        error
+      );
       const code = error?.statusCode || 400;
       const status = error?.response?.status || error?.statusCode || 400;
       console.log(
@@ -475,7 +584,7 @@ export class ChatgptService implements OnModuleInit {
         'statusText:',
         error?.response?.statusText,
         'status',
-        error?.response?.status,
+        error?.response?.status
       );
       if (error.status && error.status === 402) {
         const errMsg = { message: `Catch Error ${error.message}`, code: 402 };
@@ -488,36 +597,70 @@ export class ChatgptService implements OnModuleInit {
 
       if (!status) {
         if (res) {
-          return res.write(JSON.stringify({ message: error.message, code: 500 }));
+          return res.write(
+            JSON.stringify({ message: error.message, code: 500 })
+          );
         } else {
           throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
         }
       }
 
-      let message = OpenAiErrorCodeMessage[status] ? OpenAiErrorCodeMessage[status] : '服务异常、请重新试试吧！！！';
+      let message = OpenAiErrorCodeMessage[status]
+        ? OpenAiErrorCodeMessage[status]
+        : '服务异常、请重新试试吧！！！';
 
-      if (error?.message.includes('The OpenAI account associated with this API key has been deactivated.') && Number(keyType) === 1) {
-        await this.modelsService.lockKey(keyId, '当前模型key已被封禁、已冻结当前调用Key、尝试重新对话试试吧！', -1);
+      if (
+        error?.message.includes(
+          'The OpenAI account associated with this API key has been deactivated.'
+        ) &&
+        Number(keyType) === 1
+      ) {
+        await this.modelsService.lockKey(
+          keyId,
+          '当前模型key已被封禁、已冻结当前调用Key、尝试重新对话试试吧！',
+          -1
+        );
         message = '当前模型key已被封禁';
       }
 
-      if (error?.statusCode === 429 && error.message.includes('billing') && Number(keyType) === 1) {
-        await this.modelsService.lockKey(keyId, '当前模型key余额已耗尽、已冻结当前调用Key、尝试重新对话试试吧！', -3);
+      if (
+        error?.statusCode === 429 &&
+        error.message.includes('billing') &&
+        Number(keyType) === 1
+      ) {
+        await this.modelsService.lockKey(
+          keyId,
+          '当前模型key余额已耗尽、已冻结当前调用Key、尝试重新对话试试吧！',
+          -3
+        );
         message = '当前模型key余额已耗尽';
       }
 
-      if (error?.statusCode === 429 && error?.statusText === 'Too Many Requests') {
+      if (
+        error?.statusCode === 429 &&
+        error?.statusText === 'Too Many Requests'
+      ) {
         message = '当前模型调用过于频繁、请重新试试吧！';
       }
 
       /* 提供了错误的秘钥 */
-      if (error?.statusCode === 401 && error.message.includes('Incorrect API key provided') && Number(keyType) === 1) {
+      if (
+        error?.statusCode === 401 &&
+        error.message.includes('Incorrect API key provided') &&
+        Number(keyType) === 1
+      ) {
         await this.modelsService.lockKey(keyId, '提供了错误的模型秘钥', -2);
         message = '提供了错误的模型秘钥、已冻结当前调用Key、请重新尝试对话！';
       }
 
       /* 模型有问题 */
-      if (error?.statusCode === 404 && error.message.includes('This is not a chat model and thus not supported') && Number(keyType) === 1) {
+      if (
+        error?.statusCode === 404 &&
+        error.message.includes(
+          'This is not a chat model and thus not supported'
+        ) &&
+        Number(keyType) === 1
+      ) {
         await this.modelsService.lockKey(keyId, '当前模型不是聊天模型', -4);
         message = '当前模型不是聊天模型、已冻结当前调用Key、请重新尝试对话！';
       }
@@ -527,7 +670,10 @@ export class ChatgptService implements OnModuleInit {
       }
 
       /* 防止因为key的原因直接导致客户端以为token过期退出  401只给用于鉴权token中 */
-      const errMsg = { message: message || 'Please check the back-end console', code: code === 401 ? 400 : code || 500 };
+      const errMsg = {
+        message: message || 'Please check the back-end console',
+        code: code === 401 ? 400 : code || 500,
+      };
 
       if (res) {
         return res.write(JSON.stringify(errMsg));
@@ -548,15 +694,24 @@ export class ChatgptService implements OnModuleInit {
     await this.userBalanceService.validateBalance(req, 'mjDraw', money);
     let images = [];
     /* 从3的卡池随机拿一个key */
-    const detailKeyInfo = await this.modelsService.getCurrentModelKeyInfo('dall-e-3');
+    const detailKeyInfo = await this.modelsService.getCurrentModelKeyInfo(
+      'dall-e-3'
+    );
     const keyId = detailKeyInfo?.id;
     const { key, proxyResUrl } = await this.formatModelToken(detailKeyInfo);
-    Logger.log(`draw paompt info <==**==> ${body.prompt}, key ===> ${key}`, 'DrawService');
+    Logger.log(
+      `draw paompt info <==**==> ${body.prompt}, key ===> ${key}`,
+      'DrawService'
+    );
     try {
       const api = `${proxyResUrl}/v1/images/generations`;
       const params = { ...body, model: 'dall-e-3' };
       console.log('dall-e draw params: ', params);
-      const res = await axios.post(api, { ...params, response_format: 'b64_json' }, { headers: { Authorization: `Bearer ${key}` } });
+      const res = await axios.post(
+        api,
+        { ...params, response_format: 'b64_json' },
+        { headers: { Authorization: `Bearer ${key}` } }
+      );
       images = res.data.data;
       const task = [];
       for (const item of images) {
@@ -566,7 +721,12 @@ export class ChatgptService implements OnModuleInit {
       }
       const urls = await Promise.all(task);
       /* 绘制openai的dall-e2绘画也扣除的是绘画积分次数 */
-      await this.userBalanceService.deductFromBalance(req.user.id, 'mjDraw', params?.quality === 'standard' ? 2 : 4, money);
+      await this.userBalanceService.deductFromBalance(
+        req.user.id,
+        'mjDraw',
+        params?.quality === 'standard' ? 2 : 4,
+        money
+      );
       const curIp = getClientIp(req);
       const taskLog = [];
       const cosType = await this.uploadService.getUploadType();
@@ -589,7 +749,7 @@ export class ChatgptService implements OnModuleInit {
             completionTokens: 0,
             totalTokens: 0,
             model: 'dall-e-3',
-          }),
+          })
         );
       });
       await Promise.all(taskLog);
@@ -599,22 +759,50 @@ export class ChatgptService implements OnModuleInit {
       console.log('openai-draw error: ', JSON.stringify(error), key, status);
       const message = error?.response?.data?.error?.message;
       if (status === 429) {
-        throw new HttpException('当前请求已过载、请稍等会儿再试试吧！', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          '当前请求已过载、请稍等会儿再试试吧！',
+          HttpStatus.BAD_REQUEST
+        );
       }
-      if (status === 400 && message.includes('This request has been blocked by our content filters')) {
-        throw new HttpException('您的请求已被系统拒绝。您的提示可能存在一些非法的文本。', HttpStatus.BAD_REQUEST);
+      if (
+        status === 400 &&
+        message.includes('This request has been blocked by our content filters')
+      ) {
+        throw new HttpException(
+          '您的请求已被系统拒绝。您的提示可能存在一些非法的文本。',
+          HttpStatus.BAD_REQUEST
+        );
       }
-      if (status === 400 && message.includes('Billing hard limit has been reached')) {
-        await this.modelsService.lockKey(keyId, '当前模型key已被封禁、已冻结当前调用Key、尝试重新对话试试吧！', -1);
-        throw new HttpException('当前Key余额已不足、请重新再试一次吧！', HttpStatus.BAD_REQUEST);
+      if (
+        status === 400 &&
+        message.includes('Billing hard limit has been reached')
+      ) {
+        await this.modelsService.lockKey(
+          keyId,
+          '当前模型key已被封禁、已冻结当前调用Key、尝试重新对话试试吧！',
+          -1
+        );
+        throw new HttpException(
+          '当前Key余额已不足、请重新再试一次吧！',
+          HttpStatus.BAD_REQUEST
+        );
       }
       if (status === 500) {
-        throw new HttpException('绘制图片失败，请检查你的提示词是否有非法描述！', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          '绘制图片失败，请检查你的提示词是否有非法描述！',
+          HttpStatus.BAD_REQUEST
+        );
       }
       if (status === 401) {
-        throw new HttpException('绘制图片失败，此次绘画被拒绝了！', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          '绘制图片失败，此次绘画被拒绝了！',
+          HttpStatus.BAD_REQUEST
+        );
       }
-      throw new HttpException('绘制图片失败，请稍后试试吧！', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '绘制图片失败，请稍后试试吧！',
+        HttpStatus.BAD_REQUEST
+      );
     }
   }
 
@@ -622,7 +810,16 @@ export class ChatgptService implements OnModuleInit {
   async getAllKeyList() {
     const list = await this.gptKeysEntity.find({
       where: { status: 1 },
-      select: ['id', 'key', 'weight', 'model', 'maxModelTokens', 'maxResponseTokens', 'openaiProxyUrl', 'openaiTimeoutMs'],
+      select: [
+        'id',
+        'key',
+        'weight',
+        'model',
+        'maxModelTokens',
+        'maxResponseTokens',
+        'openaiProxyUrl',
+        'openaiTimeoutMs',
+      ],
     });
     const list3 = list.filter((t) => t.model.includes('gpt-3'));
     const list4 = list.filter((t) => t.model.includes('gpt-4'));
@@ -634,7 +831,9 @@ export class ChatgptService implements OnModuleInit {
 
   /* 拿到代理地址 */
   async getModelProxyUrl(modelKey) {
-    const openaiBaseUrl = await this.globalConfigService.getConfigs(['openaiBaseUrl']);
+    const openaiBaseUrl = await this.globalConfigService.getConfigs([
+      'openaiBaseUrl',
+    ]);
     return modelKey?.proxyUrl || openaiBaseUrl || 'https://api.openai.com';
   }
 
@@ -666,7 +865,13 @@ export class ChatgptService implements OnModuleInit {
     let maxToken = null;
     let maxTokenRes = null;
     let proxyResUrl = null;
-    let { model, maxModelTokens = 0, maxResponseTokens = 0, proxyUrl = '', key } = detailKeyInfo;
+    let {
+      model,
+      maxModelTokens = 0,
+      maxResponseTokens = 0,
+      proxyUrl = '',
+      key,
+    } = detailKeyInfo;
 
     if (model.toLowerCase().includes('gpt-4')) {
       maxModelTokens >= 8192 && (maxModelTokens = 8192);
@@ -725,7 +930,10 @@ export class ChatgptService implements OnModuleInit {
     try {
       const { name, icon, order, id, status } = body;
       if (id) {
-        return await this.chatBoxTypeEntity.update({ id }, { name, icon, order, status });
+        return await this.chatBoxTypeEntity.update(
+          { id },
+          { name, icon, order, status }
+        );
       } else {
         return await this.chatBoxTypeEntity.save({ name, icon, order, status });
       }
@@ -741,7 +949,10 @@ export class ChatgptService implements OnModuleInit {
     }
     const count = await this.chatBoxEntity.count({ where: { typeId: id } });
     if (count) {
-      throw new HttpException('当前分类下有未处理数据不可移除！', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '当前分类下有未处理数据不可移除！',
+        HttpStatus.BAD_REQUEST
+      );
     }
     return await this.chatBoxTypeEntity.delete({ id });
   }
@@ -785,7 +996,9 @@ export class ChatgptService implements OnModuleInit {
     });
     const typeIds = [...new Set(data.map((t) => t.typeId))];
     const appIds = [...new Set(data.map((t) => t.appId))];
-    const typeRes = await this.chatBoxTypeEntity.find({ where: { id: In(typeIds) } });
+    const typeRes = await this.chatBoxTypeEntity.find({
+      where: { id: In(typeIds) },
+    });
     const appRes = await this.appEntity.find({ where: { id: In(appIds) } });
     return data.map((item: any) => {
       const { typeId, appId } = item;
@@ -796,7 +1009,10 @@ export class ChatgptService implements OnModuleInit {
   }
 
   async queryChatBoxFrontend() {
-    const typeRes = await this.chatBoxTypeEntity.find({ order: { order: 'DESC' }, where: { status: true } });
+    const typeRes = await this.chatBoxTypeEntity.find({
+      order: { order: 'DESC' },
+      where: { status: true },
+    });
     const boxinfos = await this.chatBoxEntity.find({ where: { status: true } });
     const appIds = [...new Set(boxinfos.map((t) => t.appId))];
     const appInfos = await this.appEntity.find({ where: { id: In(appIds) } });
@@ -815,7 +1031,10 @@ export class ChatgptService implements OnModuleInit {
     try {
       const { name, icon, order, id, status } = body;
       if (id) {
-        return await this.chatPreTypeEntity.update({ id }, { name, icon, order, status });
+        return await this.chatPreTypeEntity.update(
+          { id },
+          { name, icon, order, status }
+        );
       } else {
         return await this.chatPreTypeEntity.save({ name, icon, order, status });
       }
@@ -831,7 +1050,10 @@ export class ChatgptService implements OnModuleInit {
     }
     const count = await this.chatBoxEntity.count({ where: { typeId: id } });
     if (count) {
-      throw new HttpException('当前分类下有未处理数据不可移除！', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '当前分类下有未处理数据不可移除！',
+        HttpStatus.BAD_REQUEST
+      );
     }
     return await this.chatPreTypeEntity.delete({ id });
   }
@@ -872,7 +1094,9 @@ export class ChatgptService implements OnModuleInit {
       order: { order: 'DESC' },
     });
     const typeIds = [...new Set(data.map((t) => t.typeId))];
-    const typeRes = await this.chatPreTypeEntity.find({ where: { id: In(typeIds) } });
+    const typeRes = await this.chatPreTypeEntity.find({
+      where: { id: In(typeIds) },
+    });
     return data.map((item: any) => {
       const { typeId, appId } = item;
       item.typeInfo = typeRes.find((t) => t.id === typeId);
@@ -881,16 +1105,27 @@ export class ChatgptService implements OnModuleInit {
   }
 
   async queryChatPreList() {
-    const typeRes = await this.chatPreTypeEntity.find({ order: { order: 'DESC' }, where: { status: true } });
-    const chatPreData = await this.chatPreEntity.find({ where: { status: true } });
+    const typeRes = await this.chatPreTypeEntity.find({
+      order: { order: 'DESC' },
+      where: { status: true },
+    });
+    const chatPreData = await this.chatPreEntity.find({
+      where: { status: true },
+    });
     return typeRes.map((t: any) => {
-      t.childList = chatPreData.filter((box) => box.typeId === t.id && box.status);
+      t.childList = chatPreData.filter(
+        (box) => box.typeId === t.id && box.status
+      );
       return t;
     });
   }
 
   /* 通过模型拿到当前模型支持的最大上下文 */
-  async getMaxTokenFromModelWithOpenAi(model: string, maxModelToken, maxResToken) {
+  async getMaxTokenFromModelWithOpenAi(
+    model: string,
+    maxModelToken,
+    maxResToken
+  ) {
     let maxToken = 4096;
     let maxRes = 2048;
 
@@ -906,7 +1141,10 @@ export class ChatgptService implements OnModuleInit {
       }
 
       /* gpt4 1106 或者 preview  最大 128k  回复最大 4096 */
-      if (model.toLowerCase().includes('gpt-4-1106') || model.toLowerCase().includes('gpt-4-vision-preview')) {
+      if (
+        model.toLowerCase().includes('gpt-4-1106') ||
+        model.toLowerCase().includes('gpt-4-vision-preview')
+      ) {
         maxToken = maxModelToken >= 128000 ? 128000 : maxModelToken;
         maxRes = maxResToken >= 4096 ? 4096 : maxResToken;
       }

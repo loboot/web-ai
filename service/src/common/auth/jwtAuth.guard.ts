@@ -1,5 +1,10 @@
 import { RedisCacheService } from '@/modules/redisCache/redisCache.service';
-import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import * as jwt from 'jsonwebtoken';
 import { ModuleRef } from '@nestjs/core';
@@ -12,21 +17,23 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     private redisCacheService: RedisCacheService,
     private readonly moduleRef: ModuleRef,
     private readonly globalConfigService: GlobalConfigService,
-    private readonly authService: AuthService,
+    private readonly authService: AuthService
   ) {
     super();
   }
 
   async canActivate(context) {
     if (!this.redisCacheService) {
-      this.redisCacheService = this.moduleRef.get(RedisCacheService, { strict: false });
+      this.redisCacheService = this.moduleRef.get(RedisCacheService, {
+        strict: false,
+      });
     }
     const request = context.switchToHttp().getRequest();
     // TODO 域名检测
     const domain = request.headers['x-website-domain'];
     const token = this.extractToken(request);
     request.user = this.validateToken(token);
-    const auth = this.globalConfigService.getNineAiToken();
+    const auth = this.globalConfigService.getBINGOAIToken();
     await this.redisCacheService.checkTokenAuth(token, request);
     return true;
   }
@@ -56,7 +63,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     try {
       return jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
-      throw new HttpException('亲爱的用户,请登录后继续操作,我们正在等您的到来！', HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+        '亲爱的用户,请登录后继续操作,我们正在等您的到来！',
+        HttpStatus.UNAUTHORIZED
+      );
     }
   }
 

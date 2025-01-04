@@ -1,34 +1,40 @@
 <script lang="ts" setup name="Copyright">
-import { onMounted } from 'vue'
-import useSettingsStore from '@/store/modules/settings'
-import apiConfig from '@/api/modules/config'
+import { onMounted } from 'vue';
+import useSettingsStore from '@/store/modules/settings';
+import apiConfig from '@/api/modules/config';
 
 const copyright = ref({
-  copyrightTitle: 'NineAi Admin',
+  copyrightTitle: 'BINGOAI Admin',
   copyrightUrl: '/',
-})
+});
 
 async function getCopyright() {
-  const res: any = await apiConfig.copyright()
+  const res: any = await apiConfig.copyright();
   if (!res.success) {
-    return
+    return;
   }
-  copyright.value = res.data
+  copyright.value = res.data;
 }
 
-const route = useRoute()
-const settingsStore = useSettingsStore()
+const route = useRoute();
+const settingsStore = useSettingsStore();
 
 onMounted(() => {
-  getCopyright()
-})
+  getCopyright();
+});
 </script>
 
 <template>
   <footer class="copyright">
     <span>Copyright</span>
     <span class="icon">©</span>
-    <a v-if="settingsStore.settings.copyright.beian" :href="copyright.copyrightUrl" target="_blank" rel="noopener">{{ copyright.copyrightTitle }}</a>
+    <a
+      v-if="settingsStore.settings.copyright.beian"
+      :href="copyright.copyrightUrl"
+      target="_blank"
+      rel="noopener"
+      >{{ copyright.copyrightTitle }}</a
+    >
   </footer>
 </template>
 

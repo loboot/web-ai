@@ -1,7 +1,7 @@
-import type { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router';
 
 function Layout() {
-  return import('@/layouts/index.vue')
+  return import('@/layouts/index.vue');
 }
 
 const routes: RouteRecordRaw = {
@@ -37,7 +37,7 @@ const routes: RouteRecordRaw = {
     //   name: 'SensitiveBuiltIn',
     //   component: () => import('@/views/sensitive/builtIn.vue'),
     //   meta: {
-    //     title: 'NineAi敏感词',
+    //     title: 'BINGOAI敏感词',
     //     icon: 'menu-minganci',
     //   },
     // },
@@ -60,6 +60,6 @@ const routes: RouteRecordRaw = {
       },
     },
   ],
-}
+};
 
-export default routes
+export default routes;

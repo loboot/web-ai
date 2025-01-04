@@ -37,7 +37,7 @@ function jumpPage() {
 <template>
   <div @click="jumpPage">
     <img
-      :src="logoPath ? logoPath : '/logo.ico'"
+      :src="logoPath ? logoPath : '/logo.png'"
       :class="[getMobileClass, imageClass, notJump ? '' : 'cursor-pointer']"
       class="px-0 box-content dark:border-[#ffffff17] border-#ebebeb-400"
       alt=""
