@@ -156,7 +156,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="main min-h-screen bg-center dark:bg-[#2F2E34] h-full flex flex-col overflow-hidden ">
+  <div class="main min-h-screen bg-center  h-full flex flex-col overflow-hidden ">
     <TitleBar title="会员商场" :des="tips" :class="[isMobile ? 'px-3' : 'px-24']" />
     <div class=" flex justify-center items-center" :style="{ height: isMobile ? '60px' : '180px' }">
       <NTabs type="segment" :style="{ width: isMobile ? '90%' : '400px' }" @update:value="updateTabs">
