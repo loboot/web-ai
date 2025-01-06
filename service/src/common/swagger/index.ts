@@ -2,8 +2,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { PORT, SWAGGERPREFIX, APIPREFIX } from '@/config/main';
 
 const swaggerOptions = new DocumentBuilder()
-  .setTitle('Nine Team api document')
-  .setDescription('Nine Team api document')
+  .setTitle('Bingo Team api document')
+  .setDescription('Bingo Team api document')
   .setVersion('1.0.0')
   .addBearerAuth()
   .build();

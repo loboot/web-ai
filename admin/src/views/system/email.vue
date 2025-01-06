@@ -222,7 +222,7 @@ onMounted(() => {
             >
               <el-input
                 v-model="formInline.registerVerifyEmailFrom"
-                placeholder="邮件尾部来源 From: (默认： Nine_Ai_Team)"
+                placeholder="邮件尾部来源 From: (默认： Bingo_Ai_Team)"
                 clearable
               />
             </el-form-item>
@@ -238,7 +238,7 @@ onMounted(() => {
                 v-model="formInline.registerVerifyEmailDesc"
                 type="textarea"
                 :rows="3"
-                placeholder="默认内容(欢迎使用NineTeam团队AI团队的产品服务,请在三十分钟内完成你的账号激活,点击以下按钮激活您的账号) | 发送的邮件内容、会追加一个激活按钮、详细内容请查看文档。    "
+                placeholder="默认内容(欢迎使用BingoTeam团队AI团队的产品服务,请在三十分钟内完成你的账号激活,点击以下按钮激活您的账号) | 发送的邮件内容、会追加一个激活按钮、详细内容请查看文档。    "
                 clearable
               />
             </el-form-item>
@@ -272,7 +272,7 @@ onMounted(() => {
             >
               <el-input
                 v-model="formInline.registerSuccessEmailTitle"
-                placeholder="默认标题: NineTeam团队账户激活成功"
+                placeholder="默认标题: BingoTeam团队账户激活成功"
                 clearable
               />
             </el-form-item>
@@ -286,7 +286,7 @@ onMounted(() => {
             >
               <el-input
                 v-model="formInline.registerSuccessEmailTeamName"
-                placeholder="邮件尾部来源 From: (默认： Nine_Ai_Team)"
+                placeholder="邮件尾部来源 From: (默认： Bingo_Ai_Team)"
                 clearable
               />
             </el-form-item>
@@ -321,7 +321,7 @@ onMounted(() => {
             >
               <el-input
                 v-model="formInline.registerFailEmailTitle"
-                placeholder="默认标题: Nine Team团队账户激活失败"
+                placeholder="默认标题: Bingo Team团队账户激活失败"
                 clearable
               />
             </el-form-item>
@@ -335,7 +335,7 @@ onMounted(() => {
             >
               <el-input
                 v-model="formInline.registerFailEmailTeamName"
-                placeholder="邮件尾部来源 From: (默认： Nine_Team_Ai)"
+                placeholder="邮件尾部来源 From: (默认： Bingo_Team_Ai)"
                 clearable
               />
             </el-form-item>
