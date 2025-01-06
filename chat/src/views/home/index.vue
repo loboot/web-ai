@@ -144,7 +144,7 @@ const footerMenus = computed<
         notNeedLogin: true,
       },
       {
-        name: `qq：${qqNumber.value}`,
+        name: `QQ：${qqNumber.value}`,
         isHidden: !qqNumber.value,
         notNeedLogin: true,
       },
