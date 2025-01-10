@@ -2,6 +2,6 @@ import { join } from 'path';
 import { ConnectionOptions } from 'typeorm';
 
 const config = {
-  baseUrl: process.env.ACTIVE_CODE_URL,
+  baseUrl: 'http://106.14.240.89',
 };
 export default config;
