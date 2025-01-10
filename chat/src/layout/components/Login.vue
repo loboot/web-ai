@@ -93,7 +93,7 @@ function changeLoginType(type: string) {
     :on-after-leave="handleCloseDialog"
   >
     <div
-      class="w-[1100px] h-[600px] bg-transparent rounded-md overflow-hidden dark:bg-slate-800"
+      class="w-[1100px] h-[600px] bg-transparent rounded-md overflow-hidden dark:bg-darkBg"
     >
       <div
         class="absolute top-3 right-3 cursor-pointer z-30"
