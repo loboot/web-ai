@@ -153,7 +153,9 @@ const footerMenus = computed<
 ]);
 
 function checkShow(name: string) {
-  return ~menuList.value.findIndex((v) => v.name === name);
+  return (
+    ~menuList.value.findIndex((v) => v.name === name) || !menuList.value.length
+  );
 }
 
 interface FileItem {
@@ -235,10 +237,7 @@ init();
         <div class="my-6 text-[18px] font-[600] text-[rgb(108,114,117)]">
           {{ globalConfig.homeSubTitle }}
         </div>
-        <div
-          class="flex items-center justify-center gap-x-[10px]"
-          v-if="menuList.length"
-        >
+        <div class="flex items-center justify-center gap-x-[10px]">
           <button
             class="btn-box border border-[rgba(255,255,255,0.4)] bg-gradient-to-b from-[rgb(62,144,240)] to-[rgb(27,110,207)]"
             @click="handleMenuClick(menuList[0])"
