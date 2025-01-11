@@ -143,7 +143,7 @@ const isHome = computed(() => route.name === 'Home');
             >
               <NAvatar
                 :size="42"
-                :src="userInfo.avatar"
+                :src="userInfo.avatar ?? defaultAvatar"
                 round
                 bordered
                 :fallback-src="defaultAvatar"
