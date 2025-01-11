@@ -65,6 +65,7 @@ export class MenuService {
         menuType: 0,
         menuPlatform: 1,
         order: 500,
+        isShow: false,
       },
       {
         menuTipText: '思维导图',
@@ -74,6 +75,7 @@ export class MenuService {
         menuType: 0,
         menuPlatform: 1,
         order: 600,
+        isShow: false,
       },
       {
         menuTipText: '会员中心',
@@ -92,6 +94,7 @@ export class MenuService {
         menuType: 0,
         menuPlatform: 1,
         order: 800,
+        isShow: false,
       },
     ];
     const mobileMenuData = [
@@ -103,6 +106,7 @@ export class MenuService {
         menuType: 0,
         menuPlatform: 0,
         order: 100,
+        isShow: false,
       },
       {
         menuTipText: '应用',
@@ -121,6 +125,7 @@ export class MenuService {
         menuType: 0,
         menuPlatform: 0,
         order: 300,
+        isShow: false,
       },
       {
         menuTipText: '思维导图',
@@ -139,6 +144,7 @@ export class MenuService {
         menuType: 0,
         menuPlatform: 0,
         order: 500,
+        isShow: false,
       },
     ];
 
@@ -151,6 +157,8 @@ export class MenuService {
     const { menuPlatform } = query;
     let where: any = {};
     menuPlatform && (where.menuPlatform = menuPlatform);
+    console.log(await this.menuEntity.find({ where, order: { order: 'ASC' } }));
+
     return await this.menuEntity.find({ where, order: { order: 'ASC' } });
   }
 
