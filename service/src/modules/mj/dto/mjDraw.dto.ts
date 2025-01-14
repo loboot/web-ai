@@ -11,4 +11,6 @@ export class MjDrawDto {
   })
   @IsDefined({ message: '绘画提示词是必传参数！' })
   prompt: string;
+
+  mode: string;
 }

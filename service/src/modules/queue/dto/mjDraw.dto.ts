@@ -12,15 +12,25 @@ export class MjDrawDto {
   @IsOptional()
   prompt: string;
 
-  @ApiProperty({ example: '--ar 16:9 --c 0', description: '除了prompt的额外参数' })
+  @ApiProperty({
+    example: '--ar 16:9 --c 0',
+    description: '除了prompt的额外参数',
+  })
   @IsOptional()
   extraParam?: string;
 
-  @ApiProperty({ example: 'https://xsdasdasd.com', description: '垫图图片地址' })
+  @ApiProperty({
+    example: 'https://xsdasdasd.com',
+    description: '垫图图片地址',
+  })
   @IsOptional()
   imgUrl?: string;
 
-  @ApiProperty({ example: 'IMAGINE', description: '任务类型,可用值:IMAGINE,UPSCALE,VARIATION,ZOOM,PAN,DESCRIBE,BLEND,SHORTEN,SWAP_FACE' })
+  @ApiProperty({
+    example: 'IMAGINE',
+    description:
+      '任务类型,可用值:IMAGINE,UPSCALE,VARIATION,ZOOM,PAN,DESCRIBE,BLEND,SHORTEN,SWAP_FACE',
+  })
   @IsOptional()
   action: string;
 
@@ -35,4 +45,8 @@ export class MjDrawDto {
   @ApiProperty({ example: 1, description: '任务ID' })
   @IsOptional()
   taskId: number;
+
+  @ApiProperty({ example: '', description: 'MJ mode' })
+  @IsOptional()
+  mode: string;
 }

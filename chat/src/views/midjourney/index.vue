@@ -33,7 +33,7 @@ import {
   fetchMidjourneyFullPrompt,
   fetchMidjourneyPromptList,
 } from '@/api';
-import { fetchDrawTaskAPI, fetchTranslateAPI } from '@/api/mjDraw';
+import { fetchDrawTaskAPI, fetchTranslateAPI, MjModeType } from '@/api/mjDraw';
 import type { ResData } from '@/api/types';
 import {
   fetchGetMjPromptAssociateApi,
@@ -170,6 +170,12 @@ const versionOptions = computed(() => {
   return [];
 });
 
+const mjMode = ref<MjModeType>('');
+const mjModeOptions = ref([
+  { label: '默认', value: '' },
+  { label: '快速', value: 'mj-turbo' },
+  { label: '慢速', value: 'mj-relax' },
+]);
 const modelList = [
   { name: 'Midjourney', img: mjImg, val: 'MJ', desc: '真实风格' },
   { name: 'NIJI', img: nijiImg, val: 'NIJI', desc: '动漫风格' },
@@ -421,6 +427,7 @@ async function handleSubmit() {
     imgUrl,
     extraParam,
     action: 'IMAGINE',
+    mode: mjMode.value,
   });
   curFile &&
     (curFile = {
@@ -593,6 +600,21 @@ onMounted(() => {
         </ul>
         <div class="mt-4">
           <div class="mt-2 flex justify-between items-center text-xs">
+            <span class="w-[65px] item-name block">模式</span>
+            <div class="flex-1 flex items-center">
+              <div v-if="!mjModeOptions.length">暂无数据</div>
+              <n-radio-group v-model:value="mjMode" size="small">
+                <n-radio-button
+                  v-for="mode in mjModeOptions"
+                  :key="mode.value"
+                  :value="mode.value"
+                  :label="mode.label"
+                >
+                </n-radio-button>
+              </n-radio-group>
+            </div>
+          </div>
+          <div class="mt-4 flex justify-between items-center text-xs">
             <span class="w-[65px] item-name block">版本</span>
             <div class="flex-1 flex items-center">
               <!-- <NSelect
