@@ -68,10 +68,11 @@ export class MidjourneyService {
   /* MJ 绘画 */
   async draw(jobData, jobId) {
     const { id, action, drawId } = jobData;
+
     const drawInfo = await this.midjourneyEntity.findOne({ where: { id } });
     console.log(drawInfo);
 
-    const { customId } = drawInfo;
+    const { customId, mode } = drawInfo;
     try {
       /* 把任务ID绑定到DB去 */
       await this.bindJobId(id, jobId);
@@ -83,7 +84,7 @@ export class MidjourneyService {
       /* 把所有绘制记录存入 */
       await this.updateDrawData(jobData, drawRes);
       // await this.updateDrawStatus(id, MidjourneyStatusEnum.DRAWED);
-      this.drawSuccess(jobData);
+      this.drawSuccess(jobData, mode);
       return true;
     } catch (error) {
       // this.lockPrompt = this.lockPrompt.filter((item) => item !== drawInfo.randomDrawId);
@@ -548,10 +549,16 @@ export class MidjourneyService {
   }
 
   /* 绘图成功扣费 */
-  async drawSuccess(jobData) {
+  async drawSuccess(jobData, mode) {
     const { id, userId, action } = jobData;
-    /* 扣除余额 放大图片（类型2）是1 其他都是4 */
-    const amount = action === 'UPSCALE' ? 1 : 4;
+    /* 扣除余额 放大图片（类型2）是1 默认4 休闲模式2 */
+    let amount = 4;
+    if (action === 'UPSCALE') {
+      amount = 1;
+    } else if (action === 'IMAGINE' && mode === 'mj-relax') {
+      amount = 2;
+    }
+
     Logger.debug(`绘画完成，执行扣费，扣除费用:${amount}积分。`);
     await this.userBalanceService.refundMjBalance(userId, -amount);
     await this.midjourneyEntity.update({ id }, { status: 3 });
