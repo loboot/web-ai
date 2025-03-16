@@ -170,10 +170,10 @@ const versionOptions = computed(() => {
   return [];
 });
 
-const mjMode = ref<MjModeType>('mj-turbo');
+const mjMode = ref<MjModeType>('');
 const mjModeOptions = ref([
-  { label: '快速模式', value: 'mj-turbo' },
-  { label: '休闲模式', value: 'mj-relax' },
+  { label: '快速模式', value: '' },
+  { label: '普通模式', value: 'mj-turbo' },
 ]);
 const modelList = [
   { name: 'Midjourney', img: mjImg, val: 'MJ', desc: '真实风格' },

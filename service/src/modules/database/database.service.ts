@@ -290,6 +290,47 @@ export class DatabaseService implements OnModuleInit {
           encry: 0,
         },
         { configKey: 'isVerifyEmail', configVal: '1', public: 1, encry: 0 },
+        // MJ
+        { configKey: 'mjFastFreeOpen', configVal: '0', public: 1, encry: 0 },
+        { configKey: 'mjFastDrawPoint', configVal: '4', public: 1, encry: 0 },
+        {
+          configKey: 'mjFastUpscalePoint',
+          configVal: '4',
+          public: 1,
+          encry: 0,
+        },
+        {
+          configKey: 'mjFastVariationPoint',
+          configVal: '4',
+          public: 1,
+          encry: 0,
+        },
+        {
+          configKey: 'mjFastUpscalePoint',
+          configVal: '4',
+          public: 1,
+          encry: 0,
+        },
+
+        { configKey: 'mjTurboFreeOpen', configVal: '0', public: 1, encry: 0 },
+        {
+          configKey: 'mjTurboUpscalePoint',
+          configVal: '2',
+          public: 1,
+          encry: 0,
+        },
+        {
+          configKey: 'mjTurboVariationPoint',
+          configVal: '2',
+          public: 1,
+          encry: 0,
+        },
+        {
+          configKey: 'mjTurboUpscalePoint',
+          configVal: '2',
+          public: 1,
+          encry: 0,
+        },
       ];
 
       const res = await this.connection.query(

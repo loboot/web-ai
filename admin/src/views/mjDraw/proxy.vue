@@ -19,6 +19,14 @@ const formInline = reactive({
   // mjUseBaiduFy: '0',
   mjHideNotBlock: '0',
   mjHideWorkIn: '0',
+  mjFastFreeOpen: '0',
+  mjFastDrawPoint: '4',
+  mjFastUpscalePoint: '4',
+  mjFastVariationPoint: '4',
+  mjTurboFreeOpen: '0',
+  mjTurboDrawPoint: '2',
+  mjTurboUpscalePoint: '2',
+  mjTurboVariationPoint: '2',
 });
 
 const rules = ref<FormRules>({});
@@ -37,6 +45,14 @@ async function queryAllconfig() {
       // 'mjUseBaiduFy',
       'mjHideNotBlock',
       'mjHideWorkIn',
+      'mjFastFreeOpen',
+      'mjFastDrawPoint',
+      'mjFastUpscalePoint',
+      'mjFastVariationPoint',
+      'mjTurboFreeOpen',
+      'mjTurboDrawPoint',
+      'mjTurboUpscalePoint',
+      'mjTurboVariationPoint',
     ],
   });
   Object.assign(formInline, res.data);
@@ -165,6 +181,149 @@ onMounted(() => {
           </el-col>
         </el-row>
         <el-divider />
+
+        <h4>Midjourney快速模式绘画配置</h4>
+        <el-row>
+          <el-col :span="6">
+            <a-row>
+              <el-form-item
+                label="免费开放"
+                prop="mjFastFreeOpen"
+                label-width="150"
+              >
+                <el-switch
+                  v-model="formInline.mjFastFreeOpen"
+                  active-value="1"
+                  inactive-value="0"
+                />
+              </el-form-item>
+            </a-row>
+          </el-col>
+          <el-col :span="6">
+            <a-row>
+              <el-form-item
+                label-width="100"
+                label="绘画操作"
+                prop="mjFastDrawPoint"
+              >
+                <el-input
+                  :disabled="formInline.mjFastFreeOpen === '1'"
+                  type="number"
+                  min="0"
+                  v-model="formInline.mjFastDrawPoint"
+                  placeholder="请输入"
+                />
+              </el-form-item>
+            </a-row>
+          </el-col>
+          <el-col :span="6">
+            <a-row>
+              <el-form-item
+                label-width="100"
+                label="放大操作"
+                prop="mjFastUpscalePoint"
+              >
+                <el-input
+                  :disabled="formInline.mjFastFreeOpen === '1'"
+                  type="number"
+                  min="0"
+                  v-model="formInline.mjFastUpscalePoint"
+                  placeholder="请输入"
+                />
+              </el-form-item>
+            </a-row>
+          </el-col>
+          <el-col :span="6">
+            <a-row>
+              <el-form-item
+                label-width="100"
+                label="变体操作"
+                prop="mjFastVariationPoint"
+              >
+                <el-input
+                  :disabled="formInline.mjFastFreeOpen === '1'"
+                  type="number"
+                  min="0"
+                  v-model="formInline.mjFastVariationPoint"
+                  placeholder="请输入"
+                />
+              </el-form-item>
+            </a-row>
+          </el-col>
+        </el-row>
+        <el-divider />
+
+        <h4>Midjourney普通模式绘画配置</h4>
+        <el-row>
+          <el-col :span="6">
+            <a-row>
+              <el-form-item
+                label="免费开放"
+                prop="mjTurboFreeOpen"
+                label-width="150"
+              >
+                <el-switch
+                  v-model="formInline.mjTurboFreeOpen"
+                  active-value="1"
+                  inactive-value="0"
+                />
+              </el-form-item>
+            </a-row>
+          </el-col>
+          <el-col :span="6">
+            <a-row>
+              <el-form-item
+                label-width="100"
+                label="绘画操作"
+                prop="mjTurboDrawPoint"
+              >
+                <el-input
+                  :disabled="formInline.mjTurboFreeOpen === '1'"
+                  type="number"
+                  min="0"
+                  v-model="formInline.mjTurboDrawPoint"
+                  placeholder="请输入"
+                />
+              </el-form-item>
+            </a-row>
+          </el-col>
+          <el-col :span="6">
+            <a-row>
+              <el-form-item
+                label-width="100"
+                label="放大操作"
+                prop="mjTurboUpscalePoint"
+              >
+                <el-input
+                  :disabled="formInline.mjTurboFreeOpen === '1'"
+                  type="number"
+                  min="0"
+                  v-model="formInline.mjTurboUpscalePoint"
+                  placeholder="请输入"
+                />
+              </el-form-item>
+            </a-row>
+          </el-col>
+          <el-col :span="6">
+            <a-row>
+              <el-form-item
+                label-width="100"
+                label="变体操作"
+                prop="mjTurboVariationPoint"
+              >
+                <el-input
+                  :disabled="formInline.mjTurboFreeOpen === '1'"
+                  type="number"
+                  min="0"
+                  v-model="formInline.mjTurboVariationPoint"
+                  placeholder="请输入"
+                />
+              </el-form-item>
+            </a-row>
+          </el-col>
+        </el-row>
+        <el-divider />
+
         <h4>绘图可选设置</h4>
 
         <!-- <el-row>

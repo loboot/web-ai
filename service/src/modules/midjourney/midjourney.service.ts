@@ -548,16 +548,53 @@ export class MidjourneyService {
     await this.midjourneyEntity.update({ id }, { status: 4 });
   }
 
+  /** 获取绘画积分*/
+  async getAmount(mode, action) {
+    const configs = await this.globalConfigService.getConfigs([
+      'mjFastFreeOpen',
+      'mjFastDrawPoint',
+      'mjFastUpscalePoint',
+      'mjFastVariationPoint',
+      'mjTurboFreeOpen',
+      'mjTurboDrawPoint',
+      'mjTurboUpscalePoint',
+      'mjTurboVariationPoint',
+    ]);
+
+    let amount = 2;
+    if (mode === 'mj-turbo') {
+      if (configs.mjTurboFreeOpen === '1') {
+        amount = 0;
+      } else {
+        if (action === 'IMAGINE') {
+          amount = Number(configs.mjTurboDrawPoint);
+        } else if (action === 'UPSCALE') {
+          amount = Number(configs.mjTurboUpscalePoint);
+        } else if (action === 'VARIATION') {
+          amount = Number(configs.mjTurboVariationPoint);
+        }
+      }
+    } else {
+      if (configs.mjTurboFreeOpen === '1') {
+        amount = 0;
+      } else {
+        if (action === 'IMAGINE') {
+          amount = Number(configs.mjTurboDrawPoint);
+        } else if (action === 'UPSCALE') {
+          amount = Number(configs.mjTurboUpscalePoint);
+        } else if (action === 'VARIATION') {
+          amount = Number(configs.mjTurboVariationPoint);
+        }
+      }
+    }
+
+    return amount;
+  }
   /* 绘图成功扣费 */
   async drawSuccess(jobData, mode) {
     const { id, userId, action } = jobData;
-    /* 扣除余额 放大图片（类型2）是1 默认4 休闲模式2 */
-    let amount = 4;
-    if (action === 'UPSCALE') {
-      amount = 1;
-    } else if (action === 'IMAGINE' && mode === 'mj-relax') {
-      amount = 2;
-    }
+
+    let amount = await this.getAmount(mode, action);
 
     Logger.debug(`绘画完成，执行扣费，扣除费用:${amount}积分。`);
     await this.userBalanceService.refundMjBalance(userId, -amount);
